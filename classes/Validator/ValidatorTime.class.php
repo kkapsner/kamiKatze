@@ -31,7 +31,7 @@ class ValidatorTime{
 	 * @assert ("1985", "12", "31") === true
 	 * @assert (1985, 0, "test") === false
 	 */
-	public static function validDate($y, $m, $d){
+	public static function isValidDate($y, $m, $d){
 		if (!ValidatorNumber::isIntLike($y) ||
 			!ValidatorNumber::isIntLike($m) ||
 			!ValidatorNumber::isIntLike($d) ||
@@ -67,7 +67,7 @@ class ValidatorTime{
 	 * @assert (-1, 0, 0, 0, false) === true
 	 * @assert (0, 0, 0, 0, true) === true
 	 */
-	public static function validTime($h, $m, $s, $ms = 0, $oneDay = true){
+	public static function isValidTime($h, $m, $s, $ms = 0, $oneDay = true){
 		return
 			ValidatorNumber::isIntLike($h) &&
 			ValidatorNumber::isIntLike($m) &&
