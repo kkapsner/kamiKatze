@@ -60,6 +60,10 @@ class ValidatorNumber{
 	 * @assert (10, 10, 20) === true
 	 * @assert (10, 11, 20) === false
 	 * @assert (10, 0, 9) === false
+	 * @assert (10, 0) === true
+	 * @assert (10, 11) === false
+	 * @assert (10, null, 10) === true
+	 * @assert (10, null, 9) === false
 	 */
 	public static function isNumberInRange($value, $min = null, $max = null){
 		if (self::isFloatLike($value)){
@@ -67,7 +71,7 @@ class ValidatorNumber{
 				$min = $value;
 			}
 			if ($max === null || !self::isFloatLike($max)){
-				$man = $value;
+				$max = $value;
 			}
 			if ($min <= $value && $max >= $value){
 				return true;
