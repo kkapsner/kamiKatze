@@ -2,7 +2,8 @@
 
 /**
  * Description of EmailSMTP
- *
+ * 
+ * @link http://tools.ietf.org/html/rfc5321
  * @author kkapsner
  */
 class EmailSMTP{
