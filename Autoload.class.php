@@ -127,7 +127,19 @@ class Autoload {
 	 * The paths to the class files.
 	 * @var array
 	 */
-	public $loadingPoints = array();
+	protected $loadingPoints = array();
+
+	/**
+	 * Get the loading point to the specified class.
+	 * @param type $classname
+	 * @param type $namespace
+	 */
+	public function getLoadingPoint($classname, $namespace = ""){
+		if (array_key_exists($namespace, $this->loadingPoints) && array_key_exists($classname, $this->loadingPoints[$namespace])){
+			return $this->loadingPoints[$namespace][$classname];
+		}
+		return false;
+	}
 	/**
 	 *
 	 * @param string $classname
