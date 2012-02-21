@@ -77,7 +77,7 @@ class EmailHeader{
 	 * @return string the folded value string. If a non printable character is in the value the value is encoded.
 	 */
 	public function getFoldedValue($alreadyConsumedChars = 0){
-		return EmailEncoder::escapeHeaderValue($this->value, $alreadyConsumedChars + 1, $this->valueCharset);
+		return EmailEncoder::escapeHeaderValue($this->value, $alreadyConsumedChars, $this->valueCharset);
 	}
 
 	/**
@@ -85,7 +85,7 @@ class EmailHeader{
 	 * @return string
 	 */
 	public function __toString(){
-		return $this->name . ": " . $this->getFoldedValue(strlen($this->name) + 1) . Email::newLine;
+		return $this->name . ": " . $this->getFoldedValue(strlen($this->name) + 2) . Email::newLine;
 	}
 
 }

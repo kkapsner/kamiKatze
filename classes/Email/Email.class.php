@@ -204,7 +204,7 @@ class Email{
 			}
 			$this->inlinePart->addPart($this->textMasterPart);
 		}
-		$id = EmailEncoder::generateID() . "@byKKJS";
+		$id = EmailEncoder::generateID() . "_byKKJS";
 
 		$this->inlinePart->addPart(
 			new EmailPart(
@@ -214,7 +214,7 @@ class Email{
 				$name,
 				array(
 					new EmailHeader("Content-Transfer-Encoding", "base64"),
-					new EmailHeader("Content-ID", "<" . $id . ">"),
+					new EmailHeaderNotEncodingValue("Content-ID", "<" . $id . ">"),
 					new EmailHeaderParametric("Content-Disposition", "inline", array("filename" => $name))
 				)
 			)

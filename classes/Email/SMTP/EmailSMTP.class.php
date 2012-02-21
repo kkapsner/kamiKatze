@@ -128,7 +128,7 @@ class EmailSMTP{
 			preg_match('/^(\d{3})([ \-])(.+)$/', $part, $m);
 			$answer .= $part;
 		} while ($m && $m[2] === "-");
-		var_dump($answer);
+		#var_dump($answer);
 		return $answer;
 	}
 }
