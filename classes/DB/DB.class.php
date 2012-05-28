@@ -10,7 +10,11 @@ class DB extends PDO{
 		$defaultConfig,
 		$instance
 	;
-	
+
+	/**
+	 * get the default DB instance.
+	 * @return DB
+	 */
 	public static function getInstance(){
 		if (self::$instance === null){
 			self::$instance = new self();
