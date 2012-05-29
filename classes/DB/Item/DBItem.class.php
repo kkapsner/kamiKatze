@@ -404,9 +404,9 @@ class DBItem extends ViewableHTML{
 					case DBItemFieldOption::DB_ITEM:
 						switch ($item->correlation){
 							case DBItemFieldOption::ONE_TO_ONE:
-								$oldValue = $this->{$name};
-								if ($oldValue !== null){
-									$oldValue->{$item->correlationName} = null;
+								$valueItem = $this->{$name};
+								if ($valueItem !== null){
+									$valueItem->{$item->correlationName} = null;
 								}
 							case DBItemFieldOption::N_TO_ONE:
 								if ($value === null){
@@ -445,8 +445,8 @@ class DBItem extends ViewableHTML{
 										$valueItem->{$item->correlationName} = $this;
 									}
 
-									foreach ($oldValues as $oldValue){
-										$oldValue->{$item->correlationName} = null;
+									foreach ($oldValues as $valueItem){
+										$valueItem->{$item->correlationName} = null;
 									}
 								}
 								else {
@@ -473,7 +473,7 @@ class DBItem extends ViewableHTML{
 										self::setInLinkingTable($name, $item->correlationName, $this->DBid, $valueItem->DBid);
 									}
 
-									foreach ($oldValues as $oldValue){
+									foreach ($oldValues as $valueItem){
 										self::removeInLinkingTable($name, $item->correlationName, $this->DBid, $valueItem->DBid);
 									}
 								}
