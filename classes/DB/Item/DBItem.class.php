@@ -10,7 +10,7 @@
  *
  * @author kkapsner
  */
-class DBItem extends ViewableHTML{
+abstract class DBItem extends ViewableHTML{
 	
 	/**
 	 * Prefix of table name
