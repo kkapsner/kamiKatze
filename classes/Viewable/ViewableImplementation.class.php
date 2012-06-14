@@ -21,7 +21,7 @@ class ViewableImplementation implements Viewable{
 		if (!is_file($file)){
 			$parent = get_parent_class($name);
 			if ($parent !== false){
-				return $this->viewByName($parent, $context, $output);
+				return $this->viewByName($parent, $context, $output, $args);
 			}
 			else {
 				return false;
