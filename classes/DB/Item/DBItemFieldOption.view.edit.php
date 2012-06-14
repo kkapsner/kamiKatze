@@ -36,7 +36,7 @@ if ($this->editable){
 							foreach (DBItem::getByConditionCLASS($this->class) as $hmItem){
 								echo "\n\t\t\t\t" .
 									'<option value="' . $hmItem->DBid . '"';
-								if (in_array($hmItem, $hmItems, true)){
+								if ($hmItems->contains($hmItem, true)){
 									echo ' selected="selected"';
 								}
 								echo '">';

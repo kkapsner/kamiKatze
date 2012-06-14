@@ -7,35 +7,16 @@ echo "<ul>";
 
 foreach (DBItemFieldOption::parseClass(get_class($this)) as $item){
 	/* @var $item DBItemFieldOption */
-	echo "<li>" .
-		$this->html($item->displayName) . ": ";
-	if ($item->type === DBItemFieldOption::DB_ITEM){
-		$value = $this->{$item->name};
-		if (is_array($value)){
-			if (count($value)){
-				echo "<ul>";
-				foreach ($value as $valueItem){
-					echo "<li>";
-					$valueItem->view("singleLine", true);
-					echo "</li>";
-				}
-				echo "</ul>";
-			}
-			else {
-				echo "---";
-			}
-		}
-		else {
-			if ($value !== null){
-				$value->view("singleLine", true);
-			}
-			else {
-				echo "---";
-			}
-		}
+	echo "<li>" . $this->html($item->displayName) . ": ";
+	$value = $this->{$item->name};
+	if (is_a($value, "Viewable")){
+		$value->view("singleLine", true, $args);
+	}
+	elseif ($value === null){
+		echo "---";
 	}
 	else {
-		echo $this->html($this->{$item->name});
+		echo $this->html($value);
 	}
 	echo "</li>";
 }

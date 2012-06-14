@@ -64,7 +64,7 @@ abstract class DBItem extends ViewableHTML{
 	;
 	
 	/**
-	 * Get the 
+	 * Get the DBItem of type $class with ID $id.
 	 * @param string $class
 	 * @param int $id
 	 * @return DBItem of type $class
@@ -92,10 +92,10 @@ abstract class DBItem extends ViewableHTML{
 	 * @param string $class
 	 * @param string $where
 	 * @param string $orderBy
-	 * @return array of DBItems of $class
+	 * @return DBItemCollection with $class
 	 */
 	public static function getByConditionCLASS($class, $where = false, $orderBy = false){
-		$ret = array();
+		$ret = new DBItemCollection($class);
 		$db = DB::getInstance();
 
 		$sql = "SELECT `id` FROM " . $db->quote(self::$tablePrefix . $class, DB::PARAM_IDENT);
@@ -137,10 +137,10 @@ abstract class DBItem extends ViewableHTML{
 	 * @param string $name
 	 * @param string $linkedName
 	 * @param int $linkedId
-	 * @return array of DBItems of $class
+	 * @return DBItemCollection with $class
 	 */
 	protected static function getByLinkingTable($class, $name, $linkedName, $linkedId){
-		$ret = array();
+		$ret = new DBItemCollection($class);
 		$db = DB::getInstance();
 		
 		$table = self::getLinkingTableName($name, $linkedName);
@@ -207,7 +207,7 @@ abstract class DBItem extends ViewableHTML{
 							$dbItemFields[$item->name] = self::getCLASS($item->class,  $fields[$item->name]);
 							break;
 						case DBItemFieldOption::ONE_TO_N: case DBItemFieldOption::N_TO_N:
-							$dbItemFields[$item->name] = array();
+							$dbItemFields[$item->name] = new DBItemCollection($item->class);
 							foreach ($fields[$item->name] as $id){
 								$dbItemFields[$item->name][] = self::getCLASS($item->class, $id);
 							}
@@ -307,7 +307,7 @@ abstract class DBItem extends ViewableHTML{
 								$this->{$item->name} = null;
 								break;
 							case DBItemFieldOption::ONE_TO_N: case DBItemFieldOption::N_TO_N:
-								$this->{$item->name} = array();
+								$this->{$item->name} = new DBItemCollection($item->class);
 								break;
 						}
 						break;
@@ -426,16 +426,16 @@ abstract class DBItem extends ViewableHTML{
 								}
 								break;
 							case DBItemFieldOption::ONE_TO_N:
-								if (is_array($value)){
+								if (is_a($value, "DBItemCollection")){
+									if ($value->getClass() !== $item->class && is_subclass_of($value->getClass(), $item->class)){
+										throw new InvalidArgumentException("Property " . $name . " contains a non " . $item->class . ".");
+									}
 									$oldValues = $this->{$name};
 									$newValue = array();
 
 									foreach ($value as $valueItem){
-										if (!($valueItem instanceof $item->class)){
-											throw new InvalidArgumentException("Property " . $name . " contains a non " . $item->class . ".");
-										}
-										if (($pos = array_search($valueItem, $oldValues, true)) !== false){
-											array_splice($oldValues, $pos, 1);
+										if (($pos = $oldValues->search($valueItem, true)) !== false){
+											$oldValues->splice($pos, 1);
 										}
 										else {
 											$newValue[] = $valueItem;
@@ -450,20 +450,20 @@ abstract class DBItem extends ViewableHTML{
 									}
 								}
 								else {
-									throw new InvalidArgumentException("Property " . $name . " is not an array.");
+									throw new InvalidArgumentException("Property " . $name . " is not an DBItemCollection.");
 								}
 								break;
 							case DBItemFieldOption::N_TO_N:
-								if (is_array($value)){
+								if (is_a($value, "DBItemCollection")){
+									if ($value->getClass() !== $item->class && is_subclass_of($value->getClass(), $item->class)){
+										throw new InvalidArgumentException("Property " . $name . " contains a non " . $item->class . ".");
+									}
 									$oldValues = $this->{$name};
 									$newValue = array();
 
 									foreach ($value as $valueItem){
-										if (!($valueItem instanceof $item->class)){
-											throw new InvalidArgumentException("Property " . $name . " contains a non " . $item->class . ".");
-										}
-										if (($pos = array_search($valueItem, $oldValues, true)) !== false){
-											array_splice($oldValues, $pos, 1);
+										if (($pos = $oldValues->search($valueItem, true)) !== false){
+											$oldValues->splice($pos, 1);
 										}
 										else {
 											$newValue[] = $valueItem;
@@ -478,7 +478,7 @@ abstract class DBItem extends ViewableHTML{
 									}
 								}
 								else {
-									throw new InvalidArgumentException("Property " . $name . " is not an array.");
+									throw new InvalidArgumentException("Property " . $name . " is not an DBItemCollection.");
 								}
 								break;
 						}
