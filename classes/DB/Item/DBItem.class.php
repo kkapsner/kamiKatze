@@ -23,7 +23,13 @@ abstract class DBItem extends ViewableHTML{
 	 * @var array
 	 */
 	private static $instances = array();
-	
+
+	/**
+	 * Stores all extensions for ALL DBItems
+	 * @var array
+	 */
+	protected static $extensions = array();
+
 	protected
 		/**
 		 * @var DB
@@ -63,6 +69,8 @@ abstract class DBItem extends ViewableHTML{
 		$newValues = array()
 	;
 	
+	// static class functions
+
 	/**
 	 * Get the DBItem of type $class with ID $id.
 	 * @param string $class
@@ -244,6 +252,38 @@ abstract class DBItem extends ViewableHTML{
 		}
 	}
 
+	/**
+	 * Adds an extension to a certain $class.
+	 * @param string $class
+	 * @param DBItemExtension $extension
+	 */
+	public static function addExtensionCLASS($class, DBItemExtension $extension){
+		if ($extension->isValidClass($class)){
+			self::$extensions[] = array("class" => $class, "extension" => $extension);
+		}
+		else {
+			throw new InvalidArgumentException("Extension " . $extension->getName() . " is not build for class " . $class . ".");
+		}
+	}
+	
+	/**
+	 * Returns all extensions of a certain $class and all its parent classes.
+	 * @param string $class
+	 * @return array of DBItemExtension
+	 */
+	public static function getExtensionsCLASS($class){
+		$ret = array();
+		foreach (self::$extensions as $extension){
+			if ($extension["class"] === $class || is_subclass_of($class, $extension["class"])){
+				$ret[] = $extension["extension"];
+			}
+		}
+		return $ret;
+	}
+
+
+	// class methods
+
 	protected function __construct($DBid){
 		$this->db = DB::getInstance();
 		$this->table = $this->db->quote(self::$tablePrefix . get_class($this), DB::PARAM_IDENT);
@@ -379,6 +419,11 @@ abstract class DBItem extends ViewableHTML{
 		throw new InvalidArgumentException("No property " . $name . " found.");
 	}
 
+	/**
+	 * Sets the real value in $oldValues resp. $newValues
+	 * @param string $name
+	 * @param mixed $value
+	 */
 	private function setRealValue($name, $value){
 		if (array_key_exists($name, $this->newValues)){
 			$this->newValues[$name] = $value;
@@ -388,6 +433,7 @@ abstract class DBItem extends ViewableHTML{
 			$this->changed = true;
 		}
 	}
+
 	public function __set($name, $value){
 		if ($this->deleted){
 			throw new Exception("Deleted item can not be accessed.");
