@@ -262,7 +262,7 @@ abstract class DBItem extends ViewableHTML{
 			self::$extensions[] = array("class" => $class, "extension" => $extension);
 		}
 		else {
-			throw new InvalidArgumentException("Extension " . $extension->getName() . " is not build for class " . $class . ".");
+			throw new InvalidArgumentException("Extension '" . $extension->getName() . "' is not build for class " . $class . ".");
 		}
 	}
 	

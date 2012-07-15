@@ -143,9 +143,9 @@ class DBItemFieldOption extends ViewableHTML{
 					$item->correlation = self::ONE_TO_ONE;
 			}
 			$item->correlationName = array_read_key("correlationName", $options, $class);
-			$item->editable = array_read_key("editable", $options, true);
 		}
 
+		$item->editable = array_read_key("editable", $options, true);
 		$item->searchable = array_read_key("searchable", $options, $item->searchable);
 		$item->displayName = array_read_key("displayName", $options, $item->displayName);
 
