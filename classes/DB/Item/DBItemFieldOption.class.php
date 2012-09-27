@@ -81,6 +81,19 @@ class DBItemFieldOption extends ViewableHTML{
 	 */
 	public $correlationName = null;
 
+	/**
+	 * Indicates if the field is a extender. I.e. the dataset will be extended by the field of a table thats name is
+	 * stored in this field. This field has to be a enum.
+	 * @var bool
+	 */
+	public $extender = false;
+	/**
+	 * An array with the fieldOptions for all posible field values (enum!). The keys are the field values and the
+	 * entries are the FieldOptions
+	 * @var array 
+	 */
+	public $extensionFieldOptions = array();
+
 
 	/**
 	 *
@@ -148,6 +161,15 @@ class DBItemFieldOption extends ViewableHTML{
 		$item->editable = array_read_key("editable", $options, true);
 		$item->searchable = array_read_key("searchable", $options, $item->searchable);
 		$item->displayName = array_read_key("displayName", $options, $item->displayName);
+
+		if ($item->type === "enum"){
+			$item->extender = array_read_key("extender", $options, $item->extender);
+			if ($item->extender){
+				foreach ($item->typeExtension as $value){
+					$item->extensionFieldOptions[$value] = DBItemFieldOption::parseClass($value);
+				}
+			}
+		}
 
 		return $item;
 	}
