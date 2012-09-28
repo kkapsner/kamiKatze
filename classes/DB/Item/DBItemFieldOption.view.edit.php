@@ -1,5 +1,6 @@
 <?php
 /* @var $this DBItemFieldOption */
+/* @var $context string */
 /* @var $args DBItem */
 if ($this->editable){
 	?>
@@ -58,6 +59,27 @@ if ($this->editable){
 							'</option>';
 					}
 					echo "\n\t\t\t" . '</select>';
+					if ($this->extender){
+						foreach ($this->typeExtension as $value){
+							echo "\n\t\t\t" .'<table class="dbItemExtender" data-extension="' . $this->html($value) . '">' .
+								'<caption>' . $this->html($value) . "</caption>";
+							foreach ($this->extensionFieldOptions[$value] as $subItem){
+								$subItem->view($context, true, $args);
+							}
+							echo "\n\t\t\t" . '</table>';
+						}
+						echo '<script>(function(){
+							var sel = document.getElementsByTagName("select");
+							sel = sel[sel.length - 1];
+							var tables = sel.parentNode.getElementsByTagName("table");
+							sel.onchange = function(){
+								for (var i = 0; i < tables.length; i++){
+									tables[i].style.display = (tables[i].getAttribute("data-extension") === sel.value)? "": "none";
+								}
+							}
+							sel.onchange();
+						})();</script>';
+					}
 					break;
 				default:
 					?><input type="text" name="<?php echo $postName;?>" value="<?php echo $this->html($args->{$this->name});?>"><?php
