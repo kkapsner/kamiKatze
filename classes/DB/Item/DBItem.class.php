@@ -7,6 +7,7 @@
  * A DBItem instance represents an entry in a DB. To specifiy the table extend this class in a class that has the name of the table.
  *
  * @author Korbinian Kapsner
+ * @todo make extra class for DBItem with extensions
  * @package DB\Item
  */
 abstract class DBItem extends ViewableHTML{
@@ -201,10 +202,94 @@ abstract class DBItem extends ViewableHTML{
 		$db->query("DELETE FROM " . $table . " WHERE " . $db->quote($linkedName . "_id", DB::PARAM_IDENT) . " = " . $linkedId . " AND " . $db->quote($name . "_id", DB::PARAM_IDENT) . " = " . $id);
 	}
 	
+	/**
+	 * Checks if the $value is valid for a field.
+	 * @param DBItemFieldOption $fieldOption Field option for the validated field
+	 * @param mixed $value Privided value.
+	 * @return DBItemValidationException|null If no error occures null is returned
+	 */
+	protected static function validateField(DBItemFieldOption $fieldOption, $value){
+		if ($value === null && !$fieldOption->null){
+			return new DBItemValidationException(
+				"Field " . $fieldOption->displayName . " may not be NULL.",
+				DBItemValidationException::WRONG_NULL
+			);
+		}
+		// TODO: type checking
+		if ($fieldOption->type === "enum" && !in_array($value, $fieldOption->typeExtension, true)){
+			return new DBItemValidationException(
+				"Field " . $fieldOption->displayName . " must be one of " . implode(", ", $fieldOption->typeExtension) . " " . $fieldOption->regExp . " but '" . $value . "' provided.",
+				DBItemValidationException::WRONG_VALUE
+			);
+		}
+		if ($fieldOption->regExp && !preg_match($fieldOption->regExp, $value)){
+			return new DBItemValidationException(
+				"Field " . $fieldOption->displayName . " must match regular expression " . $fieldOption->regExp . " but '" . $value . "' provided.",
+				DBItemValidationException::WRONG_REGEXP
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Checks all fields in a array $fieldOptions for validity.
+	 * @param array $fieldOptions All fields to be checked.
+	 * @param array $values Provided values
+	 * @return array Array of all occuring errors.
+	 */
+	protected static function validateFieldsByFieldOptions($fieldOptions, $values){
+		$errors = array();
+		foreach ($fieldOptions as $fieldOption){
+			/* @var $fieldOption DBItemFieldOption */
+			$error = null;
+			if (array_key_exists($fieldOption->name, $values)){
+				$error = self::validateField($fieldOption, $values[$fieldOption->name]);
+			}
+			elseif ($fieldOption->default === null && !$fieldOption->null) {
+				$error = new DBItemValidationException("Field " . $fieldOption->displayName . " is reqired.", DBItemValidationException::WRONG_MISSING);
+			}
+			if ($error !== null){
+				$errors[$fieldOption->name] = $error;
+			}
+			elseif ($fieldOption->extender){
+				$extenderValue = array_read_key($fieldOption->name, $values, $fieldOption->default);
+				if ($extenderValue !== null){
+					$errors = array_merge(
+						$errors,
+						self::validateFieldsByFieldOptions($fieldOption->extensionFieldOptions[$extenderValue], $values)
+					);
+				}
+			}
+		}
+		return $errors;
+	}
+
+	/**
+	 * Checks if the provided $values are valid for the specific $class
+	 * @param string $class The class to be checked.
+	 * @param array $values The provided values.
+	 * @return true|array true if everything is fine or an array of all occuring errors.
+	 */
+	public static function validateFieldsCLASS($class, $values){
+		$errors = self::validateFieldsByFieldOptions(DBItemFieldOption::parseClass($class), $values);
+		if (count($errors) == 0){
+			return true;
+		}
+		else {
+			return $errors;
+		}
+	}
 	
+	/**
+	 * Creates all the DB entries in the extender tables.
+	 * @param DBItemFieldOption $fieldOption Option of the extender field.
+	 * @param int $newId ID of the new created item.
+	 * @param array $fields Contains the provided values to create the item.
+	 * @return array Array containing all field options where the type is DBItemFieldOption::DB_ITEM
+	 */
 	private static function createExtenderCLASS(DBItemFieldOption $fieldOption, $newId, $fields){
 		$db = DB::getInstance();
-		$keys = array($db->quote($item->name, DB::PARAM_IDENT));
+		$keys = array($db->quote('id', DB::PARAM_IDENT));
 		$values = array($newId);
 		$dbItemFields = array();
 		$extenderValue = array_read_key($fieldOption->name, $fields, $fieldOption->default);
@@ -229,7 +314,8 @@ abstract class DBItem extends ViewableHTML{
 					$dbItemFields = array_merge($dbItemFields, self::createExtenderCLASS($item, $newId, $fields));
 				}
 			}
-			$db->query("INSERT INTO " . $db->quote(self::$tablePrefix . $fieldOption->name, DB::PARAM_IDENT) . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $values) . ")");
+			$db->query("INSERT INTO " . $db->quote(self::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $values) . ")");
+
 		}
 		return $dbItemFields;
 	}
@@ -240,6 +326,12 @@ abstract class DBItem extends ViewableHTML{
 	 * @return DBItem of type $class 
 	 */
 	public static function createCLASS($class, $fields = array()){
+		$errors = self::validateFieldsCLASS($class, $fields);
+		if ($errors !== true){
+			$keys = array_keys($errors);
+			throw $errors[$keys[0]];
+		}
+
 		$db = DB::getInstance();
 		$keys = array();
 		$values = array();
@@ -369,7 +461,7 @@ abstract class DBItem extends ViewableHTML{
 				);
 				$data = $data->fetch(DB::FETCH_ASSOC);
 				if (!$data){
-					throw new Exception("Invalid database contact administrator. (" . $this->DBid . " not found in extender table " . $extenderValue . ")");
+					throw new Exception("Invalid database. Please contact administrator. (ID " . $this->DBid . " not found in extender table " . $extenderValue . ")");
 				}
 			}
 		}
@@ -733,4 +825,31 @@ abstract class DBItem extends ViewableHTML{
 
 register_shutdown_function(array("DBItem", "saveAll"));
 
+/**
+ * Exception for a sanitation error.
+ * @author Korbibian Kapsner
+ * @package DB\Item
+ */
+class DBItemValidationException extends UnexpectedValueException{
+	/**
+	 * Error code if the value was null where it was not allowed
+	 */
+	const WRONG_NULL = 0;
+	/**
+	 * Error code if the value was the wrong type
+	 */
+	const WRONG_TYPE = 1;
+	/**
+	 * Error code if the value was wrong. E.g. if the field is a enum and the value was not allowed.
+	 */
+	const WRONG_VALUE = 2;
+	/**
+	 * Error code if the value did not match the provided regular expression.
+	 */
+	const WRONG_REGEXP = 3;
+	/**
+	 * Error code if the value is missing but required
+	 */
+	const WRONG_MISSING = 4;
+}
 ?>
