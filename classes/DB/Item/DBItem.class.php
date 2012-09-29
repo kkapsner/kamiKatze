@@ -46,13 +46,7 @@ abstract class DBItem extends ViewableHTML{
 	 * @var int
 	 */
 	protected $DBid = null;
-
-	/**
-	 * If the item is new
-	 * @var bool
-	 */
-	protected $new = false;
-
+	
 	/**
 	 * If the item has changed
 	 * @var bool
@@ -110,7 +104,7 @@ abstract class DBItem extends ViewableHTML{
 	}
 
 	/**
-	 *
+	 * Returns items of the $class which forfill the $where condition. 
 	 * @param string $class
 	 * @param string $where
 	 * @param string $orderBy
@@ -154,7 +148,7 @@ abstract class DBItem extends ViewableHTML{
 	}
 	
 	/**
-	 *
+	 * Gets all connected items by a linking table.
 	 * @param string $class Classname of the instances that should be received
 	 * @param string $name Name of the field that contains the received instances
 	 * @param string $linkedName Name of the field on the other side
@@ -178,7 +172,7 @@ abstract class DBItem extends ViewableHTML{
 	}
 
 	/**
-	 *
+	 * Sets a connection in a linking table.
 	 * @param string $name
 	 * @param string $linkedName
 	 * @param int $linkedId
@@ -193,7 +187,7 @@ abstract class DBItem extends ViewableHTML{
 	}
 
 	/**
-	 *
+	 * Removes a connection in a linking table.
 	 * @param string $name
 	 * @param string $linkedName
 	 * @param int $linkedId
@@ -207,6 +201,38 @@ abstract class DBItem extends ViewableHTML{
 		$db->query("DELETE FROM " . $table . " WHERE " . $db->quote($linkedName . "_id", DB::PARAM_IDENT) . " = " . $linkedId . " AND " . $db->quote($name . "_id", DB::PARAM_IDENT) . " = " . $id);
 	}
 	
+	
+	private static function createExtenderCLASS(DBItemFieldOption $fieldOption, $newId, $fields){
+		$db = DB::getInstance();
+		$keys = array($db->quote($item->name, DB::PARAM_IDENT));
+		$values = array($newId);
+		$dbItemFields = array();
+		$extenderValue = array_read_key($fieldOption->name, $fields, $fieldOption->default);
+		if ($extenderValue !== null){
+			foreach ($fieldOption->extensionFieldOptions[$extenderValue] as $item){
+				/* @var $item DBItemFieldOption */
+				if (array_key_exists($item->name, $fields)){
+					if ($item->type === DBItemFieldOption::DB_ITEM){
+						$dbItemFields[] = $item;
+					}
+					else {
+						$keys[] = $db->quote($item->name, DB::PARAM_IDENT);
+						if ($item->null && $fields[$item->name] === ""){
+							$values[] = "NULL";
+						}
+						else {
+							$values[] = $db->quote($fields[$item->name], DB::PARAM_STR);
+						}
+					}
+				}
+				if ($item->extender){
+					$dbItemFields = array_merge($dbItemFields, self::createExtenderCLASS($item, $newId, $fields));
+				}
+			}
+			$db->query("INSERT INTO " . $db->quote(self::$tablePrefix . $fieldOption->name, DB::PARAM_IDENT) . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $values) . ")");
+		}
+		return $dbItemFields;
+	}
 	/**
 	 * Creates a new instance of the specific $class with the values in the $fields
 	 * @param string $class Classname of the new instance
@@ -222,18 +248,7 @@ abstract class DBItem extends ViewableHTML{
 			/* @var $item DBItemFieldOption */
 			if (array_key_exists($item->name, $fields)){
 				if ($item->type === DBItemFieldOption::DB_ITEM){
-					switch ($item->correlation){
-						case DBItemFieldOption::ONE_TO_ONE: case DBItemFieldOption::N_TO_ONE:
-							$dbItemFields[$item->name] = self::getCLASS($item->class,  $fields[$item->name]);
-							break;
-						case DBItemFieldOption::ONE_TO_N: case DBItemFieldOption::N_TO_N:
-							$dbItemFields[$item->name] = new DBItemCollection($item->class);
-							foreach ($fields[$item->name] as $id){
-								$dbItemFields[$item->name][] = self::getCLASS($item->class, $id);
-							}
-							break;
-					}
-					
+					$dbItemFields[] = $item;
 				}
 				else {
 					$keys[] = $db->quote($item->name, DB::PARAM_IDENT);
@@ -248,10 +263,26 @@ abstract class DBItem extends ViewableHTML{
 		}
 		$db->query("INSERT INTO " . $db->quote(self::$tablePrefix . $class, DB::PARAM_IDENT) . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $values) . ")");
 		$newId = $db->lastInsertId();
-		#TODO: create extenders
+		foreach (DBItemFieldOption::parseClass($class) as $item){
+			if ($item->extender){
+				$dbItemFields = array_merge($dbItemFields, self::createExtenderCLASS($item, $newId, $fields));
+			}
+		}
 		$item = self::getCLASS($class, $newId);
 		
-		foreach ($dbItemFields as $name => $value){
+		foreach ($dbItemFields as $fieldOption){
+			/* @var $fieldOption DBItemFieldOption */
+			switch ($fieldOption->correlation){
+				case DBItemFieldOption::ONE_TO_ONE: case DBItemFieldOption::N_TO_ONE:
+					$value = self::getCLASS($fieldOption->class,  $fields[$fieldOption->name]);
+					break;
+				case DBItemFieldOption::ONE_TO_N: case DBItemFieldOption::N_TO_N:
+					$value = new DBItemCollection($fieldOption->class);
+					foreach ($fields[$fieldOption->name] as $id){
+						$value[] = self::getCLASS($fieldOption->class, $id);
+					}
+					break;
+			}
 			$item->{$name} = $value;
 		}
 		
@@ -427,31 +458,6 @@ abstract class DBItem extends ViewableHTML{
 			$this->changed = false;
 		}
 	}
-	
-	/**
-	 * Returns the real value in $oldValues resp. $newValues
-	 * @param string|DBItemFieldOption $name the name
-	 * @return mixed
-	 */
-	private function getRealValue($name){
-		if ($name instanceof DBItemFieldOption){
-			$defaultReturn = $name->default;
-			$name = $name->name;
-		}
-		else {
-			$defaultReturn = null;
-		}
-		
-		if (array_key_exists($name, $this->newValues)){
-			return $this->newValues[$name];
-		}
-		if (array_key_exists($name, $this->oldValues)){
-			return $this->oldValues[$name];
-		}
-
-		return $defaultReturn;
-		#throw new InvalidArgumentException("No property " . $name . " found.");
-	}
 
 	/**
 	 * Searches in the field options for a given name. If $searchInAllExtenders is true not only the actual extenders are searched but
@@ -463,7 +469,7 @@ abstract class DBItem extends ViewableHTML{
 	 */
 	private function getFieldOption($name, $searchInAllExtenders = false, $options = null){
 		if ($options === null){
-			$options = DBItemFieldOption::parseClass($class);
+			$options = DBItemFieldOption::parseClass(get_class($this));
 		}
 		foreach ($options as $item){
 			/* @var $item DBItemFieldOption */
@@ -482,7 +488,7 @@ abstract class DBItem extends ViewableHTML{
 					}
 				}
 				else {
-					$extenderValue = $this->getRealValue($item->name);
+					$extenderValue = $this->getRealValue($item);
 					if ($extenderValue !== null){
 						$value = $this->getFieldOption(
 							$name, $searchInAllExtenders, $item->extensionFieldOptions[$extenderValue]
@@ -496,69 +502,31 @@ abstract class DBItem extends ViewableHTML{
 		}
 		return null;
 	}
-
+	
 	/**
-	 *
-	 * @param array $options Array of DBItemFieldOptions to be searched in
-	 * @param string $name the name to search for
-	 * @param bool $success if the search was successful
-	 * @return mixed value of the field if found. Null if not found - BUT check $success if the field was found
+	 * Returns the real value in $oldValues resp. $newValues. If it is not present in any of this arrays the default value for this field is returned
+	 * @param DBItemFieldOption $fieldOption the name
+	 * @return mixed
 	 */
-	private function getBySearchInFieldOptions($options, $name, &$success = true){
-		$success = true;
-		foreach ($options as $item){
-			/* @var $item DBItemFieldOption */
-			if ($item->name === $name){
-				switch ($item->type){
-					case DBItemFieldOption::DB_ITEM:
-						switch ($item->correlation){
-							case DBItemFieldOption::ONE_TO_ONE: case DBItemFieldOption::N_TO_ONE:
-								$value = $this->getRealValue($name);
-								if ($value !== null){
-									return self::getClass($item->class, $value);
-								}
-								else{
-									return null;
-								}
-								break;
-							case DBItemFieldOption::ONE_TO_N:
-								return self::getByConditionCLASS($item->class, $this->db->quote($item->correlationName, DB::PARAM_IDENT) . " = " . $this->DBid);
-								break;
-							case DBItemFieldOption::N_TO_N:
-								return self::getByLinkingTable($item->class, $item->name, $item->correlationName, $this->DBid);
-								break;
-						}
-						break;
-					default:
-						return $this->getRealValue($name);
-				}
-			}
-			if ($item->extender){
-				$extenderValue = $this->getRealValue($item->name);
-				if ($extenderValue !== null){
-					$value = $this->getBySearchInFieldOptions(
-						$item->extensionFieldOptions[$extenderValue], $name, $success
-					);
-					if ($success){
-						return $value;
-					}
-				}
-				foreach ($item->typeExtension as $possibleExtenderValue){
-					if ($possibleExtenderValue !== $extenderValue){
-						$value = $this->getBySearchInFieldOptions(
-							$item->extensionFieldOptions[$possibleExtenderValue], $name, $success
-						);
-						if ($success){
-							return $value;
-						}
-					}
-				}
-			}
+	private function getRealValue(DBItemFieldOption $fieldOption){
+		$name = $fieldOption->name;
+		if (array_key_exists($name, $this->newValues)){
+			return $this->newValues[$name];
 		}
-		$success = false;
-		return null;
+		if (array_key_exists($name, $this->oldValues)){
+			return $this->oldValues[$name];
+		}
+
+		return $fieldOption->default;
 	}
 
+	/**
+	 * Magic function __get
+	 * @param string $name
+	 * @return mixed
+	 * @throws Exception
+	 * @throws InvalidArgumentException
+	 */
 	public function __get($name){
 		if ($this->deleted){
 			throw new Exception("Deleted item can not be accessed.");
@@ -566,19 +534,43 @@ abstract class DBItem extends ViewableHTML{
 		if ($name === "DBid"){
 			return $this->DBid;
 		}
-		/*
-		$class = get_class($this);
-
-		$value = $this->getBySearchInFieldOptions(DBItemFieldOption::parseClass($class), $name, $success);
-		if ($success){
-			return $value;
-		}*/
+		
 		$fieldOption = $this->getFieldOption($name, true);
 		if ($fieldOption === null){
 			throw new InvalidArgumentException("No property " . $name . " found.");
 		}
 		else {
-			return $this->getRealValue($fieldOption);
+			switch ($fieldOption->type){
+				case DBItemFieldOption::DB_ITEM:
+					switch ($fieldOption->correlation){
+						case DBItemFieldOption::ONE_TO_ONE: case DBItemFieldOption::N_TO_ONE:
+							$value = $this->getRealValue($fieldOption);
+							if ($value !== null){
+								return self::getClass($fieldOption->class, $value);
+							}
+							else{
+								return null;
+							}
+							break;
+						case DBItemFieldOption::ONE_TO_N:
+							return self::getByConditionCLASS(
+								$fieldOption->class,
+								$this->db->quote($fieldOption->correlationName, DB::PARAM_IDENT) . " = " . $this->DBid
+							);
+							break;
+						case DBItemFieldOption::N_TO_N:
+							return self::getByLinkingTable(
+								$fieldOption->class,
+								$fieldOption->name,
+								$fieldOption->correlationName,
+								$this->DBid
+							);
+							break;
+					}
+					break;
+				default:
+					return $this->getRealValue($fieldOption);
+			}
 		}
 	}
 
@@ -598,122 +590,12 @@ abstract class DBItem extends ViewableHTML{
 	}
 
 	/**
-	 *
-	 * @param array $options Array of DBItemFieldOptions to be searched in
-	 * @param type $name the name to search for
-	 * @param mixed $value the value to be set
-	 * @param type $success if the search was successful
+	 * Magic function __set
+	 * @param string $name
+	 * @param mixed $value
+	 * @throws Exception
+	 * @throws InvalidArgumentException
 	 */
-	private function setBySearchInFieldOptions($options, $name, $value, &$success){
-		$success = true;
-		foreach ($options as $item){
-			/* @var $item DBItemFieldOption */
-			if ($item->name === $name){
-				switch ($item->type){
-					case DBItemFieldOption::DB_ITEM:
-						switch ($item->correlation){
-							case DBItemFieldOption::ONE_TO_ONE:
-								$valueItem = $this->{$name};
-								if ($valueItem !== null){
-									$valueItem->{$item->correlationName} = null;
-								}
-							case DBItemFieldOption::N_TO_ONE:
-								if ($value === null){
-									$this->{$name} = null;
-								}
-								elseif ($value instanceof $item->class){
-									if ($this->getRealValue($name) !== $value->DBid){
-										$this->setRealValue($name, $value->DBid);
-										if ($item->correlation === DBItemFieldOption::ONE_TO_ONE){
-											$value->{$item->correlationName} = null;
-											$value->setRealValue($item->correlationName, $this->DBid);
-										}
-									}
-								}
-								else {
-									throw new InvalidArgumentException("Property " . $name . " is no " . $item->class . ".");
-								}
-								break;
-							case DBItemFieldOption::ONE_TO_N:
-								if (is_a($value, "DBItemCollection")){
-									if ($value->getClass() !== $item->class && is_subclass_of($value->getClass(), $item->class)){
-										throw new InvalidArgumentException("Property " . $name . " contains a non " . $item->class . ".");
-									}
-									$oldValues = $this->{$name};
-									$newValue = array();
-
-									foreach ($value as $valueItem){
-										if (($pos = $oldValues->search($valueItem, true)) !== false){
-											$oldValues->splice($pos, 1);
-										}
-										else {
-											$newValue[] = $valueItem;
-										}
-									}
-									foreach ($newValue as $valueItem){
-										$valueItem->{$item->correlationName} = $this;
-									}
-
-									foreach ($oldValues as $valueItem){
-										$valueItem->{$item->correlationName} = null;
-									}
-								}
-								else {
-									throw new InvalidArgumentException("Property " . $name . " is not an DBItemCollection.");
-								}
-								break;
-							case DBItemFieldOption::N_TO_N:
-								if (is_a($value, "DBItemCollection")){
-									if ($value->getClass() !== $item->class && is_subclass_of($value->getClass(), $item->class)){
-										throw new InvalidArgumentException("Property " . $name . " contains a non " . $item->class . ".");
-									}
-									$oldValues = $this->{$name};
-									$newValue = array();
-
-									foreach ($value as $valueItem){
-										if (($pos = $oldValues->search($valueItem, true)) !== false){
-											$oldValues->splice($pos, 1);
-										}
-										else {
-											$newValue[] = $valueItem;
-										}
-									}
-									foreach ($newValue as $valueItem){
-										self::setInLinkingTable($name, $item->correlationName, $this->DBid, $valueItem->DBid);
-									}
-
-									foreach ($oldValues as $valueItem){
-										self::removeInLinkingTable($name, $item->correlationName, $this->DBid, $valueItem->DBid);
-									}
-								}
-								else {
-									throw new InvalidArgumentException("Property " . $name . " is not an DBItemCollection.");
-								}
-								break;
-						}
-						break;
-					default:
-						$this->setRealValue($name, $value);
-				}
-
-				#exit foreach-loop AND function
-				return;
-			}
-			if ($item->extender){
-				$extenderValue = $this->getRealValue($item->name);
-				if ($extenderValue !== null){
-					$this->setBySearchInFieldOptions(
-						$item->extensionFieldOptions[$extenderValue], $name, $value, $success
-					);
-					if ($success){
-						return;
-					}
-				}
-			}
-		}
-		$success = false;
-	}
-
 	public function __set($name, $value){
 		if ($this->deleted){
 			throw new Exception("Deleted item can not be accessed.");
@@ -721,13 +603,110 @@ abstract class DBItem extends ViewableHTML{
 		if (!$this->changeable){
 			throw new Exception("This item can not be changed.");
 		}
-		$class = get_class($this);
-		$this->setBySearchInFieldOptions(DBItemFieldOption::parseClass($class), $name, $value, $success);
-		if (!$success){
+
+		$fieldOption = $this->getFieldOption($name, false);
+		if ($fieldOption === null){
 			throw new InvalidArgumentException("No property " . $name . " found.");
+		}
+		else {
+			switch ($fieldOption->type){
+				case DBItemFieldOption::DB_ITEM:
+					switch ($fieldOption->correlation){
+						case DBItemFieldOption::ONE_TO_ONE:
+							//remove old dependency
+							$valueItem = $this->{$name};
+							if ($valueItem !== null){
+								$valueItem->{$fieldOption->correlationName} = null;
+							}
+							//desired missing break
+						case DBItemFieldOption::N_TO_ONE:
+							if ($value === null){
+								$this->{$name} = null;
+							}
+							elseif ($value instanceof $fieldOption->class){
+								if ($this->getRealValue($fieldOption) !== $value->DBid){
+									$this->setRealValue($name, $value->DBid);
+									if ($fieldOption->correlation === DBItemFieldOption::ONE_TO_ONE){
+										$value->{$fieldOption->correlationName} = null;
+										$value->setRealValue($fieldOption->correlationName, $this->DBid);
+									}
+								}
+							}
+							else {
+								throw new InvalidArgumentException("Property " . $name . " is no " . $fieldOption->class . ".");
+							}
+							break;
+						case DBItemFieldOption::ONE_TO_N:
+							if (is_a($value, "DBItemCollection")){
+								if ($value->getClass() !== $fieldOption->class && is_subclass_of($value->getClass(), $fieldOption->class)){
+									throw new InvalidArgumentException("Property " . $name . " contains a non " . $fieldOption->class . ".");
+								}
+								$oldValues = $this->{$name};
+								$newValue = array();
+
+								foreach ($value as $valueItem){
+									if (($pos = $oldValues->search($valueItem, true)) !== false){
+										$oldValues->splice($pos, 1);
+									}
+									else {
+										$newValue[] = $valueItem;
+									}
+								}
+								foreach ($newValue as $valueItem){
+									$valueItem->{$fieldOption->correlationName} = $this;
+								}
+
+								foreach ($oldValues as $valueItem){
+									$valueItem->{$fieldOption->correlationName} = null;
+								}
+							}
+							else {
+								throw new InvalidArgumentException("Property " . $name . " is not an DBItemCollection.");
+							}
+							break;
+						case DBItemFieldOption::N_TO_N:
+							if (is_a($value, "DBItemCollection")){
+								if ($value->getClass() !== $fieldOption->class && is_subclass_of($value->getClass(), $fieldOption->class)){
+									throw new InvalidArgumentException("Property " . $name . " contains a non " . $fieldOption->class . ".");
+								}
+								$oldValues = $this->{$name};
+								$newValue = array();
+
+								foreach ($value as $valueItem){
+									if (($pos = $oldValues->search($valueItem, true)) !== false){
+										$oldValues->splice($pos, 1);
+									}
+									else {
+										$newValue[] = $valueItem;
+									}
+								}
+								foreach ($newValue as $valueItem){
+									self::setInLinkingTable($name, $fieldOption->correlationName, $this->DBid, $valueItem->DBid);
+								}
+
+								foreach ($oldValues as $valueItem){
+									self::removeInLinkingTable($name, $fieldOption->correlationName, $this->DBid, $valueItem->DBid);
+								}
+							}
+							else {
+								throw new InvalidArgumentException("Property " . $name . " is not an DBItemCollection.");
+							}
+							break;
+					}
+					break;
+				default:
+					$this->setRealValue($name, $value);
+			}
 		}
 	}
 
+	/**
+	 * Amgic function __call
+	 * @param type $name
+	 * @param type $arguments
+	 * @return type
+	 * @throws BadMethodCallException
+	 */
 	public function __call($name, $arguments){
 		if (method_exists("DBItem", $name . "CLASS")){
 			array_unshift($arguments, get_class($this));
@@ -735,8 +714,14 @@ abstract class DBItem extends ViewableHTML{
 		}
 		throw new BadMethodCallException("No method called " . $name);
 	}
-
-	# only PHP >= 5.3 (__callStatic itself AND late static binding)
+	
+	/**
+	 * only PHP >= 5.3 (__callStatic itself AND late static binding)
+	 * @param type $name
+	 * @param type $arguments
+	 * @return type
+	 * @throws BadMethodCallException
+	 */
 	public static function __callStatic($name, $arguments){
 		if (method_exists("DBItem", $name . "CLASS")){
 			array_unshift($arguments, get_called_class());
