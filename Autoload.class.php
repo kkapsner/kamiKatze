@@ -1,4 +1,12 @@
 <?php
+/**
+ * Definition file for Autload class.
+ */
+
+/**
+ * Main class for autoloading classes.
+ * @author Korbinian Kapsner
+ */
 
 class Autoload {
 	/**
@@ -7,11 +15,15 @@ class Autoload {
 	 */
 	public $classExtension = ".class.php";
 	/**
-	 * file extension for a view file
-	 * @var string
+	 * Array of the paths to search in
+	 * @var array
 	 */
-	public $viewExtension = ".view.php";
 	protected $searchPath = array();
+
+	/**
+	 * Protected constuctor. Use Autoload::getInstance().
+	 * @see Autoload::getInstance()
+	 */
 	protected function __construct(){
 		$mainScriptDir = realpath(dirname($_SERVER["SCRIPT_FILENAME"])) . DIRECTORY_SEPARATOR;
 		$this->addPath($mainScriptDir);
@@ -24,6 +36,7 @@ class Autoload {
 	 * @var Autoload
 	 */
 	protected static $instance = null;
+
 	/**
 	 * Factory method.
 	 * @return Autoload
@@ -141,9 +154,9 @@ class Autoload {
 		return false;
 	}
 	/**
-	 *
-	 * @param string $classname
-	 * @param string $namespace 
+	 * Loads a specific class.
+	 * @param string $classname the class name
+	 * @param string $namespace used namespace
 	 */
 	public function load($classname, $namespace = ""){
 		$split = array_values(
