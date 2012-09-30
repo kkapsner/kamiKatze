@@ -1,9 +1,17 @@
-<table>
+<table class="collection <?php echo $this->getClass();?>">
+	<colgroup>
+		<?php
+		/* @var $this DBItemCollection */
+		$fieldOptions = DBItemFieldOption::parseClass($this->getClass());
+		foreach ($fieldOptions as $fieldItem){
+			/* @var $fieldItem DBItemFieldOption */
+			echo '<col class="' . $fieldItem->name . '">';
+		}
+		?>
+	</colgroup>
 	<thead>
 		<tr>
 			<?php
-			/* @var $this DBItemCollection */
-			$fieldOptions = DBItemFieldOption::parseClass($this->getClass());
 			foreach ($fieldOptions as $fieldItem){
 				/* @var $fieldItem DBItemFieldOption */
 				echo "<th>" . $fieldItem->name . "</th>";
@@ -19,7 +27,7 @@
 				echo '<tr>';
 				foreach ($fieldOptions as $fieldItem){
 					/* @var $fieldItem DBItemFieldOption */
-					echo "<td>";
+					echo '<td class="' . $fieldItem->name . '">';
 					$fieldItem->view(false, true, $item);
 					echo "</td>";
 				}
