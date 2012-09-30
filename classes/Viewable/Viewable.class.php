@@ -6,7 +6,7 @@
  * @author kkapsner
  */
 interface Viewable{
-	public function view($content = false, $output = false, $args = false);
+	public function view($context = false, $output = false, $args = false);
 }
 
 ?>
