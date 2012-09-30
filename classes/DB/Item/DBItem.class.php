@@ -319,17 +319,22 @@ abstract class DBItem extends ViewableHTML{
 		}
 		return $dbItemFields;
 	}
+
 	/**
 	 * Creates a new instance of the specific $class with the values in the $fields
 	 * @param string $class Classname of the new instance
-	 * @param array $fields field values
+	 * @param array $fieldValues field values
+	 * @param bool $bypassValidation If set to true the provided values are not validated.
+	 * DO ONLY USE IF VALIDATION IS DONE BEFOREHAND MANUALY.
 	 * @return DBItem of type $class 
 	 */
-	public static function createCLASS($class, $fields = array()){
-		$errors = self::validateFieldsCLASS($class, $fields);
-		if ($errors !== true){
-			$keys = array_keys($errors);
-			throw $errors[$keys[0]];
+	public static function createCLASS($class, $fieldValues = array(), $bypassValidation = false){
+		if (!$bypassValidation){
+			$errors = self::validateFieldsCLASS($class, $fieldValues);
+			if ($errors !== true){
+				$keys = array_keys($errors);
+				throw $errors[$keys[0]];
+			}
 		}
 
 		$db = DB::getInstance();
@@ -338,17 +343,17 @@ abstract class DBItem extends ViewableHTML{
 		$dbItemFields = array();
 		foreach (DBItemFieldOption::parseClass($class) as $item){
 			/* @var $item DBItemFieldOption */
-			if (array_key_exists($item->name, $fields)){
+			if (array_key_exists($item->name, $fieldValues)){
 				if ($item->type === DBItemFieldOption::DB_ITEM){
 					$dbItemFields[] = $item;
 				}
 				else {
 					$keys[] = $db->quote($item->name, DB::PARAM_IDENT);
-					if ($item->null && $fields[$item->name] === ""){
+					if ($item->null && $fieldValues[$item->name] === ""){
 						$values[] = "NULL";
 					}
 					else {
-						$values[] = $db->quote($fields[$item->name], DB::PARAM_STR);
+						$values[] = $db->quote($fieldValues[$item->name], DB::PARAM_STR);
 					}
 				}
 			}
@@ -357,7 +362,7 @@ abstract class DBItem extends ViewableHTML{
 		$newId = $db->lastInsertId();
 		foreach (DBItemFieldOption::parseClass($class) as $item){
 			if ($item->extender){
-				$dbItemFields = array_merge($dbItemFields, self::createExtenderCLASS($item, $newId, $fields));
+				$dbItemFields = array_merge($dbItemFields, self::createExtenderCLASS($item, $newId, $fieldValues));
 			}
 		}
 		$item = self::getCLASS($class, $newId);
@@ -366,11 +371,11 @@ abstract class DBItem extends ViewableHTML{
 			/* @var $fieldOption DBItemFieldOption */
 			switch ($fieldOption->correlation){
 				case DBItemFieldOption::ONE_TO_ONE: case DBItemFieldOption::N_TO_ONE:
-					$value = self::getCLASS($fieldOption->class,  $fields[$fieldOption->name]);
+					$value = self::getCLASS($fieldOption->class,  $fieldValues[$fieldOption->name]);
 					break;
 				case DBItemFieldOption::ONE_TO_N: case DBItemFieldOption::N_TO_N:
 					$value = new DBItemCollection($fieldOption->class);
-					foreach ($fields[$fieldOption->name] as $id){
+					foreach ($fieldValues[$fieldOption->name] as $id){
 						$value[] = self::getCLASS($fieldOption->class, $id);
 					}
 					break;
@@ -503,33 +508,66 @@ abstract class DBItem extends ViewableHTML{
 		}
 	}
 
+	private function saveExtender(DBItemFieldOption $extenderOption){
+		$extenderValue = $this->getRealValue($extenderOption);
+		if ($extenderValue !== null){
+			$prop = array();
+			foreach ($extenderOption->extensionFieldOptions[$extenderValue] as $item){
+				/* @var $item DBItemFieldOption */
+				if (array_key_exists($item->name, $this->newValues)){
+					$name = $item->name;
+					$value = $this->newValues[$name];
+					$prop[] = $this->db->quote($name, DB::PARAM_IDENT) . " = " . ($value === null? "NULL": $this->db->quote($value));
+
+					$this->oldValues[$name] = $value;
+					unset($this->newValues[$name]);
+				}
+				if ($item->extender){
+					$this->saveExtender($item);
+				}
+			}
+			if (count($prop) !== 0){
+				$this->db->query("UPDATE " . $this->db->quote(self::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " SET " . implode(", ", $prop) . " WHERE `id` = " . $this->DBid);
+			}
+		}
+	}
+	
 	/**
 	 * Saves the item to the database
-	 * @todo save extenders
 	 */
 	public function save(){
 		if ($this->changed && !$this->deleted){
 			$prop = array();
-			foreach ($this->newValues as $name => $value){
-				$prop[] = $this->db->quote($name, DB::PARAM_IDENT) . " = " . ($value === null? "NULL": $this->db->quote($value));
-
-				$this->oldValues[$name] = $value;
-				unset($this->newValues[$name]);
+			foreach (DBItemFieldOption::parseClass(get_class($this)) as $item){
+				/* @var $item DBItemFieldOption */
+				if (array_key_exists($item->name, $this->newValues)){
+					$name = $item->name;
+					$value = $this->newValues[$name];
+					$prop[] = $this->db->quote($name, DB::PARAM_IDENT) . " = " . ($value === null? "NULL": $this->db->quote($value));
+					
+					$this->oldValues[$name] = $value;
+					unset($this->newValues[$name]);
+				}
+				if ($item->extender){
+					$this->saveExtender($item);
+				}
 			}
-			$this->db->query("UPDATE " . $this->table . " SET " . implode(", ", $prop) . " WHERE `id` = " . $this->DBid);
+			if (count($prop) !== 0){
+				$this->db->query("UPDATE " . $this->table . " SET " . implode(", ", $prop) . " WHERE `id` = " . $this->DBid);
+			}
 			$this->changed = false;
 		}
 	}
 
 	/**
-	 * Deletes the item from the database. Also all connections to the item are removed.
-	 * @todo delete extenders
+	 * Deletes the extender entries of the item in the database. CALL ONLY FORM delete() OR ITSELF!
+	 * @param DBItemFieldOption $extenderOption field option for the extender.
 	 */
-	public function delete(){
-		if (!$this->deleted){
-			$this->db->query("DELETE FROM  " . $this->table . " WHERE `id` = " . $this->DBid);
-
-			foreach (DBItemFieldOption::parseClass(get_class($this)) as $item){
+	private function deleteExtender(DBItemFieldOption $extenderOption){
+		$extenderValue = $this->getRealValue($extenderOption);
+		if ($extenderValue !== null){
+			$this->db->query("DELETE FROM  " . $this->db->quote(self::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " WHERE `id` = " . $this->DBid);
+			foreach ($extenderOption->extensionFieldOptions[$extenderValue] as $item){
 				/* @var $item DBItemFieldOption */
 				switch ($item->type){
 					case DBItemFieldOption::DB_ITEM:
@@ -542,6 +580,37 @@ abstract class DBItem extends ViewableHTML{
 								break;
 						}
 						break;
+				}
+				if ($item->extender){
+					$this->deleteExtender($item);
+				}
+			}
+		}
+	}
+	/**
+	 * Deletes the item from the database. Also all connections to the item are removed.
+	 */
+	public function delete(){
+		if (!$this->deleted){
+			$this->db->query("DELETE FROM  " . $this->table . " WHERE `id` = " . $this->DBid);
+			
+			$class = get_class($this);
+			foreach (DBItemFieldOption::parseClass($class) as $item){
+				/* @var $item DBItemFieldOption */
+				switch ($item->type){
+					case DBItemFieldOption::DB_ITEM:
+						switch ($item->correlation){
+							case DBItemFieldOption::ONE_TO_ONE: case DBItemFieldOption::N_TO_ONE:
+								$this->{$item->name} = null;
+								break;
+							case DBItemFieldOption::ONE_TO_N: case DBItemFieldOption::N_TO_N:
+								$this->{$item->name} = new DBItemCollection($item->class);
+								break;
+						}
+						break;
+				}
+				if ($item->extender){
+					$this->deleteExtender($item);
 				}
 			}
 			
@@ -700,6 +769,9 @@ abstract class DBItem extends ViewableHTML{
 		if ($fieldOption === null){
 			throw new InvalidArgumentException("No property " . $name . " found.");
 		}
+		elseif ($fieldOption->extender){
+			throw new InvalidArgumentException("Extenders can not be changed.");
+		}
 		else {
 			switch ($fieldOption->type){
 				case DBItemFieldOption::DB_ITEM:
@@ -825,31 +897,4 @@ abstract class DBItem extends ViewableHTML{
 
 register_shutdown_function(array("DBItem", "saveAll"));
 
-/**
- * Exception for a sanitation error.
- * @author Korbibian Kapsner
- * @package DB\Item
- */
-class DBItemValidationException extends UnexpectedValueException{
-	/**
-	 * Error code if the value was null where it was not allowed
-	 */
-	const WRONG_NULL = 0;
-	/**
-	 * Error code if the value was the wrong type
-	 */
-	const WRONG_TYPE = 1;
-	/**
-	 * Error code if the value was wrong. E.g. if the field is a enum and the value was not allowed.
-	 */
-	const WRONG_VALUE = 2;
-	/**
-	 * Error code if the value did not match the provided regular expression.
-	 */
-	const WRONG_REGEXP = 3;
-	/**
-	 * Error code if the value is missing but required
-	 */
-	const WRONG_MISSING = 4;
-}
 ?>
