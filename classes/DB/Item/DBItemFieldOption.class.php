@@ -1,14 +1,14 @@
 <?php
-
 /*
- *
+ * DBItemFieldOption class definition
  *
  */
 
 /**
- * Description of DBItemFieldOption
+ * Options and properties managing class for a field.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package DB\Item
  */
 class DBItemFieldOption extends ViewableHTML{
 	const DB_ITEM = "DBItem";
@@ -18,65 +18,69 @@ class DBItemFieldOption extends ViewableHTML{
 	const N_TO_ONE   = 2;
 	const N_TO_N     = 3;
 
+	/**
+	 * Cache array for already parsed classes.
+	 * @var array
+	 */
 	static protected $classOptions = array();
 
 	/**
-	 *
+	 * Name of the field.
 	 * @var string
 	 */
 	public $name;
 	/**
-	 *
+	 * Name to be displayed.
 	 * @var string
 	 */
 	public $displayName;
 	/**
-	 *
+	 * Regular expression that a value must match.
 	 * @var string
 	 */
 	public $regExp = null;
 	/**
-	 *
+	 * The type of the field
 	 * @var string
 	 */
 	public $type = null;
 	/**
-	 *
-	 * @var string
+	 * The type extension (part in the brackets). If the field is an enum or set ths is an array of the possible values.
+	 * @var mixed
 	 */
 	public $typeExtension = null;
 	/**
-	 *
+	 * If null is a valid value.
 	 * @var bool
 	 */
 	public $null = false;
 	/**
-	 *
+	 * The default value.
 	 * @var mixed
 	 */
 	public $default = null;
 	/**
-	 *
+	 * If a search can be performed on this field.
 	 * @var bool
 	 */
 	public $searchable = true;
 	/**
-	 *
+	 * If this field can be changed.
 	 * @var bool
 	 */
 	public $editable = true;
 	/**
-	 *
+	 * If this is not null this field represents another DBItem with this class.
 	 * @var string
 	 */
 	public $class = null;
 	/**
-	 *
+	 * The correlation between this DBItem and the other one.
 	 * @var int
 	 */
 	public $correlation = null;
 	/**
-	 *
+	 * The field name of this DBItem in the other one.
 	 * @var string
 	 */
 	public $correlationName = null;
@@ -96,8 +100,9 @@ class DBItemFieldOption extends ViewableHTML{
 
 
 	/**
-	 *
-	 * @param array $result
+	 * Generates the field options from a DB result.
+	 * @param string $class The class name
+	 * @param array $result The results to parse
 	 * @return self
 	 */
 	protected static function parseResult($class, $result){
@@ -108,14 +113,14 @@ class DBItemFieldOption extends ViewableHTML{
 			$item->type = $m[1];
 			$item->typeExtension = $m[2];
 			
-			if ($item->type === "enum"){
+			if ($item->type === "enum" || $item->type === "set"){
 				if (preg_match_all('/\'((?:\'{2}|[^\'])*)\'/', $item->typeExtension, $m)){
 					$item->typeExtension = $m[1];
 					foreach ($item->typeExtension as $i => $v){
 						$item->typeExtension[$i] = str_replace("''", "'", $v);
 					}
 				
-					$item->default = $item->typeExtension[0];
+					#$item->default = $item->typeExtension[0];
 				}
 				else {
 					$item->typeExtension = array();
@@ -175,8 +180,8 @@ class DBItemFieldOption extends ViewableHTML{
 	}
 
 	/**
-	 *
-	 * @param string $class
+	 * Gets the field options for a specific class.
+	 * @param string $class The class name
 	 * @return array of DBItemFieldOption
 	 */
 	public static function parseClass($class){
@@ -196,7 +201,10 @@ class DBItemFieldOption extends ViewableHTML{
 		}
 		return self::$classOptions[$class];
 	}
-	
+
+	/**
+	 * Constructor of DBItemFieldOption.
+	 */
 	protected function __construct($name){
 		$this->name = $name;
 		$this->displayName = $name;

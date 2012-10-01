@@ -50,35 +50,47 @@ if ($this->editable){
 					}
 					break;
 				case "enum":
-					echo "\n\t\t\t" . '<select name="' . $postName . '">';
-					foreach ($this->typeExtension as $value){
-						echo "\n\t\t\t\t" .
-							'<option value="' . $this->html($value) . '"' .
-								($args->{$this->name} === $value? ' selected="selected"': '') . '>' .
-								$this->html($value) .
-							'</option>';
-					}
-					echo "\n\t\t\t" . '</select>';
-					if ($this->extender){
+					if (!$this->extender || $args->DBid === 0){
+						echo "\n\t\t\t" . '<select name="' . $postName . '">';
 						foreach ($this->typeExtension as $value){
-							echo "\n\t\t\t" .'<table class="dbItemExtender" data-extension="' . $this->html($value) . '">' .
-								'<caption>' . $this->html($value) . "</caption>";
-							foreach ($this->extensionFieldOptions[$value] as $subItem){
-								$subItem->view($context, true, $args);
-							}
-							echo "\n\t\t\t" . '</table>';
+							echo "\n\t\t\t\t" .
+								'<option value="' . $this->html($value) . '"' .
+									($args->{$this->name} === $value? ' selected="selected"': '') . '>' .
+									$this->html($value) .
+								'</option>';
 						}
-						echo '<script>(function(){
-							var sel = document.getElementsByTagName("select");
-							sel = sel[sel.length - 1];
-							var tables = sel.parentNode.getElementsByTagName("table");
-							sel.onchange = function(){
-								for (var i = 0; i < tables.length; i++){
-									tables[i].style.display = (tables[i].getAttribute("data-extension") === sel.value)? "": "none";
+						echo "\n\t\t\t" . '</select>';
+						if ($this->extender){
+							foreach ($this->typeExtension as $value){
+								echo "\n\t\t\t" .'<table class="dbItemExtender" data-extension="' . $this->html($value) . '">' .
+									'<caption>' . $this->html($value) . "</caption>";
+								foreach ($this->extensionFieldOptions[$value] as $subItem){
+									$subItem->view($context, true, $args);
 								}
+								echo "\n\t\t\t" . '</table>';
 							}
-							sel.onchange();
-						})();</script>';
+							echo '<script>(function(){
+								var sel = document.getElementsByTagName("select");
+								sel = sel[sel.length - 1];
+								var tables = sel.parentNode.getElementsByTagName("table");
+								sel.onchange = function(){
+									for (var i = 0; i < tables.length; i++){
+										tables[i].style.display = (tables[i].getAttribute("data-extension") === sel.value)? "": "none";
+									}
+								}
+								sel.onchange();
+							})();</script>';
+						}
+					}
+					else {
+						$value = $args->{$this->name};
+						
+						echo "\n\t\t\t" .'<table class="dbItemExtender" data-extension="' . $this->html($value) . '">' .
+							'<caption>' . $this->html($value) . "</caption>";
+						foreach ($this->extensionFieldOptions[$value] as $subItem){
+							$subItem->view($context, true, $args);
+						}
+						echo "\n\t\t\t" . '</table>';
 					}
 					break;
 				default:

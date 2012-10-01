@@ -5,7 +5,7 @@
  */
 
 /**
- * Exception for a sanitation error.
+ * Exception for a validation error.
  * @author Korbibian Kapsner
  * @package DB\Item
  */
