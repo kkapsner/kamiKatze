@@ -7,6 +7,7 @@
  * Reads CSV files. Accessing data lines is over the ArrayAccess interface.
  *
  * @author Korbinian Kapsner
+ * @package CSV
  */
 class CSVReader implements ArrayAccess{
 	/**
@@ -44,32 +45,41 @@ class CSVReader implements ArrayAccess{
 	}
 
 	/**
+	 * {@inheritdoc}
 	 *
 	 * @todo implement
+	 * @param type $offset
 	 */
 	public function offsetExists($offset){
 		
 	}
 
 	/**
+	 * {@inheritdoc}
 	 *
 	 * @todo implement
+	 * @param type $offset
 	 */
 	public function offsetGet($offset){
 		
 	}
 
 	/**
+	 * {@inheritdoc}
 	 *
 	 * @todo implement
+	 * @param type $offset
+	 * @param type $value
 	 */
 	public function offsetSet($offset, $value){
 		
 	}
 
 	/**
+	 * {@inheritdoc}
 	 *
 	 * @todo implement
+	 * @param type $offset
 	 */
 	public function offsetUnset($offset){
 		

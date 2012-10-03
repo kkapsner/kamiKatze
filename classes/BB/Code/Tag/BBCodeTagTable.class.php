@@ -1,23 +1,40 @@
 <?php
+/**
+ * BBCodeTagTable definition file.
+ */
 
 /**
- * @author kkapsner
+ * BBCode for a table.
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagTable extends BBCodeTag{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "inline";
-	protected static $allowedChildren = array("block", "inline", "element");
-	protected static $allowedParents = array("block", "inline");
-	
 
 	/**
-	 * The parameter list.
-	 * @var array
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("block", "inline", "element");
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
 	 */
 	protected $parameter = array("class" => false);
 	
 
+
 	/**
-	 * Generates HTML.
+	 * {@inheritdoc}
+	 *
 	 * @return string
 	 * @todo implementation of table to html
 	 */

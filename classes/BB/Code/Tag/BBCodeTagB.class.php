@@ -1,31 +1,42 @@
 <?php
+/**
+ * BBCodeTagB definition file.
+ */
 
 /**
- * @author kkapsner
+ * Represention of a b-tag. The text within this node is bold.
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagB extends BBCodeTagSimpleReplace{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "inline";
+
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $allowedChildren = array("inline");
+
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $allowedParents = array("block", "inline");
 
 
+
 	/**
-	 * The replace HTML tag.
-	 * @var string
+	 * {@inheritdoc}
 	 */
 	protected $htmlTag = "b";
 
-	/**
-	 * The class.
-	 * @var string
-	 */
-	protected $class = NULL;
 
 	/**
-	 * The parameter list.
-	 * @var array
+	 * {@inheritdoc}
 	 */
-	#protected $parameter = array();
+	protected $class = NULL;
 }
 
 ?>

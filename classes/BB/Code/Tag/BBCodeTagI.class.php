@@ -1,31 +1,39 @@
 <?php
+/**
+ * BBCodeTagI definition file
+ */
 
 /**
- * @author kkapsner
+ * Represention of a BBCode-tag [i].
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagI extends BBCodeTagSimpleReplace{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "inline";
-	protected static $allowedChildren = array("block", "inline");
-	protected static $allowedParents = array("block", "inline");
-
 
 	/**
-	 * The replace HTML tag.
-	 * @var string
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
 	 */
 	protected $htmlTag = "i";
 
 	/**
-	 * The class.
-	 * @var string
+	 * {@inheritdoc}
 	 */
 	protected $class = NULL;
-
-	/**
-	 * The parameter list.
-	 * @var array
-	 */
-	#protected $parameter = array("class" => false);
 }
 
 ?>

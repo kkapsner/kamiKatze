@@ -1,9 +1,13 @@
 <?php
+/**
+ * EmailHeader definition file
+ */
 
 /**
- * Description of EmailHeader
+ * Representation of an email header.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email\Header
  */
 class EmailHeader{
 	/**
@@ -24,6 +28,12 @@ class EmailHeader{
 	 */
 	public $valueCharset = NULL;
 
+	/**
+	 * Constructor of Emailheader
+	 *
+	 * @param string $name The header name
+	 * @param string $value The header value
+	 */
 	public function __construct($name, $value = ""){
 		$this->setName($name);
 		$this->setValue($value);
@@ -72,6 +82,7 @@ class EmailHeader{
 	}
 	
 	/**
+	 * Calls EmailEncoder::escapeHeaderValue() to fold the value.
 	 *
 	 * @param type $alreadyConsumedChars number of chars not to be used in the first line
 	 * @return string the folded value string. If a non printable character is in the value the value is encoded.

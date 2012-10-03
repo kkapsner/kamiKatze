@@ -1,24 +1,37 @@
 <?php
+/**
+ * BBCodeTagMap definition file
+ */
 
 /**
- * @author kkapsner
+ * Represention of a BBCode-tag [map].
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagMap extends BBCodeTag{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "inline";
-	protected static $allowedChildren = array("text");
-	protected static $allowedParents = array("block", "inline");
-	
 
 	/**
-	 * The parameter list.
-	 * @var array
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("text");
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
 	 */
 	protected $parameter = array("zoom" => 14, "width" => false, "height" => false);
-	
 
 	/**
-	 * Generates HTML.
-	 * @return string
+	 * {@inheritdoc}
 	 */
 	public function toHTML(){
 		return '<iframe ' .

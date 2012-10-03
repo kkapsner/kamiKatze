@@ -1,24 +1,38 @@
 <?php
+/**
+ * BBCodeTagPhpfunction definition file
+ */
 
 /**
- * @author kkapsner
+ * Represention of a BBCode-tag [phpfunction].
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
+ * @todo document usage
  */
 class BBCodeTagPhpfunction extends BBCodeTag{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "inline";
-	protected static $allowedChildren = array("text");
-	protected static $allowedParents = array("block", "inline");
-	
 
 	/**
-	 * The parameter list.
-	 * @var array
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("text");
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
 	 */
 	protected $parameter = array("name" => false);
-	
 
 	/**
-	 * Generates HTML.
-	 * @return string
+	 * {@inheritdoc}
 	 */
 	public function toHTML(){
 		if ($this->name){

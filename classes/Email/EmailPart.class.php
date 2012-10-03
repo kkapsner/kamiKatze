@@ -1,38 +1,73 @@
 <?php
+/**
+ * EmailPart definition file
+ */
 
 /**
- * Description of EmailPart
+ * Representation of one part of an email
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email
  */
 
 class EmailPart{
+	/**
+	 * The MIME content-type
+	 * @var string
+	 */
 	public $contentType;
+
+	/**
+	 * The used charset.
+	 * @var string
+	 */
 	public $charset;
+
+	/**
+	 * The parts name
+	 * @var string
+	 */
 	public $name;
+
+	/**
+	 * The content
+	 * @var string
+	 */
 	public $content;
 
 	/**
+	 * The parent mail part
 	 * @var EmailPart
 	 */
 	public $parentPart = NULL;
+
 	/**
 	 * Array of the child parts.
-	 * @var array
+	 * @var EmailPart[]
 	 */
 	public $childParts = array();
+
 	/**
 	 * Array of EmailHeaders.
-	 * @var array
+	 * @var EmailHeader[]
 	 */
 	public $headers = array();
+
 	/**
 	 * The boundary for multipart.
 	 * @var string
 	 */
 	private $boundary = false;
 
-
+	/**
+	 * Constructor of EmailPart
+	 *
+	 * @param string $contentType
+	 * @param string $content
+	 * @param string $charset
+	 * @param string $name
+	 * @param EmailHeader[] $headers
+	 */
 	public function __construct($contentType, $content, $charset = '', $name = '', array $headers = NULL){
 		if(!$this->boundary) $this->boundary = EmailEncoder::generateBoundary();
 
@@ -109,6 +144,7 @@ class EmailPart{
 	}
 
 	/**
+	 * Generates the parts head and returns it.
 	 * @return string The header of the mail part.
 	 */
 	function getHead(){
@@ -131,6 +167,7 @@ class EmailPart{
 	}
 
 	/**
+	 * Generates the parts body and returns it.
 	 *
 	 * @return string The body of the mail part.
 	 */
@@ -149,7 +186,8 @@ class EmailPart{
 	}
 
 	/**
-	 *
+	 * Generates the complete part and returns it.
+	 * 
 	 * @return string Whole email part.
 	 */
 	function __toString(){

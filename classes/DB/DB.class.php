@@ -1,15 +1,32 @@
 <?php
+/**
+ * DB definition file
+ */
 
 /**
  * Extension to PDO
+ *
+ * @author Korbinian Kapsner
+ * @package DB
  */
 
 class DB extends PDO{
+	/**
+	 * Represents an identifier.
+	 */
 	const PARAM_IDENT = 6;
-	protected static
-		$defaultConfig,
-		$instance
-	;
+
+	/**
+	 * The standard configuration for a DB connection. Stored in dbConfig.ini
+	 * @var ConfigFile
+	 */
+	protected static $defaultConfig;
+
+	/**
+	 * Standard instance of the DB connection.
+	 * @var DB
+	 */
+	protected static $instance;
 
 	/**
 	 * get the default DB instance.
@@ -21,7 +38,15 @@ class DB extends PDO{
 		}
 		return self::$instance;
 	}
-	
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param type $dsn
+	 * @param type $username
+	 * @param type $password
+	 * @param array $driverOptions
+	 */
 	public function __construct($dsn = null, $username = null, $password = null, array $driverOptions = null){
 		if (self::$defaultConfig === null){
 			self::$defaultConfig = new ConfigFile("dbConfig.ini");
@@ -39,6 +64,13 @@ class DB extends PDO{
 		$this->setAttribute(DB::ATTR_ORACLE_NULLS, DB::NULL_NATURAL);
 	}
 
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param string $string
+	 * @param int $parameter_type
+	 * @return string
+	 */
 	public function quote($string, $parameter_type = DB::PARAM_STR){
 		if ($parameter_type === self::PARAM_IDENT){
 			return $this->escapeIdentifier($string);
@@ -50,6 +82,7 @@ class DB extends PDO{
 
 	/**
 	 * escapes an indentifier apropriate (supported driver: mysql). Surrounding chars are included.
+	 * 
 	 * @param string $identifier
 	 * @param bool $includeChar
 	 * @return string

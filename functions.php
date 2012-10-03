@@ -1,7 +1,6 @@
 <?php
-
-/*
- * deklares some globale funktions
+/**
+ * declares some globale funktions
  * 
  */
 

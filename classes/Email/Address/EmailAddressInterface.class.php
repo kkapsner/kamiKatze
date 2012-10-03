@@ -1,8 +1,13 @@
 <?php
+/**
+ * EmailAddressInterface definition file
+ */
 
 /**
+ * Interface for interaction with a Email address
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email\Address
  */
 interface EmailAddressInterface{
 	/**
@@ -17,7 +22,9 @@ interface EmailAddressInterface{
 	 */
 	public function toHeaderEncoded($alreadyConsumedChars = 0);
 
-	
+	/**
+	 * Magic function __toString
+	 */
 	public function __toString();
 }
 

@@ -1,28 +1,45 @@
 <?php
+/**
+ * BBCodeTag<tagName> definition file
+ */
 
 /**
- * @author kkapsner
+ * Represention of a BBCode-tag [<tagName>].
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTag<tagName> extends BBCodeTag{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "block";
-	protected static $allowedChildren = array("block", "inline");
-	protected static $allowedParents = array("block", "inline");
-	
 
 	/**
-	 * The parameter list.
-	 * @var array
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("block", "inline");
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
+	 * @todo describe parameter
 	 */
 	protected $parameter = array();
 	
 
+
 	/**
-	 * Generates HTML.
+	 * {@inheritdoc}
+	 *
 	 * @return string
+	 * @todo implement <tagName>s toHTML-function.
 	 */
-	public function toHTML(){
-		//TODO: <tagName> toHTML
-	}
+	public function toHTML(){}
 }
 
 ?>

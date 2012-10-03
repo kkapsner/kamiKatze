@@ -1,17 +1,32 @@
 <?php
+/**
+ * BBCodeTagLink definition file
+ */
 
 /**
- * @author kkapsner
+ * Represention of a BBCode-tag [link].
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagLink extends BBCodeTag{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "inline";
-	protected static $allowedChildren = array("inline", "!link");
-	protected static $allowedParents = array("block", "inline");
-	
 
 	/**
-	 * The parameter list.
-	 * @var array
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("inline", "!link");
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
 	 */
 	protected $parameter = array("url" => false, "type" => false);
 	
@@ -39,8 +54,7 @@ class BBCodeTagLink extends BBCodeTag{
 	}
 
 	/**
-	 * Generates HTML.
-	 * @return string
+	 * {@inheritdoc}
 	 */
 	public function toHTML(){
 		$startHTML = '<a class="link ' . $this->type . '"';
@@ -69,6 +83,11 @@ class BBCodeTagLink extends BBCodeTag{
 		return $startHTML . $innerHTML . $endHTML;
 	}
 
+	/**
+	 * Modifies an URL so that it is an external URL afterwards
+	 * @param string $url
+	 * @return string
+	 */
 	private function parseExternURL($url){
 		if (!preg_match('@^(?:https?|ftp)://@i', $url)){
 			$url = "http://" . $url;

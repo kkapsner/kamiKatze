@@ -1,14 +1,26 @@
 <?php
+/**
+ * EmailAddress definition file
+ */
 
 /**
- * Description of EmailAddress
+ * Represention of an email address.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email\Address
  */
 class EmailAddress implements EmailAddressInterface{
-	public
-		$address,
-		$name;
+	/**
+	 * the email address
+	 * @var string
+	 */
+	public $address;
+
+	/**
+	 * the name. Not required.
+	 * @var string
+	 */
+	public $name;
 
 	/**
 	 * The charset of the Name. Default: EmailEncoder::$defaultCharset
@@ -16,6 +28,12 @@ class EmailAddress implements EmailAddressInterface{
 	 */
 	public $charset = NULL;
 
+	/**
+	 * Constructor of EmailAddress
+	 *
+	 * @param string $address the email address
+	 * @param string $name the name
+	 */
 	public function __construct($address, $name = ""){
 		$this->address = $address;
 		$this->name = $name;

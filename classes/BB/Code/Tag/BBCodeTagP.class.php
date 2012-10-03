@@ -1,31 +1,39 @@
 <?php
+/**
+ * BBCodeTagP definition file
+ */
 
 /**
- * @author kkapsner
+ * Represention of a BBCode-tag [p].
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagP extends BBCodeTagSimpleReplace{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "block";
-	protected static $allowedChildren = array("inline");
-	protected static $allowedParents = array("block", "inline");
-	
 
 	/**
-	 * The replace HTML tag.
-	 * @var string
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("inline");
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
 	 */
 	protected $htmlTag = "p";
 
 	/**
-	 * The class.
-	 * @var string
+	 * {@inheritdoc}
 	 */
 	protected $class = NULL;
-
-	/**
-	 * The parameter list.
-	 * @var array
-	 */
-	#protected $parameter = array("class" => false);
 }
 
 ?>

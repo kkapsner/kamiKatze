@@ -1,9 +1,13 @@
 <?php
+/**
+ * EmailAddressGroup definition file
+ */
 
 /**
- * Description of EmailAddressGroup
+ * Representation of a group of email addresses
  *
- * @author kkapsner
+ * @author Korbinian Kapser
+ * @package Email\Address
  */
 class EmailAddressGroup implements EmailAddressInterface, SeekableIterator{
 	/**
@@ -19,11 +23,17 @@ class EmailAddressGroup implements EmailAddressInterface, SeekableIterator{
 	public $charset = NULL;
 	
 	/**
+	 * Array of the groups members
 	 *
-	 * @var array 
+	 * @var EmailAddressInterface[]
 	 */
 	protected $members = array();
 
+	/**
+	 * Constructor of EmaiAddressGroup
+	 *
+	 * @param type $name the name of the group
+	 */
 	public function __construct($name){
 		$this->name = $name;
 	}
@@ -60,7 +70,12 @@ class EmailAddressGroup implements EmailAddressInterface, SeekableIterator{
 		}
 	}
 	
-	
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param int $alreadyConsumedChars
+	 * @return string
+	 */
 	public function toHeaderEncoded($alreadyConsumedChars = 0){
 		$ret = "";
 		#if ($this->name){
@@ -79,6 +94,11 @@ class EmailAddressGroup implements EmailAddressInterface, SeekableIterator{
 		return $ret;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @return string
+	 */
 	public function __toString(){
 		return $this->name . ": " . implode(", ", $this->members) . ";";
 	}
@@ -89,26 +109,53 @@ class EmailAddressGroup implements EmailAddressInterface, SeekableIterator{
 	 * @var int
 	 */
 	protected $current = 0;
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @return EmailAddressInterface
+	 */
 	public function current(){
 		return $this->members[$this->current];
 	}
 
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @return int
+	 */
 	public function key(){
 		return $this->current;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function next(){
 		$this->current++;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function rewind(){
 		$this->current = 0;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param int $position
+	 */
 	public function seek($position){
 		$this->current = $position;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @return boolean
+	 */
 	public function valid(){
 		return $this->current >= 0 && $this->current < count($this->members);
 	}

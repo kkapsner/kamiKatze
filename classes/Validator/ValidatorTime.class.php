@@ -1,12 +1,18 @@
 <?php
+/**
+ * ValidatorTime definition file
+ */
 
 /**
- * Description of ValidatorTime
+ * Class to validate time and date. No instance class.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Validator
  */
 class ValidatorTime{
-	private static $instance;
+	/**
+	 * Private constructor for Validator. No way and need to create an instance.
+	 */
 	private function __construct(){}
 
 	/**

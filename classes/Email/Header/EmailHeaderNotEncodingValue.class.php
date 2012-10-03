@@ -1,11 +1,20 @@
 <?php
+/**
+ * EmailHeaderNotEncodingValue definition file
+ */
 
 /**
- * Description of EmailHeaderNotEncodingValue
+ * Email header that has a value that shall not be encoded.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email\Header
  */
 class EmailHeaderNotEncodingValue extends EmailHeader{
+	/**
+	 * {@inheritdoc}
+	 * 
+	 * @return string
+	 */
 	public function __toString(){
 		return $this->name . ": " . $this->value . Email::newLine;
 	}

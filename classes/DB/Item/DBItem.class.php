@@ -20,13 +20,13 @@ abstract class DBItem extends ViewableHTML{
 	
 	/**
 	 * Stores all instances of ANY DBItem.
-	 * @var array
+	 * @var DBItem[]
 	 */
 	private static $instances = array();
 
 	/**
 	 * Stores all extensions for ALL DBItems
-	 * @var array
+	 * @var DBItemExtension[]
 	 */
 	protected static $extensions = array();
 
@@ -68,13 +68,13 @@ abstract class DBItem extends ViewableHTML{
 
 	/**
 	 * Array of the old values in the DB
-	 * @var array
+	 * @var mixed[]
 	 */
 	protected $oldValues = array();
 
 	/**
 	 * Array of the new values that are set
-	 * @var array
+	 * @var mixed[]
 	 */
 	protected $newValues = array();
 	
@@ -130,10 +130,10 @@ abstract class DBItem extends ViewableHTML{
 	}
 	
 	/**
-	 *
-	 * @param string $name1
-	 * @param string $name2
-	 * @return string 
+	 * Returns the table name of a linking table
+	 * @param string $name1 Name for one of the linked classes
+	 * @param string $name2 Name for the other linked class
+	 * @return string the table name
 	 */
 	protected static function getLinkingTableName($name1, $name2){
 		$db = DB::getInstance();
@@ -233,9 +233,9 @@ abstract class DBItem extends ViewableHTML{
 
 	/**
 	 * Checks all fields in a array $fieldOptions for validity.
-	 * @param array $fieldOptions All fields to be checked.
-	 * @param array $values Provided values
-	 * @return array Array of all occuring errors.
+	 * @param DBItemFieldOption[] $fieldOptions All fields to be checked.
+	 * @param mixed[] $values Provided values
+	 * @return DBItemValidationException[] Array of all occuring errors.
 	 */
 	protected static function validateFieldsByFieldOptions($fieldOptions, $values){
 		$errors = array();
@@ -267,8 +267,8 @@ abstract class DBItem extends ViewableHTML{
 	/**
 	 * Checks if the provided $values are valid for the specific $class
 	 * @param string $class The class to be checked.
-	 * @param array $values The provided values.
-	 * @return true|array true if everything is fine or an array of all occuring errors.
+	 * @param mixed[] $values The provided values.
+	 * @return true|DBItemValidationException[] true if everything is fine or an array of all occuring errors.
 	 */
 	public static function validateFieldsCLASS($class, $values){
 		$errors = self::validateFieldsByFieldOptions(DBItemFieldOption::parseClass($class), $values);
@@ -284,8 +284,8 @@ abstract class DBItem extends ViewableHTML{
 	 * Creates all the DB entries in the extender tables.
 	 * @param DBItemFieldOption $fieldOption Option of the extender field.
 	 * @param int $newId ID of the new created item.
-	 * @param array $fields Contains the provided values to create the item.
-	 * @return array Array containing all field options where the type is DBItemFieldOption::DB_ITEM
+	 * @param mixed[] $fields Contains the provided values to create the item.
+	 * @return DBItemFieldOption[] Array containing all field options where the type is DBItemFieldOption::DB_ITEM
 	 */
 	private static function createExtenderCLASS(DBItemFieldOption $fieldOption, $newId, $fields){
 		$db = DB::getInstance();
@@ -323,7 +323,7 @@ abstract class DBItem extends ViewableHTML{
 	/**
 	 * Creates a new instance of the specific $class with the values in the $fields
 	 * @param string $class Classname of the new instance
-	 * @param array $fieldValues field values
+	 * @param mixed[] $fieldValues field values
 	 * @param bool $bypassValidation If set to true the provided values are not validated.
 	 * DO ONLY USE IF VALIDATION IS DONE BEFOREHAND MANUALY.
 	 * @return DBItem of type $class 
@@ -416,7 +416,7 @@ abstract class DBItem extends ViewableHTML{
 	/**
 	 * Returns all extensions of a certain $class and all its parent classes.
 	 * @param string $class
-	 * @return array of DBItemExtension
+	 * @return DBItemExtension[]
 	 */
 	public static function getExtensionsCLASS($class){
 		$ret = array();
@@ -479,6 +479,7 @@ abstract class DBItem extends ViewableHTML{
 			}
 		}
 	}
+
 	/**
 	 * Loads the item fresh from the database.
 	 */
@@ -508,6 +509,10 @@ abstract class DBItem extends ViewableHTML{
 		}
 	}
 
+	/**
+	 * Saves the data in the item for the speicfied extender
+	 * @param DBItemFieldOption $extenderOption field option of the extender
+	 */
 	private function saveExtender(DBItemFieldOption $extenderOption){
 		$extenderValue = $this->getRealValue($extenderOption);
 		if ($extenderValue !== null){
@@ -587,6 +592,7 @@ abstract class DBItem extends ViewableHTML{
 			}
 		}
 	}
+
 	/**
 	 * Deletes the item from the database. Also all connections to the item are removed.
 	 */
@@ -625,7 +631,7 @@ abstract class DBItem extends ViewableHTML{
 	 * also all potentional extenders.
 	 * @param string $name Name for the field to be searched.
 	 * @param bool $searchInAllExtenders If the search should also include potentional extenders not only the actual ones.
-	 * @param array $options DO NOT USE - only for recursive call with the extenders
+	 * @param DBItemFieldOption[] $options DO NOT USE - only for recursive call with the extenders
 	 * @return DBItemFieldOption The field option to the given $name. If the $name is not found null is returned.
 	 */
 	private function getFieldOption($name, $searchInAllExtenders = false, $options = null){

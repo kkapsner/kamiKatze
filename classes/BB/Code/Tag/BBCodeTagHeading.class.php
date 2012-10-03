@@ -1,29 +1,42 @@
 <?php
+/**
+ * BBCodeTagHeading definition file
+ */
 
 /**
- * @author kkapsner
+ * Representation of the BBCode-tag [heading]
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagHeading extends BBCodeTagSimpleReplace{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "block";
-	protected static $allowedChildren = array("inline");
-	protected static $allowedParents = array("block", "inline");
-
 
 	/**
-	 * The replace HTML tag.
-	 * @var string
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("inline");
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
 	 */
 	protected $htmlTag = "h3";
 
 	/**
-	 * The class.
-	 * @var string
+	 * {@inheritdoc}
 	 */
 	protected $class = NULL;
 
 	/**
-	 * The parameter list.
-	 * @var array
+	 * {@inheritdoc}
 	 */
 	protected $parameter = array("class" => false, "id" => false);
 }

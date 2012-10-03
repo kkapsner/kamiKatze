@@ -1,11 +1,19 @@
 <?php
+/**
+ * ValidatorNumber definition file
+ */
 
 /**
- * Description of ValidatorNumber
+ * Validator for numbers. No instance class.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Validator
  */
 class ValidatorNumber{
+
+	/**
+	 * Private constructor for ValidatorNumber. No way to create an instance.
+	 */
 	private function __construct(){}
 
 	/**

@@ -1,16 +1,47 @@
 <?php
+/**
+ * ConfigFile definition file
+ */
 
+/**
+ * Class to read and parse config files.
+ *
+ * @author Korbinian Kapsner
+ */
 class ConfigFile{
-	protected
-		$variables = array(),
-		$camelCase = false,
-		$filename
-	;
-	
+	/**
+	 * Storage for the found variables.
+	 * @var mixed[]
+	 */
+	protected $variables = array();
+
+	/**
+	 * Flag for forcing camel cased variable names.
+	 * @var bool
+	 */
+	protected $camelCase = false;
+
+	/**
+	 * The filename
+	 * @var string
+	 */
+	protected $filename;
+
+	/**
+	 * Constructor for ConfigFile
+	 *
+	 * @param string $filename
+	 */
 	public function __construct($filename){
 		$this->filename = basename($filename);
 	}
-	
+
+	/**
+	 * Loads the config file and parses the content.
+	 *
+	 * @param string $path The path to the config file. If not present the config file is searched with the Autoload::searchFile() function.
+	 * @throws ConfigFileNotFoundException
+	 */
 	public function load($path = false){
 		if ($path === false){
 			$path = Autoload::getInstance()->searchFile($this->filename);
@@ -84,19 +115,44 @@ class ConfigFile{
 		
 	}
 	
-	
+	/**
+	 * Setter for camelCase
+	 * @param bool $cc
+	 */
 	public function setCamelCase($cc){
 		$this->camelCase = $cc;
 	}
+
+	/**
+	 * Getter for camelCase
+	 * @return bool
+	 */
 	public function getCamelCase(){
 		return $this->camelCase;
 	}
-	
+
+	/**
+	 * Parses a given variable name to the desired format
+	 *
+	 * @see ConfigFile::camelCase
+	 * @param string $name
+	 * @return string
+	 */
 	private function parseName($name){
-		if ($this->camelCase) return $this->toCamelCase($name);
-		else return $name;
+		if ($this->camelCase){
+			return $this->toCamelCase($name);
+		}
+		else {
+			return $name;
+		}
 	}
-	
+
+	/**
+	 * Translates a string to camel case.
+	 *
+	 * @param string $str
+	 * @return string
+	 */
 	public function toCamelCase($str){
 		if (is_array($str)){
 			return ucfirst($str[1]);
@@ -109,16 +165,36 @@ class ConfigFile{
 		}
 	}
 	
-	
+	/**
+	 * Parses a value string. This is done with eval...
+	 *
+	 * @param string $value
+	 * @return mixed
+	 * @todo avoid eval
+	 */
 	private function parseValue($value){
 		$value = preg_replace_callback('/<((?:[^<>]|\\.)*)>|{((?:[^{}]|\\.)*)}/', array($this, "replaceVariableInValue"), $value);
 		return eval("return " . $value . ";");
 	}
-	
+
+	/**
+	 * RegExp callback for ConfigFile::parseValue(). DO NOT USE.
+	 *
+	 * @param string[] $m
+	 * @return mixed
+	 * @todo better implementation to hide this function (or remove it)
+	 */
 	public function replaceVariableInValue($m){
 		return $this->valueToCode($this->__get($m[0] . $m[1]));
 	}
-	
+
+	/**
+	 * Generates PHP-code from a value
+	 *
+	 * @param mixed $value
+	 * @return string
+	 * @todo is this function really neccessary? if we switch to JSON-encoding...
+	 */
 	public function valueToCode($value){
 		if (is_string($value)){
 			return '"' . str_replace('"', '\"', str_replace('\\', '\\\\', $value)) . '"';
@@ -136,17 +212,32 @@ class ConfigFile{
 			return "''";
 		}
 	}
-	
+
+	/**
+	 * Magic __set method.
+	 *
+	 * @param string $name
+	 * @param mixed $value
+	 */
 	public function __set($name, $value){
 		$this->variables[$this->parseName($name)] = $value;
 	}
-	
+
+	/**
+	 * Magic __get method.
+	 *
+	 * @param string $name
+	 * @return mixed
+	 */
 	public function __get($name){
 		$name = $this->parseName($name);
 		return (array_key_exists($name, $this->variables))? $this->variables[$name]: NULL;
 	}
 }
 
+/**
+ * Exception if a config file was not found.
+ */
 class ConfigFileNotFoundException extends Exception{}
 
 ?>

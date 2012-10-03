@@ -1,29 +1,42 @@
 <?php
+/**
+ * BBCodeTagTitle definition file
+ */
 
 /**
- * @author kkapsner
+ * Represention of a BBCode-tag [title].
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagTitle extends BBCodeTagSimpleReplace{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "block";
-	protected static $allowedChildren = array("inline");
-	protected static $allowedParents = array("block", "inline");
-
 
 	/**
-	 * The replace HTML tag.
-	 * @var string
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("inline");
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
 	 */
 	protected $htmlTag = "h1";
 
 	/**
-	 * The class.
-	 * @var string
+	 * {@inheritdoc}
 	 */
 	protected $class = "title";
 
 	/**
-	 * The parameter list.
-	 * @var array
+	 * {@inheritdoc}
 	 */
 	protected $parameter = array("class" => false, "id" => false);
 }

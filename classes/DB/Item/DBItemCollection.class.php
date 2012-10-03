@@ -16,7 +16,7 @@ class DBItemCollection extends ViewableHTML implements ArrayAccess, SeekableIter
 	 */
 	protected $class;
 	/**
-	 *
+	 * Constructor for DBItemCollection
 	 * @param mixed $class Class name of the items in the collection. Must be a subclass of DBItem..
 	 */
 	public function __construct($class){
@@ -42,21 +42,30 @@ class DBItemCollection extends ViewableHTML implements ArrayAccess, SeekableIter
 	private $content = array();
 
 	/**
+	 * {@inheritdoc}
 	 *
+	 * @param int $offset
+	 * @return mixed
 	 */
 	public function offsetExists($offset){
 		return array_key_exists($offset, $this->content);
 	}
 
 	/**
+	 * {@inheritdoc}
 	 *
+	 * @param int $offset
+	 * @return mixed
 	 */
 	public function offsetGet($offset){
 		return $this->content[$offset];
 	}
 
 	/**
+	 * {@inheritdoc}
 	 *
+	 * @param int $offset
+	 * @param mixed $value
 	 * @throws InvalidArgumentException
 	 */
 	public function offsetSet($offset, $value){
@@ -79,7 +88,9 @@ class DBItemCollection extends ViewableHTML implements ArrayAccess, SeekableIter
 	}
 
 	/**
+	 * {@inheritdoc}
 	 *
+	 * @param int $offset
 	 */
 	public function offsetUnset($offset){
 		unset($this->content[$offset]);
@@ -94,42 +105,50 @@ class DBItemCollection extends ViewableHTML implements ArrayAccess, SeekableIter
 	private $currentKey = 0;
 
 	/**
+	 * {@inheritdoc}
 	 *
+	 * @return DBItem
 	 */
 	public function current(){
 		return $this->content[$this->currentKey];
 	}
 
 	/**
+	 * {@inheritdoc}
 	 *
+	 * @return int
 	 */
 	public function key(){
 		return $this->currentKey;
 	}
 
 	/**
-	 *
+	 * {@inheritdoc}
 	 */
 	public function next(){
 		$this->currentKey++;
 	}
 
 	/**
-	 *
+	 * {@inheritdoc}
 	 */
 	public function rewind(){
 		$this->currentKey = 0;
 	}
 
 	/**
+	 * {@inheritdoc}
 	 *
+	 * @param int $position
 	 */
 	public function seek($position){
 		$this->currentKey = $position;
 	}
 
 	/**
+	 * {@inheritdoc}
 	 *
+	 * @return bool
 	 */
 	public function valid(){
 		return $this->offsetExists($this->currentKey);
@@ -137,7 +156,9 @@ class DBItemCollection extends ViewableHTML implements ArrayAccess, SeekableIter
 
 	//Countable interface
 	/**
+	 * {@inheritdoc}
 	 *
+	 * @return int
 	 */
 	public function count(){
 		return count($this->content);

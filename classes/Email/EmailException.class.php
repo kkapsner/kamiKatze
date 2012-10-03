@@ -1,9 +1,13 @@
 <?php
+/**
+ * EmailException definition file
+ */
 
 /**
- * Description of EmailException
+ * Exception for all kind of email errors.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email
  */
 class EmailException extends Exception{}
 

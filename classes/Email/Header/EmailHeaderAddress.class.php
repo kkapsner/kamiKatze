@@ -1,9 +1,13 @@
 <?php
+/**
+ * EmailheaderAddress definition file
+ */
 
 /**
- * Description of EmailHeaderAddress
+ * Representation of an email address header (like to: or cc: or bc:)
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email\Header
  */
 class EmailHeaderAddress extends EmailHeader{
 	/**
@@ -13,14 +17,15 @@ class EmailHeaderAddress extends EmailHeader{
 	public $maxLength = 0;
 	/**
 	 * The value is an array of EmailAddress or EmailAddressGroup
-	 * @var array
+	 * @var EmailAddressInterface[]
 	 */
 	protected $value = array();
 
 	/**
-	 *
-	 * @param type $name
-	 * @param EmailAddressInterface $firstAddress 
+	 * Constructor of EmailHeaderAddress
+	 * 
+	 * @param string $name The header name
+	 * @param EmailAddressInterface $firstAddress the first address in the header
 	 */
 	public function __construct($name, EmailAddressInterface $firstAddress = NULL){
 		$this->setName($name);
@@ -66,7 +71,12 @@ class EmailHeaderAddress extends EmailHeader{
 		return false;
 	}
 
-	
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param int $alreadyConsumedChars
+	 * @return string
+	 */
 	public function getFoldedValue($alreadyConsumedChars = 0){
 		$ret = "";
 		$first = true;

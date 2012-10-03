@@ -1,19 +1,40 @@
 <?php
+/**
+ * BBCodeTagText definition file
+ */
 
 /**
- * 
+ * Represention of plain text.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagText extends BBCodeTag{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "inline";
+
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $allowedChildren = array();
+
+	/**
+	 * {@inheritdoc}
+	 */
 	protected $parameter = array("text" => "", "XML" => false);
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function toBBCode(){
 		return $this->text;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function toHTML(){
 		return $this->encodeHTML($this->text);
 	}
@@ -51,26 +72,32 @@ class BBCodeTagText extends BBCodeTag{
 			case 1:
 				return $this->encodeHTML(substr($this->text, $start));
 				break;
-			case 2:
+			default:
 				return $this->encodeHTML(substr($this->text, $start, $length));
 				break;
 		}
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function toText(){
 		return $this->text;
 	}
 
 	/**
 	 * A text cannot contain other children! If another text is added this text is appended.
-	 * @param BBCodeTag $tag
-	 * @return false
+	 * @param Node $tag
+	 * @return bool
 	 */
 	public function appendChild(Node $tag){
 		if ($tag instanceof BBCodeTagText){
 			$this->text .= $tag->text;
+			return true;
 		}
-		return false;
+		else {
+			return false;
+		}
 	}
 
 }

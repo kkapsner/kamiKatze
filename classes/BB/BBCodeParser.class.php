@@ -1,9 +1,13 @@
 <?php
+/**
+ * BBCodeParser definition file
+ */
 
 /**
- * Description of BBCodeParser
+ * Parses BBCode.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package BB
  */
 class BBCodeParser{
 
@@ -14,33 +18,41 @@ class BBCodeParser{
 	public $charset = "UTF-8";
 
 	/**
-	 *
+	 * The iterator for the code.
 	 * @var StringIterator
 	 */
 	protected $codeIterator;
 
 	/**
-	 *
+	 * The root element of the document.
 	 * @var BBCodeTagRoot
 	 */
 	protected $root;
 
 	/**
-	 *
+	 * The current node in processing.
 	 * @var BBCodeTag
 	 */
 	protected $currentNode;
 
 	/**
-	 *
+	 * Buffer for non-BB text.
 	 * @var string
 	 */
 	protected $text;
 
+	/**
+	 * Constructor for BBCodeParser
+	 */
 	public function __construct(){
 		$this->codeIterator = new StringIterator();
 	}
 
+	/**
+	 * Parses the BBCode in the provided string and returns the BBCode document tree.
+	 * @param string $code the code to parse
+	 * @return BBCodeTagRoot
+	 */
 	public function parse($code){
 		$this->currentNode = $this->root = new BBCodeTagRoot();
 		$this->root->parser = $this;
@@ -69,11 +81,17 @@ class BBCodeParser{
 		return $this->root;
 	}
 
+	/**
+	 * Inserts the text buffer in the tree and clears the buffer.
+	 */
 	protected function insertText(){
 		$this->currentNode->appendChild(new BBCodeTagText(array("text" => $this->text)));
 		$this->text = "";
 	}
 
+	/**
+	 * Part of the parser that is invoced if the parses thinks the current position is a BBCode-Tag.
+	 */
 	protected function parseTag(){
 		$this->codeIterator->next();
 		$closing = $this->codeIterator->current() === "/";
@@ -123,11 +141,20 @@ class BBCodeParser{
 	 * The chars not to be in a key.
 	 * @var string
 	 */
-	protected static $noKeyChars = "=]";
+	protected static $noKeyChars = " \t\r\n\v=]";
+	
+	/**
+	 * Reads the code from the current position as if it is the start of a key and returns the retrieved key.
+	 * @return string the found key.
+	 */
 	protected function parseKey(){
 		return $this->codeIterator->goToNext(self::$noKeyChars);
 	}
 
+	/**
+	 * Reads the code from the current position as if it is the start of a value and returns the retrieved value.
+	 * @return string the found value
+	 */
 	protected function parseValue(){
 		switch ($this->codeIterator->current()){
 			case "'":
@@ -141,17 +168,23 @@ class BBCodeParser{
 		}
 	}
 
+	/**
+	 * Reads the code from the current position as if it is in a tag at the beginning of the parameter lis
+	 * @return array Array of the found parameter as key => value pairs.
+	 */
 	protected function parseParameter(){
 		$start = $this->codeIterator->key();
 		$parameter = array();
 		do {
 			$key = trim($this->parseKey());
+			$this->codeIterator->goToNextNot(" \t\n\r");
 			if ($key){
 				$value = true;
 				if ($this->codeIterator->valid() && $this->codeIterator->current() === "="){
 					$this->codeIterator->next();
 					$this->codeIterator->goToNextNot(" \t\n\r");
 					$value = $this->parseValue();
+					$this->codeIterator->goToNextNot(" \t\n\r");
 				}
 				$parameter[$key] = $value;
 			}

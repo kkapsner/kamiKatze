@@ -1,18 +1,27 @@
 <?php
+/**
+ * DBMySQLUtils definition file
+ */
 
 /**
  * Provides some MySQL utility functions
  *
  * @author kkapsner
+ * @package DB
  */
 class DBMySQLUtils{
+
+	/**
+	 * DBMySQLUtils constructor.
+	 */
 	private function __construct(){}
 
 	/**
+	 * Escapes a value.
 	 *
 	 * @param DB $db
-	 * @param type $value
-	 * @return type
+	 * @param mixed $value
+	 * @return string
 	 *
 	 * @assert ($this->db, NULL) === "NULL"
 	 * @assert ($this->db, 1) === "1"
@@ -31,6 +40,14 @@ class DBMySQLUtils{
 		}
 	}
 
+	/**
+	 * Renames a column in a table.
+	 * @param DB $db
+	 * @param type $table
+	 * @param type $oldName
+	 * @param type $newName
+	 * @throws DBException
+	 */
 	public static function renameColumn(DB $db, $table, $oldName, $newName){
 		$qTable = $db->quote($table, DB::PARAM_IDENT);
 		$stmt = $db->prepare("SHOW FULL COLUMNS FROM " . $qTable . " WHERE `Field` = ?");
@@ -50,10 +67,22 @@ class DBMySQLUtils{
 		);
 	}
 
+	/**
+	 * Converts a Unix Epoch timestamp to a SQL DateTime string.
+	 * @param int $date Unix Epoch timestamp
+	 * @return string
+	 */
 	public static function date($date){
 		return date("Y-m-d H:i:s", $date);
 	}
-	
+
+	/**
+	 * Validates a value according to a provided MySQL Data type.
+	 * @param string $type
+	 * @param mixed $value
+	 * @return boolean
+	 * @todo finish the implementation
+	 */
 	public static function validate($type, $value){
 		$ltype = strtolower($type);
 		if (preg_match('/^([a-z])+\s*(?:\((\d+)\))\s*(.*)$?/', $ltype, $m)){
@@ -76,10 +105,10 @@ class DBMySQLUtils{
 		}
 	}
 	/**
-	 *
-	 * @param type $time
-	 * @param type $oneDay
-	 * @return type
+	 * Checks if the provided string is a valid Time.
+	 * @param string $time
+	 * @param bool $oneDay if the time should be a time of a day.
+	 * @return bool
 	 *
 	 * @assert ("100:10:20") === true
 	 * @assert ("100:10:20", true) === false
@@ -90,11 +119,23 @@ class DBMySQLUtils{
 		if (count($parts) !== 3) return false;
 		return ValidatorTime::isValidTime($parts[0], $parts[1], $parts[2], 0, $oneDay);
 	}
+
+	/**
+	 * Chekcs if the provided string is a valid Date.
+	 * @param string $date
+	 * @return boolean
+	 */
 	public static function validDate($date){
 		$parts = preg_split('/\D/', $date);
 		if (count($parts) !== 3) return false;
 		return ValidatorTime::isValidDate($parts[0], $parts[1], $parts[2]);
 	}
+
+	/**
+	 * Checks if the provided string is a valid DateTime.
+	 * @param string $dateTime
+	 * @return boolean
+	 */
 	public static function validDateTime($dateTime){
 		$parts = explode(" ", $dateTime);
 		if (count($parts) !== 2) return false;

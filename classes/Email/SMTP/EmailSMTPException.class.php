@@ -1,11 +1,15 @@
 <?php
+/**
+ * EmailSMTPException definition file
+ */
 
 /**
- * Description of EmailSMTPException
+ * Exception for SMTP errors.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email\SMTP
  */
-class EmailSMTPException extends Exception{
+class EmailSMTPException extends EmailException{
 }
 
 ?>

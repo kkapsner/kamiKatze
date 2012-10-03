@@ -1,9 +1,12 @@
 <?php
+/**
+ * ExtensionSniffer definition file
+ */
 
 /**
- * Description of ExtensionSniffer
+ * Class to get MIME-types from file extensions.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
  */
 class ExtensionSniffer{
 	/**
@@ -11,16 +14,19 @@ class ExtensionSniffer{
 	 * @var array
 	 */
 	private static $extensionsMapping = array();
+
 	/**
 	 * File name of the extensions file.
 	 * @var string
 	 */
 	private static $extensionsFile = "ExtensionSniffer-mimeType.txt";
+
 	/**
 	 * If the sniffer is initialised.
 	 * @var bool
 	 */
 	private static $initialised = false;
+
 	/**
 	 * Initialises the sniffer.
 	 */
@@ -45,7 +51,7 @@ class ExtensionSniffer{
 	/**
 	 * Returns the MIME-types which correspond to the given file-extension.
 	 * @param string $extension
-	 * @parame string $default the value returned if the extension is not recognised.
+	 * @param string $default the value returned if the extension is not recognised.
 	 * @return string
 	 */
 	public static function extensionToMime($extension, $default = "application/octet-stream"){
@@ -58,7 +64,7 @@ class ExtensionSniffer{
 	/**
 	 * Returns the MIME-types which correspond to the given filename.
 	 * @param string $filename
-	 * @parame string $default the value returned if the extension is not recognised.
+	 * @param string $default the value returned if the extension is not recognised.
 	 * @return string
 	 */
 	public static function filenameToMime($filename, $default = "application/octet-stream"){

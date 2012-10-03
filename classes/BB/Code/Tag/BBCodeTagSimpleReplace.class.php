@@ -1,7 +1,13 @@
 <?php
+/**
+ * BBCodeTagSimpleReplace definition file
+ */
 
 /**
- * @author kkapsner
+ * This class is a parent class for all BBCode-tags that have a simple replace representation in HTML.
+ * 
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 abstract class BBCodeTagSimpleReplace extends BBCodeTag{
 	/**
@@ -16,13 +22,17 @@ abstract class BBCodeTagSimpleReplace extends BBCodeTag{
 	 */
 	protected $class = NULL;
 
+	/**
+	 * {@inheritdoc}
+	 */
 	protected $parameter = array("class" => false);
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function toHTML(){
-		$class = "";
-		if ($this->class){
-			$class = $this->class;
-		}
+		$class = ($this->class)? $this->class: "";
+		
 		if (array_key_exists("class", $this->parameter)){
 			$class .= " " . $this->parameter["class"];
 		}

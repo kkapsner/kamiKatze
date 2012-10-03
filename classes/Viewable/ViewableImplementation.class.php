@@ -1,12 +1,25 @@
 <?php
+/**
+ * ViewableImplementation definition file
+ */
 
 /**
- * Description of ViewableImplementation
+ * Specific implementation of the Viewable interface.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Viewable
  */
 class ViewableImplementation implements Viewable{
-	
+
+	/**
+	 * Similar to Viewable::view() but ability to provide a class name to specify the view which should be used.
+	 *
+	 * @param string $name class name to be used
+	 * @param string $context
+	 * @param boolean $output
+	 * @param mixed $args
+	 * @return string|boolean
+	 */
 	public function viewByName($name, $context = false, $output = false, $args = false){
 		$al = Autoload::getInstance();
 		$path = $al->getLoadingPoint($name);
@@ -42,7 +55,15 @@ class ViewableImplementation implements Viewable{
 			}
 		}
 	}
-	
+
+	/**
+	 * {@inheritdoc]
+	 *
+	 * @param string $context
+	 * @param boolean $output
+	 * @param mixed $args
+	 * @return string|boolean
+	 */
 	public function view($context = false, $output = false, $args = false){
 		return $this->viewByName(get_class($this), $context, $output, $args);
 	}

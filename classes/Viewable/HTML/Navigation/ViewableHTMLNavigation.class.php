@@ -1,28 +1,35 @@
 <?php
+/**
+ * ViewableHTMLNavigation definition file
+ */
 
 /**
- * Description of ViewableHTMLNavigation
+ * Viewable HTML navigation.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Viewable\HTML\Navigation
  */
 class ViewableHTMLNavigation extends ViewableHTML{
 	/**
-	 *
+	 * The navigation items.
 	 * @var array
 	 */
 	protected $items;
 
 	/**
+	 * Checks if the navigation has items.
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public function hasItems(){
 		return count($this->items) != 0;
 	}
 
 	/**
-	 *
-	 * @param mixed $item
+	 * Adds an item to the navigation
+	 * 
+	 * @param mixed $item If $item is a ViewableHTMLNavigationItem it is simply added. If not $item and $url are used to call the constructor
+	 * of ViewableHTMLNavigationItem and this item is added.
 	 * @param string $url
 	 * @return ViewableHTMLNavigationItem
 	 */

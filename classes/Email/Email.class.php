@@ -1,14 +1,25 @@
 <?php
+/**
+ * Email definition file
+ */
 
 /**
- * Description of Email
+ * Email generation class
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email
  */
 
 class Email{
+	/**
+	 * New line constant
+	 */
 	const newLine = "\r\n";
 
+	/**
+	 * used charset
+	 * @var string
+	 */
 	protected $charset = "utf-8";
 
 	/**
@@ -22,16 +33,19 @@ class Email{
 	 * @var EmailHeaderAddress
 	 */
 	public $replyTo;
+
 	/**
 	 * The TO header.
 	 * @var EmailHeaderAddress
 	 */
 	private $to;
+
 	/**
 	 * The SUBJECT header.
 	 * @var EmailHeader
 	 */
 	private $subject;
+
 	/**
 	 * Array of EmailHeaders
 	 * @var array
@@ -39,22 +53,31 @@ class Email{
 	public $headers = array();
 
 	/**
+	 * The master part of the mail
 	 * @var EmailPart
 	 */
 	protected $masterPart;
+
 	/**
+	 * The main text part
 	 * @var EmailPart
 	 */
 	protected $textMasterPart;
+
 	/**
+	 * The text part
 	 * @var EmailPart
 	 */
 	protected $textPart;
+
 	/**
+	 * The HTML part
 	 * @var EmailPart
 	 */
 	protected $htmlPart = NULL;
+
 	/**
+	 * The part for inline attachments
 	 * @var EmailPart
 	 */
 	protected $inlinePart = NULL;
@@ -282,7 +305,10 @@ class Email{
 		return $this->addAttachment($type, basename($path), file_get_contents($path));
 	}
 
-	
+	/**
+	 * Generates the mail head and returns it.
+	 * @return string
+	 */
 	public function getHead(){
 		$head = "";
 		foreach ($this->headers as $h){
@@ -292,6 +318,10 @@ class Email{
 		return $head;
 	}
 
+	/**
+	 * Generates the mail body and returns it.
+	 * @return string
+	 */
 	public function getBody(){
 		return $this->masterPart->getBody();
 	}
@@ -317,6 +347,10 @@ class Email{
 		}
 	}
 
+	/**
+	 * Generates a the complete mail string.
+	 * @return string
+	 */
 	public function __toString(){
 		return $this->getHead() . self::newLine . $this->getBody();
 	}

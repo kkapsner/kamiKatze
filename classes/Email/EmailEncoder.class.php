@@ -1,11 +1,18 @@
 <?php
+/**
+ * EmailEncoder definition file
+ */
 
 /**
- * Description of EmailEncoder
+ * Class for Email encoding issues. No instance class.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email
  */
 class EmailEncoder{
+	/**
+	 * Private constructor for EmailEncoder. No need and way to get an instance.
+	 */
 	private function __construct(){}
 
 	/**
@@ -25,7 +32,7 @@ class EmailEncoder{
 	 * Encode !"#$@[\]^`{|}~ not directly (see note in RFC 2045).
 	 * @link http://tools.ietf.org/html/rfc2045
 	 * @param string $str the string to encode
-	 * @param bool $meanfullLineBreak = true if the line-breaks in string should be NOT encoded
+	 * @param bool $meanfullLinebreaks = true if the line-breaks in string should be NOT encoded
 	 */
 	public static function quotedPrintable($str, $meanfullLinebreaks = true){
 		$maxLineLength = self::$maxLineLength;
@@ -84,7 +91,6 @@ class EmailEncoder{
 	 * @link http://tools.ietf.org/html/rfc2047
 	 * @param string $value
 	 * @param int $alreadyConsumedChars
-	 * @param int $maxLineLength
 	 * @param string $charset
 	 * @return string the encoded value with desired folding. 
 	 */
@@ -148,8 +154,6 @@ class EmailEncoder{
 	 * Folds the value.
 	 * @param string $value
 	 * @param int $alreadyConsumedChars
-	 * @param int $maxLineLength
-	 * @param int $offset
 	 * @return string
 	 */
 	public static function fold($value, $alreadyConsumedChars = 0){

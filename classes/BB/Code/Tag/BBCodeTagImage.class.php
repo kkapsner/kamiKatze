@@ -1,29 +1,42 @@
 <?php
+/**
+ * BBCodeTagImage definition file
+ */
 
 /**
- * @author kkapsner
+ * Represention of a BBCode-tag [image].
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagImage extends BBCodeTag{
-	protected static $type = "inline";
-	protected static $allowedChildren = array("text");
-	protected static $allowedParents = array("block", "inline");
-	
 	/**
-	 * The path to the "local" images directory.
-	 * @var string
+	 * {@inheritdoc}
+	 */
+	protected static $type = "inline";
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("text");
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
 	 */
 	public static $imageDirectory = "/images/";
 
 	/**
-	 * The parameter list.
-	 * @var array
+	 * {@inheritdoc}
 	 */
 	protected $parameter = array("url" => false, "alignment" => false, "width" => false, "height" => false, "legend" => false);
-	
 
 	/**
-	 * Generates HTML.
-	 * @return string
+	 * {@inheritdoc}
 	 */
 	public function toHTML(){
 		$url = $this->url;

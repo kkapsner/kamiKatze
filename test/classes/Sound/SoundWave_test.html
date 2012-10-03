@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SoundWave test</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<script src="/kkjs/modules/kkjs.load.js?modules=URL,QueryString"></script>
+		<script>
+			kkjs.event.onWindowLoad(function(){
+				// SoundWave creation
+				var player = kkjs.node.create({
+					tag: "audio",
+					style: {display: "none"},
+					autoplay: true,
+					parentNode: document.body
+				});
+				var form = kkjs.$("SoundWaveForm");
+				kkjs.event.add(form, 'submit', function(ev){
+					kkjs.node.clear(player);
+					var url = new kkjs.URL(this.action);
+					var query = new kkjs.QueryString(url.search);
+					query.data.frequency = [];
+					query.data.duration = [];
+					[].forEach.call(this.elements, function(el){
+						switch (el.name){
+							case "frequency[]":
+								query.data.frequency.push(el.value);
+								break;
+							case "duration[]":
+								query.data.duration.push(el.value);
+								break;
+						}
+					});
+					url.search = query.toString();
+
+					kkjs.node.create({
+						tag: "source",
+						type: "audio/wav",
+						src: url.toString(),
+						parentNode: player
+					});
+					player.load();
+
+
+					ev.preventDefault();
+				});
+
+				// adding and deleting input data
+				var dataTBody = kkjs.css.$("#SoundWaveForm tbody")[0];
+				var createButton = kkjs.node.create({
+					tag: "input",
+					type: "button",
+					value: "add data",
+					onclick: function(){
+						var row = kkjs.node.create({
+							tag: 'tr',
+							parentNode: dataTBody,
+							childNodes: [
+								{tag: "td", childNodes: [
+										{tag: "input", name: "frequency[]"}
+								]},
+								{tag: "td", childNodes: [
+										{tag: "input", name: "duration[]"}
+								]},
+								{tag: "td", childNodes: [
+										{tag: "input", type: "button", value: "delete", onclick: function(){kkjs.node.remove(row);}}
+								]}
+							]
+						});
+					}
+				});
+				form.insertBefore(createButton, kkjs.css.$("#SoundWaveForm input[type=submit]")[0]);
+			});
+		</script>
+	</head>
+	<body>
+		<form action="SoundWave_test.php" method="GET" id="SoundWaveForm">
+			<table>
+				<thead>
+					<tr>
+						<th>frequency [1/s]</th>
+						<th>duration [s]</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><input name="frequency[]"></td>
+						<td><input name="duration[]"></td>
+					</tr>
+					<tr>
+						<td><input name="frequency[]"></td>
+						<td><input name="duration[]"></td>
+					</tr>
+					<tr>
+						<td><input name="frequency[]"></td>
+						<td><input name="duration[]"></td>
+					</tr>
+				</tbody>
+			</table>
+			<input type="submit" value="create sound">
+		</form>
+	</body>
+</html>

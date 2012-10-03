@@ -1,24 +1,37 @@
 <?php
+/**
+ * BBCodeTagYoutube definition file.
+ */
 
 /**
- * @author kkapsner
+ * Representation of a BBCode-tag [youtube]. This allows to include a youtube video in the code.
+ *
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 class BBCodeTagYoutube extends BBCodeTag{
+	/**
+	 * {@inheritdoc}
+	 */
 	protected static $type = "inline";
-	protected static $allowedChildren = array("text");
-	protected static $allowedParents = array("block", "inline");
-	
 
 	/**
-	 * The parameter list.
-	 * @var array
+	 * {@inheritdoc}
+	 */
+	protected static $allowedChildren = array("text");
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = array("block", "inline");
+
+	/**
+	 * {@inheritdoc}
 	 */
 	protected $parameter = array("border" => 0);
-	
 
 	/**
-	 * Generates HTML.
-	 * @return string
+	 * {@inheritdoc}
 	 */
 	public function toHTML(){
 		$url = 'http://www.youtube-nocookie.com/v/' . $this->childrenToText() . '&amp;hl=de_DE&amp;fs=1&amp;rel=0&amp;border=' . $this->rand;

@@ -1,14 +1,25 @@
 <?php
+/**
+ * BBCodeAliasses definition file
+ */
 
 /**
- * @author kkapsner
+ * No instance class for alias table of BBCode-tags and BBCode-parameter.
+ *
+ * @author Korbinian Kapser
+ * @package BB\Code
  */
 class BBCodeAliasses{
 
-	private function __construct(){
+	/**
+	 * Private constructor of BBCodeAliasses that can not be invoced.
+	 */
+	private function __construct(){}
 
-	}
-
+	/**
+	 * The tag alias table
+	 * @var array
+	 */
 	private static $tagAliasTable = array(
 		"italic" => "i",
 		"kursiv" => "i",
@@ -40,10 +51,20 @@ class BBCodeAliasses{
 		"karte" => "map"
 	);
 
+	/**
+	 * Adds an tag alias to the table.
+	 * @param string $alias the alias tag name
+	 * @param string $tag the real tag name
+	 */
 	public static function addTagAlias($alias, $tag){
 		self::$tagAliasTable[$alias] = $tag;
 	}
 
+	/**
+	 * Applies the tag alias table on the provided tag name.
+	 * @param string $tagName the tag name to search for
+	 * @return string Returns the real tag name if an alias is found. Otherwise $tagName is returned unmodified
+	 */
 	public static function getRealTagFor($tagName){
 		if (array_key_exists($tagName, self::$tagAliasTable)){
 			return self::$tagAliasTable[$tagName];
@@ -53,6 +74,10 @@ class BBCodeAliasses{
 		}
 	}
 
+	/**
+	 * The parameter alias table
+	 * @var array
+	 */
 	private static $parameterAliasTable = array(
 		"breite" => "width",
 		"höhe" => "height",
@@ -66,10 +91,20 @@ class BBCodeAliasses{
 		"sprache" => "language"
 	);
 
+	/**
+	 * Adds an parameter alias to the table.
+	 * @param string $alias the alias parameter name
+	 * @param string $parameter the real parameter name
+	 */
 	public static function addParameterAlias($alias, $parameter){
 		self::$parameterAliasTable[$alias] = $parameter;
 	}
 
+	/**
+	 * Applies the parameter alias table on the provided parameter name.
+	 * @param string $parameter the parameter name to search for
+	 * @return string Returns the real parameter name if an alias is found. Otherwise $parameter is returned unmodified
+	 */
 	public static function getRealParameterFor($parameter){
 		if (array_key_exists($parameter, self::$parameterAliasTable)){
 			return self::$parameterAliasTable[$parameter];

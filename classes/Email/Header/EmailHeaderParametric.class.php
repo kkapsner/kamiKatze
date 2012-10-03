@@ -1,9 +1,13 @@
 <?php
+/**
+ * EmailHeaderParametric
+ */
 
 /**
- * Description of EmailHeaderParametric
+ * Representation of an email header with parameters.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Email\Header
  */
 class EmailHeaderParametric extends EmailHeader{
 	/**
@@ -11,7 +15,14 @@ class EmailHeaderParametric extends EmailHeader{
 	 * @var array
 	 */
 	protected $parameter = array();
-	
+
+	/**
+	 * Constructor of EmailheaderParametric
+	 *
+	 * @param string $name the header name
+	 * @param string $value the header value
+	 * @param array $parameter the header parameters
+	 */
 	public function __construct($name, $value = "", array $parameter = NULL){
 		parent::__construct($name, $value);
 		if ($parameter !== null){
@@ -21,6 +32,13 @@ class EmailHeaderParametric extends EmailHeader{
 		}
 	}
 
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param int $alreadyConsumedChars
+	 * @return string
+	 * @todo use $alreadyConsumedChars
+	 */
 	public function getFoldedValue($alreadyConsumedChars = 0){
 		$ret = $this->value;
 		foreach ($this->parameter as $name => $value){
@@ -29,16 +47,25 @@ class EmailHeaderParametric extends EmailHeader{
 		return $ret;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param string $value
+	 * @return boolean
+	 */
 	public function setValue($value){
 		if (preg_match('/^[^\x00-\x20;\x7E-\xFF]+$/i', $value)){
 			$this->value = $value;
 			return true;
 		}
-		return false;
+		else {
+			return false;
+		}
 	}
 
 	/**
 	 * Sets a parameter.
+	 *
 	 * @param string $name
 	 * @param string $value
 	 * @return bool if the parameter was set
@@ -48,6 +75,7 @@ class EmailHeaderParametric extends EmailHeader{
 			preg_match('/^[\x20-\x7E]+$/', $value)
 		){
 			$this->parameter[$name] = $value;
+			return true;
 		}
 		return false;
 	}

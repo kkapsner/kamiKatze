@@ -1,7 +1,6 @@
 <?php
-/*
+/**
  * DBItemFieldOption class definition
- *
  */
 
 /**
@@ -203,7 +202,9 @@ class DBItemFieldOption extends ViewableHTML{
 	}
 
 	/**
-	 * Constructor of DBItemFieldOption.
+	 * Protected constructor of DBItemFieldOption.
+	 *
+	 * @param type $name
 	 */
 	protected function __construct($name){
 		$this->name = $name;

@@ -1,16 +1,44 @@
 <?php
+/**
+ * BBCodeTag definition file
+ */
 
 /**
  * Base class for all BBCodeTags.
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package BB\Code\Tag
  */
 abstract class BBCodeTag extends Node{
+	/**
+	 * The type of the tag.
+	 * @var string
+	 */
 	protected static $type = "block";
+
+	/**
+	 * Array of allowed children.
+	 * @var array
+	 */
 	protected static $allowedChildren = array("block", "inline");
+
+	/**
+	 * Array of allowed parents.
+	 * @var array
+	 */
 	protected static $allowedParents = array("block", "inline");
-	
+
+	/**
+	 * Cache for self::getTagTypeInfo()
+	 * @var array
+	 */
 	private static $tagTypeInfo = array();
+
+	/**
+	 * Returns the static attributes of the class according to a tag name.
+	 * @param type $tagName
+	 * @return array
+	 */
 	private static function getTagTypeInfo($tagName){
 		if (!array_key_exists($tagName, self::$tagTypeInfo)){
 			self::$tagTypeInfo[$tagName] = get_class_vars(self::tagNameToClass($tagName));
@@ -82,7 +110,7 @@ abstract class BBCodeTag extends Node{
 	private $realTagName = NULL;
 
 	/**
-	 *
+	 * Constructor for BBCodeTag
 	 * @param array $parameter
 	 */
 	public function __construct(array $parameter = array()){
@@ -112,7 +140,13 @@ abstract class BBCodeTag extends Node{
 			!in_array("!" . $this->realTagName, $tagInfo["allowedParents"])
 		;
 	}
-	
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param Node $newChild
+	 * @return boolean
+	 */
 	public function appendChild(Node $newChild){
 		if (
 			$newChild instanceof BBCodeTag &&
@@ -183,6 +217,7 @@ abstract class BBCodeTag extends Node{
 	 * @return string
 	 */
 	abstract public function toHTML();
+
 	/**
 	 * Generates HTML from the children.
 	 * @return string
@@ -213,9 +248,10 @@ abstract class BBCodeTag extends Node{
 			}
 		}
 	}
+
 	/**
 	 * If a parameter is known its value is returned. An unknown parameter returns NULL.
-	 * @param string $name 
+	 * @param string $name
 	 */
 	public function __get($name){
 		if (array_key_exists($name, $this->parameter)){
@@ -225,7 +261,7 @@ abstract class BBCodeTag extends Node{
 	}
 
 	/**
-	 *
+	 * Returns the tag name in the code (can be an alias).
 	 * @return string the tagName.
 	 */
 	public function getTagName(){
@@ -233,13 +269,17 @@ abstract class BBCodeTag extends Node{
 	}
 
 	/**
-	 *
+	 * Returns the real tag name.
 	 * @return string the real tagName (no alias).
 	 */
 	public function getRealTagName(){
 		return $this->realTagName;
 	}
 
+	/**
+	 * Searches for the charset of the parser.
+	 * @return string the used charset. Or "utf-8" if nothing is found
+	 */
 	public function getCharset(){
 		$root = $this->getRoot();
 		if ($root !== NULL && $root instanceof BBCodeTagRoot){

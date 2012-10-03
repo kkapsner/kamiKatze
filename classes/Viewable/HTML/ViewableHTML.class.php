@@ -1,11 +1,15 @@
 <?php
+/**
+ * ViewableHTML definition file
+ */
 
 /**
- * Description of ViewableHTML
+ * Abstract class for any HTML related view
  *
- * @author kkapsner
+ * @author Korbinian Kapsner
+ * @package Viewable\HTML
  */
-class ViewableHTML extends ViewableImplementation{
+abstract class ViewableHTML extends ViewableImplementation{
 	/**
 	 * Charset used to encode strings.
 	 * @var string
@@ -19,18 +23,19 @@ class ViewableHTML extends ViewableImplementation{
 	protected $attributes = array();
 
 	/**
-	 *
-	 * @return array
+	 * Returns an array of the registered HTML attirbutes
+	 * @return string[]
 	 */
 	public function getHTMLAttirbuteList(){
 		return array_keys($this->attributes);
 	}
 
 	/**
+	 * Sets a HTML attribute.
 	 *
-	 * @param string $name
-	 * @param string $value
-	 * @param bool $isUrl
+	 * @param string $name the attribute name
+	 * @param string $value the attribute value
+	 * @param bool $isUrl if the attribute value is an URL
 	 */
 	public function setHTMLAttribute($name, $value, $isUrl = false){
 		$this->attributes[$name] = (object) array(
@@ -41,10 +46,12 @@ class ViewableHTML extends ViewableImplementation{
 	}
 
 	/**
+	 * Gets the value of a HTMl attribute
 	 *
-	 * @param string $name
-	 * @param bool $html
-	 * @return string
+	 * @param string $name the attribute name
+	 * @param bool $html if the HTML representation should be returned
+	 * @return string the attribute value or the HTML representation of the attribute (i.e. value="key"). If the attribute is not
+	 * registered an empty string is returned.
 	 */
 	public function getHTMLAttribute($name, $html = false){
 		if ($html){
@@ -74,9 +81,10 @@ class ViewableHTML extends ViewableImplementation{
 	}
 
 	/**
+	 * Returns all HTML attributes
 	 *
-	 * @param bool $html
-	 * @return mixed 
+	 * @param bool $html if the HTML representaiton should be returned
+	 * @return mixed an array of all attributes (the names are the keys in the array) or a string with all HTML representations of all attributes
 	 */
 	public function getAllHTMLAttributes($html = false){
 		$ret = $html? "": array();
@@ -91,9 +99,22 @@ class ViewableHTML extends ViewableImplementation{
 		return $ret;
 	}
 
+	/**
+	 * Escapes the text for save HTML output
+	 *
+	 * @param string $text
+	 * @return string
+	 */
 	public function html($text){
 		return htmlentities($text, ENT_QUOTES, $this->charset);
 	}
+
+	/**
+	 * Escapes the text for a save URL output in HTML
+	 * 
+	 * @param string $text
+	 * @return string
+	 */
 	public function url($text){
 		return str_replace(" ", "%20", $this->html($text));
 	}
