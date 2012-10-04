@@ -1,5 +1,5 @@
 <?php
 
-/* @var $this DBItemExtensionValue */
+/* @var $this DBItemPluginValue */
 echo $this->html($this->getName() . ": " . $this->getValue($args));
 ?>

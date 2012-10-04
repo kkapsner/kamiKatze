@@ -7,7 +7,6 @@
  * A DBItem instance represents an entry in a DB. To specifiy the table extend this class in a class that has the name of the table.
  *
  * @author Korbinian Kapsner
- * @todo make extra class for DBItem with extensions
  * @package DB\Item
  */
 abstract class DBItem extends ViewableHTML{
@@ -23,12 +22,6 @@ abstract class DBItem extends ViewableHTML{
 	 * @var DBItem[]
 	 */
 	private static $instances = array();
-
-	/**
-	 * Stores all extensions for ALL DBItems
-	 * @var DBItemExtension[]
-	 */
-	protected static $extensions = array();
 
 	/**
 	 * Instance of the DB
@@ -398,36 +391,6 @@ abstract class DBItem extends ViewableHTML{
 			}
 		}
 	}
-
-	/**
-	 * Adds an extension to a certain $class.
-	 * @param string $class
-	 * @param DBItemExtension $extension
-	 */
-	public static function addExtensionCLASS($class, DBItemExtension $extension){
-		if ($extension->isValidClass($class)){
-			self::$extensions[] = array("class" => $class, "extension" => $extension);
-		}
-		else {
-			throw new InvalidArgumentException("Extension '" . $extension->getName() . "' is not build for class " . $class . ".");
-		}
-	}
-	
-	/**
-	 * Returns all extensions of a certain $class and all its parent classes.
-	 * @param string $class
-	 * @return DBItemExtension[]
-	 */
-	public static function getExtensionsCLASS($class){
-		$ret = array();
-		foreach (self::$extensions as $extension){
-			if ($extension["class"] === $class || is_subclass_of($class, $extension["class"])){
-				$ret[] = $extension["extension"];
-			}
-		}
-		return $ret;
-	}
-
 
 	// class methods
 
@@ -871,16 +834,16 @@ abstract class DBItem extends ViewableHTML{
 	}
 
 	/**
-	 * Amgic function __call
+	 * Magic function __call
 	 * @param type $name
 	 * @param type $arguments
 	 * @return type
 	 * @throws BadMethodCallException
 	 */
 	public function __call($name, $arguments){
-		if (method_exists("DBItem", $name . "CLASS")){
+		if (method_exists($this, $name . "CLASS")){
 			array_unshift($arguments, get_class($this));
-			return call_user_func_array(array("DBItem", $name . "CLASS"), $arguments);
+			return call_user_func_array(array($this, $name . "CLASS"), $arguments);
 		}
 		throw new BadMethodCallException("No method called " . $name);
 	}
@@ -893,9 +856,10 @@ abstract class DBItem extends ViewableHTML{
 	 * @throws BadMethodCallException
 	 */
 	public static function __callStatic($name, $arguments){
-		if (method_exists("DBItem", $name . "CLASS")){
-			array_unshift($arguments, get_called_class());
-			return call_user_func_array(array("DBItem", $name . "CLASS"), $arguments);
+		$class = get_called_class();
+		if (method_exists($class, $name . "CLASS")){
+			array_unshift($arguments, $class);
+			return call_user_func_array(array($class, $name . "CLASS"), $arguments);
 		}
 		throw new BadMethodCallException("No method called " . $name);
 	}
