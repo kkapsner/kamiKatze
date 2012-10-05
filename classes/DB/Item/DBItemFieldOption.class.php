@@ -108,7 +108,7 @@ class DBItemFieldOption extends ViewableHTML{
 		$item = new self($result["Field"]);
 		$item->null = $result['Null'] === "YES";
 		$item->default = $result["Default"];
-		if (preg_match('/^(.+?)\(([^\)]*)\)$/', $result["Type"], $m)){
+		if (preg_match('/^(.+?)\((.*)\)$/', $result["Type"], $m)){
 			$item->type = $m[1];
 			$item->typeExtension = $m[2];
 			

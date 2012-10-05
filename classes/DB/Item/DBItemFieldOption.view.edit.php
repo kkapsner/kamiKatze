@@ -52,6 +52,13 @@ if ($this->editable){
 				case "enum":
 					if (!$this->extender || $args->DBid === 0){
 						echo "\n\t\t\t" . '<select name="' . $postName . '">';
+						if ($this->null){
+							echo "\n\t\t\t\t" .
+								'<option value=""' .
+									($args->{$this->name} === null? ' selected="selected"': '') . '>' .
+									'---' .
+								'</option>';
+						}
 						foreach ($this->typeExtension as $value){
 							echo "\n\t\t\t\t" .
 								'<option value="' . $this->html($value) . '"' .
