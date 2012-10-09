@@ -119,7 +119,8 @@ class LDAP extends LDAPResourceContainer{
 	}
 
 	/**
-	 * 
+	 * Binds the connection anonymous or with a specific dn and password.
+	 *
 	 * @param string $bindDN
 	 * @param string $bindPwd
 	 * @return boolean If the binding was successful
