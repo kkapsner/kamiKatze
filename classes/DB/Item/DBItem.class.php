@@ -373,7 +373,7 @@ abstract class DBItem extends ViewableHTML{
 					}
 					break;
 			}
-			$item->{$name} = $value;
+			$item->{$fieldOption->name} = $value;
 		}
 		
 		return $item;
