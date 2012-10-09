@@ -17,9 +17,11 @@ if ($this->extender && $value !== null){
 	echo "<ul>";
 	foreach ($this->extensionFieldOptions[$value] as $subItem){
 		/* @var $subItem DBItemFieldOption */
-		echo "<li>" . $this->html($subItem->displayName) . ": ";
-		$subItem->view(false, true, $args);
-		echo "</li>";
+		if ($subItem->displayable){
+			echo "<li>" . $this->html($subItem->displayName) . ": ";
+			$subItem->view(false, true, $args);
+			echo "</li>";
+		}
 	}
 	echo "</ul>";
 }

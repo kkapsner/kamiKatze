@@ -59,6 +59,11 @@ class DBItemFieldOption extends ViewableHTML{
 	 */
 	public $default = null;
 	/**
+	 * If this field should be displayed in output.
+	 * @var bool
+	 */
+	public $displayable = true;
+	/**
 	 * If a search can be performed on this field.
 	 * @var bool
 	 */
@@ -162,6 +167,7 @@ class DBItemFieldOption extends ViewableHTML{
 			$item->correlationName = array_read_key("correlationName", $options, $class);
 		}
 
+		$item->displayable = array_read_key("displayable", $options, true);
 		$item->editable = array_read_key("editable", $options, true);
 		$item->searchable = array_read_key("searchable", $options, $item->searchable);
 		$item->displayName = array_read_key("displayName", $options, $item->displayName);
