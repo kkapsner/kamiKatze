@@ -29,8 +29,8 @@ class EventEmitterImplementation implements EventEmitter{
 				call_user_func($callback, $event);
 			}
 		}
-		elseif ($event instanceof EventError){
-			throw $event->getError();
+		elseif ($event instanceof EventError && $event->getType() !== "error"){
+			$this->emit(new EventError("error", $this, $event->getError()));
 		}
 		if (!$event->getPropagationStopped() && $this->getParentEmitter()){
 			$this->getParentEmitter()->emit($event);
@@ -58,28 +58,6 @@ class EventEmitterImplementation implements EventEmitter{
 		}
 		$this->events[$eventType][] = $callback;
 	}
-	
-	/**
-	 * {@inheritdoc}
-	 * 
-	 * @param Event $event
-	 * @todo implement
-	 */
-	public static function emitStatic(Event $event){
-
-	}
-	
-	/**
-	 * {@inheritdoc}
-	 * 
-	 * @param string $eventType
-	 * @param callback $callback
-	 * @todo implement
-	 */
-	public static function onStatic($eventType, $callback){
-
-	}
-
 }
 
 ?>
