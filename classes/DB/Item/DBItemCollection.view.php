@@ -2,9 +2,9 @@
 	<colgroup>
 		<?php
 		/* @var $this DBItemCollection */
-		$fieldOptions = DBItemFieldOption::parseClass($this->getClass());
-		foreach ($fieldOptions as $fieldItem){
-			/* @var $fieldItem DBItemFieldOption */
+		$fields = DBItemField::parseClass($this->getClass());
+		foreach ($fields as $fieldItem){
+			/* @var $fieldItem DBItemField */
 			echo '<col class="' . $fieldItem->name . '">';
 		}
 		?>
@@ -12,8 +12,8 @@
 	<thead>
 		<tr>
 			<?php
-			foreach ($fieldOptions as $fieldItem){
-				/* @var $fieldItem DBItemFieldOption */
+			foreach ($fields as $fieldItem){
+				/* @var $fieldItem DBItemField */
 				echo "<th>" . $fieldItem->name . "</th>";
 			}
 			?>
@@ -25,7 +25,7 @@
 			foreach ($this as $item){
 				/* @var $item DBItem */
 				echo '<tr>';
-				foreach ($fieldOptions as $fieldItem){
+				foreach ($fields as $fieldItem){
 					/* @var $fieldItem DBItemFieldOption */
 					echo '<td class="' . $fieldItem->name . '">';
 					$fieldItem->view(false, true, $item);
@@ -35,7 +35,7 @@
 			}
 		}
 		else {
-			echo '<td colspan="' . count($fieldOptions) . '"><em>empty</em></td>';
+			echo '<td colspan="' . count($fields) . '"><em>empty</em></td>';
 		}
 		?>
 	</tbody>

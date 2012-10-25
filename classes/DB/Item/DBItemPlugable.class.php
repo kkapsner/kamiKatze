@@ -18,27 +18,29 @@ abstract class DBItemPlugable extends DBItem{
 
 	/**
 	 * Adds an plugin to a certain $class.
-	 * @param string $class
+	 * @param string|DBItemClassSpecifier $classSpecifier
 	 * @param DBItemPlugin $plugin
 	 */
-	public static function addPluginCLASS($class, DBItemPlugin $plugin){
-		if ($plugin->isValidClass($class)){
-			self::$plugins[] = array("class" => $class, "plugin" => $plugin);
+	public static function addPluginCLASS($classSpecifier, DBItemPlugin $plugin){
+		$classSpecifier = DBItemClassSpecifier::make($classSpecifier);
+		if ($plugin->isValidClass($classSpecifier)){
+			self::$plugins[] = array("class" => $classSpecifier, "plugin" => $plugin);
 		}
 		else {
-			throw new InvalidArgumentException("Plugin '" . $plugin->getName() . "' is not build for class " . $class . ".");
+			throw new InvalidArgumentException("Plugin '" . $plugin->getName() . "' is not build for class " . $classSpecifier . ".");
 		}
 	}
 	
 	/**
 	 * Returns all plugins of a certain $class and all its parent classes.
-	 * @param string $class
+	 * @param string|DBItemClassSpecifier $classSpecifier
 	 * @return DBItemPlugin[]
 	 */
-	public static function getPluginsCLASS($class){
+	public static function getPluginsCLASS($classSpecifier){
+		$classSpecifier = DBItemClassSpecifier::make($classSpecifier);
 		$ret = array();
 		foreach (self::$plugins as $plugin){
-			if ($plugin["class"] === $class || is_subclass_of($class, $plugin["class"])){
+			if ($plugin["class"] === $classSpecifier || is_subclass_of($classSpecifier, $plugin["class"])){
 				$ret[] = $plugin["plugin"];
 			}
 		}

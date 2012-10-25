@@ -9,13 +9,7 @@
  * @author Korbinian Kapsner
  * @package DB\Item
  */
-abstract class DBItem extends ViewableHTML{
-	
-	/**
-	 * Prefix of table name
-	 * @var string
-	 */
-	public static $tablePrefix = "";
+abstract class DBItem extends DBItemFriends{
 	
 	/**
 	 * Stores all instances of ANY DBItem.
@@ -35,6 +29,12 @@ abstract class DBItem extends ViewableHTML{
 	 */
 	protected $table;
 
+	/**
+	 * The class specifier.
+	 * @var DBItemClassSpecifier
+	 */
+	protected $specifier;
+	
 	/**
 	 * ID of the item in the DB
 	 * @var int
@@ -72,43 +72,49 @@ abstract class DBItem extends ViewableHTML{
 	protected $newValues = array();
 	
 	// static class functions
-
+	
 	/**
 	 * Get the DBItem of type $class with ID $id.
-	 * @param string $class
+	 * @param string|DBItemClassSpecifier $classSpecifier
 	 * @param int $id
 	 * @return DBItem of type $class
 	 */
-	public static function getCLASS($class, $id){
+	public static function getCLASS($classSpecifier, $id){
 		#check for valid ID
 		if (!is_int($id) && !ctype_digit($id)) return null;
 		$id = (int) $id;
+		
+		$classSpecifier = DBItemClassSpecifier::make($classSpecifier);
+		$className = $classSpecifier->getClassName();
+		$specifiedName = $classSpecifier->getSpecifiedName();
 
 		#check if $class is an DBItem
-		if (!is_subclass_of($class, "DBItem")) return null;
+		if (!is_subclass_of($className, "DBItem")) return null;
 
-		if (!array_key_exists($class, self::$instances)){
-			self::$instances[$class] = array();
+		if (!array_key_exists($specifiedName, self::$instances)){
+			self::$instances[$specifiedName] = array();
 		}
-		if (!array_key_exists($id, self::$instances[$class])){
-			self::$instances[$class][$id] = new $class($id);
+		if (!array_key_exists($id, self::$instances[$specifiedName])){
+			self::$instances[$specifiedName][$id] = new $className($classSpecifier, $id);
 		}
 
-		return self::$instances[$class][$id];
+		return self::$instances[$specifiedName][$id];
 	}
 
 	/**
 	 * Returns items of the $class which forfill the $where condition. 
-	 * @param string $class
+	 * @param string|DBItemClassSpecifier $classSpecifier
 	 * @param string $where
 	 * @param string $orderBy
 	 * @return DBItemCollection with $class
 	 */
-	public static function getByConditionCLASS($class, $where = false, $orderBy = false){
-		$ret = new DBItemCollection($class);
+	public static function getByConditionCLASS($classSpecifier, $where = false, $orderBy = false){
+		$classSpecifier = DBItemClassSpecifier::make($classSpecifier);
+
+		$ret = new DBItemCollection($classSpecifier->getClassName());
 		$db = DB::getInstance();
 
-		$sql = "SELECT `id` FROM " . $db->quote(self::$tablePrefix . $class, DB::PARAM_IDENT);
+		$sql = "SELECT `id` FROM " . $db->quote($classSpecifier->getTableName(), DB::PARAM_IDENT);
 		if ($where){
 			$sql .= " WHERE " . $where;
 		}
@@ -117,154 +123,19 @@ abstract class DBItem extends ViewableHTML{
 		}
 
 		foreach ($db->query($sql) as $row){
-			$ret[] = self::getCLASS($class, $row["id"]);
+			$ret[] = self::getCLASS($classSpecifier, $row["id"]);
 		}
 		return $ret;
 	}
 	
-	/**
-	 * Returns the table name of a linking table
-	 * @param string $name1 Name for one of the linked classes
-	 * @param string $name2 Name for the other linked class
-	 * @return string the table name
-	 */
-	protected static function getLinkingTableName($name1, $name2){
-		$db = DB::getInstance();
-		if ($name1 < $name2){
-			return $db->quote(self::$tablePrefix . $name1 . "_" . $name2, DB::PARAM_IDENT);
-		}
-		elseif ($name1 == $name2){
-			return $db->quote(self::$tablePrefix . $name1 . "_" . $name2, DB::PARAM_IDENT);
-		}
-		else {
-			return $db->quote(self::$tablePrefix . $name2 . "_" . $name1, DB::PARAM_IDENT);
-		}
-	}
-	
-	/**
-	 * Gets all connected items by a linking table.
-	 * @param string $class Classname of the instances that should be received
-	 * @param string $name Name of the field that contains the received instances
-	 * @param string $linkedName Name of the field on the other side
-	 * @param int $linkedId ID of the instance that links to the instances
-	 * @return DBItemCollection with $class
-	 */
-	protected static function getByLinkingTable($class, $name, $linkedName, $linkedId){
-		$ret = new DBItemCollection($class);
-		$db = DB::getInstance();
-		
-		$table = self::getLinkingTableName($name, $linkedName);
-		
-		$sql = "SELECT " . $db->quote($name . "_id", DB::PARAM_IDENT) .
-			" FROM " . $table . 
-			" WHERE " . $db->quote($linkedName . "_id", DB::PARAM_IDENT) . " = " . $linkedId;
-		$res = $db->query($sql);
-		foreach ($res as $row){
-			$ret[] = self::getCLASS($class, $row[$name . '_id']);// PHP 5.3: $class::get($row[$class . '_id']);
-		}
-		return $ret;
-	}
-
-	/**
-	 * Sets a connection in a linking table.
-	 * @param string $name
-	 * @param string $linkedName
-	 * @param int $linkedId
-	 * @param int $id
-	 */
-	protected static function setInLinkingTable($name, $linkedName, $linkedId, $id){
-		$db = DB::getInstance();
-
-		$table = self::getLinkingTableName($name, $linkedName);
-
-		$db->query("INSERT INTO " . $table . " (" . $db->quote($linkedName . "_id", DB::PARAM_IDENT) . ", " . $db->quote($name . "_id", DB::PARAM_IDENT) . ") VALUES (" . $linkedId . ", " . $id . ")");
-	}
-
-	/**
-	 * Removes a connection in a linking table.
-	 * @param string $name
-	 * @param string $linkedName
-	 * @param int $linkedId
-	 * @param int $id
-	 */
-	protected static function removeInLinkingTable($name, $linkedName, $linkedId, $id){
-		$db = DB::getInstance();
-
-		$table = self::getLinkingTableName($name, $linkedName);
-
-		$db->query("DELETE FROM " . $table . " WHERE " . $db->quote($linkedName . "_id", DB::PARAM_IDENT) . " = " . $linkedId . " AND " . $db->quote($name . "_id", DB::PARAM_IDENT) . " = " . $id);
-	}
-	
-	/**
-	 * Checks if the $value is valid for a field.
-	 * @param DBItemFieldOption $fieldOption Field option for the validated field
-	 * @param mixed $value Privided value.
-	 * @return DBItemValidationException|null If no error occures null is returned
-	 */
-	protected static function validateField(DBItemFieldOption $fieldOption, $value){
-		if ($value === null && !$fieldOption->null){
-			return new DBItemValidationException(
-				"Field " . $fieldOption->displayName . " may not be NULL.",
-				DBItemValidationException::WRONG_NULL
-			);
-		}
-		// TODO: type checking
-		if ($fieldOption->type === "enum" && !in_array($value, $fieldOption->typeExtension, true)){
-			return new DBItemValidationException(
-				"Field " . $fieldOption->displayName . " must be one of " . implode(", ", $fieldOption->typeExtension) . " " . $fieldOption->regExp . " but '" . $value . "' provided.",
-				DBItemValidationException::WRONG_VALUE
-			);
-		}
-		if ($fieldOption->regExp && !preg_match($fieldOption->regExp, $value)){
-			return new DBItemValidationException(
-				"Field " . $fieldOption->displayName . " must match regular expression " . $fieldOption->regExp . " but '" . $value . "' provided.",
-				DBItemValidationException::WRONG_REGEXP
-			);
-		}
-		return null;
-	}
-
-	/**
-	 * Checks all fields in a array $fieldOptions for validity.
-	 * @param DBItemFieldOption[] $fieldOptions All fields to be checked.
-	 * @param mixed[] $values Provided values
-	 * @return DBItemValidationException[] Array of all occuring errors.
-	 */
-	protected static function validateFieldsByFieldOptions($fieldOptions, $values){
-		$errors = array();
-		foreach ($fieldOptions as $fieldOption){
-			/* @var $fieldOption DBItemFieldOption */
-			$error = null;
-			if (array_key_exists($fieldOption->name, $values)){
-				$error = self::validateField($fieldOption, $values[$fieldOption->name]);
-			}
-			elseif ($fieldOption->default === null && !$fieldOption->null) {
-				$error = new DBItemValidationException("Field " . $fieldOption->displayName . " is reqired.", DBItemValidationException::WRONG_MISSING);
-			}
-			if ($error !== null){
-				$errors[$fieldOption->name] = $error;
-			}
-			elseif ($fieldOption->extender){
-				$extenderValue = array_read_key($fieldOption->name, $values, $fieldOption->default);
-				if ($extenderValue !== null){
-					$errors = array_merge(
-						$errors,
-						self::validateFieldsByFieldOptions($fieldOption->extensionFieldOptions[$extenderValue], $values)
-					);
-				}
-			}
-		}
-		return $errors;
-	}
-
 	/**
 	 * Checks if the provided $values are valid for the specific $class
-	 * @param string $class The class to be checked.
+	 * @param string|DBItemClassSpecifier $classSpecifier The class to be checked.
 	 * @param mixed[] $values The provided values.
 	 * @return true|DBItemValidationException[] true if everything is fine or an array of all occuring errors.
 	 */
-	public static function validateFieldsCLASS($class, $values){
-		$errors = self::validateFieldsByFieldOptions(DBItemFieldOption::parseClass($class), $values);
+	public static function validateFieldsCLASS($classSpecifier, $values){
+		$errors = DBItemField::parseClass($classSpecifier)->validate($values);
 		if (count($errors) == 0){
 			return true;
 		}
@@ -272,58 +143,20 @@ abstract class DBItem extends ViewableHTML{
 			return $errors;
 		}
 	}
-	
-	/**
-	 * Creates all the DB entries in the extender tables.
-	 * @param DBItemFieldOption $fieldOption Option of the extender field.
-	 * @param int $newId ID of the new created item.
-	 * @param mixed[] $fields Contains the provided values to create the item.
-	 * @return DBItemFieldOption[] Array containing all field options where the type is DBItemFieldOption::DB_ITEM
-	 */
-	private static function createExtenderCLASS(DBItemFieldOption $fieldOption, $newId, $fields){
-		$db = DB::getInstance();
-		$keys = array($db->quote('id', DB::PARAM_IDENT));
-		$values = array($newId);
-		$dbItemFields = array();
-		$extenderValue = array_read_key($fieldOption->name, $fields, $fieldOption->default);
-		if ($extenderValue !== null){
-			foreach ($fieldOption->extensionFieldOptions[$extenderValue] as $item){
-				/* @var $item DBItemFieldOption */
-				if (array_key_exists($item->name, $fields)){
-					if ($item->type === DBItemFieldOption::DB_ITEM){
-						$dbItemFields[] = $item;
-					}
-					else {
-						$keys[] = $db->quote($item->name, DB::PARAM_IDENT);
-						if ($item->null && $fields[$item->name] === ""){
-							$values[] = "NULL";
-						}
-						else {
-							$values[] = $db->quote($fields[$item->name], DB::PARAM_STR);
-						}
-					}
-				}
-				if ($item->extender){
-					$dbItemFields = array_merge($dbItemFields, self::createExtenderCLASS($item, $newId, $fields));
-				}
-			}
-			$db->query("INSERT INTO " . $db->quote(self::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $values) . ")");
-
-		}
-		return $dbItemFields;
-	}
 
 	/**
-	 * Creates a new instance of the specific $class with the values in the $fields
-	 * @param string $class Classname of the new instance
+	 * Creates a new instance of the specific $classSpecifier with the values in the $fields
+	 * @param string $classSpecifier Classname of the new instance
 	 * @param mixed[] $fieldValues field values
 	 * @param bool $bypassValidation If set to true the provided values are not validated.
 	 * DO ONLY USE IF VALIDATION IS DONE BEFOREHAND MANUALY.
 	 * @return DBItem of type $class 
 	 */
-	public static function createCLASS($class, $fieldValues = array(), $bypassValidation = false){
+	public static function createCLASS($classSpecifier, $fieldValues = array(), $bypassValidation = false){
+		$classSpecifier = DBItemClassSpecifier::make($classSpecifier);
+
 		if (!$bypassValidation){
-			$errors = self::validateFieldsCLASS($class, $fieldValues);
+			$errors = self::validateFieldsCLASS($classSpecifier, $fieldValues);
 			if ($errors !== true){
 				$keys = array_keys($errors);
 				throw $errors[$keys[0]];
@@ -333,47 +166,31 @@ abstract class DBItem extends ViewableHTML{
 		$db = DB::getInstance();
 		$keys = array();
 		$values = array();
-		$dbItemFields = array();
-		foreach (DBItemFieldOption::parseClass($class) as $item){
-			/* @var $item DBItemFieldOption */
-			if (array_key_exists($item->name, $fieldValues)){
-				if ($item->type === DBItemFieldOption::DB_ITEM){
-					$dbItemFields[] = $item;
-				}
-				else {
-					$keys[] = $db->quote($item->name, DB::PARAM_IDENT);
-					if ($item->null && $fieldValues[$item->name] === ""){
-						$values[] = "NULL";
-					}
-					else {
-						$values[] = $db->quote($fieldValues[$item->name], DB::PARAM_STR);
-					}
+		foreach (DBItemField::parseClass($classSpecifier) as $field){
+			/* @var $field DBItemField */
+			if (array_key_exists($field->name, $fieldValues)){
+				$value = $field->translateToDB($fieldValues[$field->name]);
+				if ($value !== null){
+					$keys[] = $db->quote($field->name, DB::PARAM_IDENT);
+					$values[] = $value;
 				}
 			}
 		}
-		$db->query("INSERT INTO " . $db->quote(self::$tablePrefix . $class, DB::PARAM_IDENT) . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $values) . ")");
+		$query = "INSERT INTO " . $db->quote($classSpecifier->getTableName(), DB::PARAM_IDENT) . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $values) . ")";
+		if ($db->query($query) === false){
+			echo $query;
+			var_dump($db->errorInfo());
+			die();
+		}
 		$newId = $db->lastInsertId();
-		foreach (DBItemFieldOption::parseClass($class) as $item){
-			if ($item->extender){
-				$dbItemFields = array_merge($dbItemFields, self::createExtenderCLASS($item, $newId, $fieldValues));
-			}
+		foreach (DBItemField::parseClass($classSpecifier) as $field){
+			$field->createDependencies($newId, $fieldValues);
 		}
-		$item = self::getCLASS($class, $newId);
+		$item = self::getCLASS($classSpecifier, $newId);
 		
-		foreach ($dbItemFields as $fieldOption){
-			/* @var $fieldOption DBItemFieldOption */
-			switch ($fieldOption->correlation){
-				case DBItemFieldOption::ONE_TO_ONE: case DBItemFieldOption::N_TO_ONE:
-					$value = self::getCLASS($fieldOption->class,  $fieldValues[$fieldOption->name]);
-					break;
-				case DBItemFieldOption::ONE_TO_N: case DBItemFieldOption::N_TO_N:
-					$value = new DBItemCollection($fieldOption->class);
-					foreach ($fieldValues[$fieldOption->name] as $id){
-						$value[] = self::getCLASS($fieldOption->class, $id);
-					}
-					break;
-			}
-			$item->{$fieldOption->name} = $value;
+		foreach (DBItemField::parseClass($classSpecifier) as $field){
+			/* @var $field DBItemField */
+			$field->performAssignmentsAfterCreation($item, $fieldValues);
 		}
 		
 		return $item;
@@ -397,50 +214,15 @@ abstract class DBItem extends ViewableHTML{
 	/**
 	 * Protected constructor. To get an instance of the desired class call DBItem::getCLASS().
 	 * @see DBItem::getCLASS()
+	 * @param DBItemClassSpecifier $classSpecifier
 	 * @param int $DBid
 	 */
-	protected function __construct($DBid){
+	protected function __construct(DBItemClassSpecifier $classSpecifier, $DBid){
 		$this->db = DB::getInstance();
-		$this->table = $this->db->quote(self::$tablePrefix . get_class($this), DB::PARAM_IDENT);
+		$this->specifier = $classSpecifier;
+		$this->table = $this->db->quote($this->specifier->getTableName(), DB::PARAM_IDENT);
 		$this->DBid = $DBid;
 		$this->load();
-	}
-
-	/**
-	 * Loads the data of an extender
-	 * @param DBItemFieldOption $extenderOption Options that describe the extender.
-	 */
-	private function loadExtender(DBItemFieldOption $extenderOption){
-		$extenderValue = $this->{$extenderOption->name};
-		if ($this->DBid === 0){
-			$data = array();
-			foreach ($extenderOption->extensionFieldOptions[$extenderValue] as $item){
-				/* @var $item DBItemFieldOption */
-				$data[$item->name] = $item->default;
-			}
-			$this->changeable = false;
-		}
-		else {
-			if ($extenderValue !== null){
-				$data = $this->db->query(
-					"SELECT * FROM " .
-					$this->db->quote(self::$tablePrefix . $extenderValue, DB::PARAM_IDENT) .
-					"WHERE `id` = " . $this->DBid
-				);
-				$data = $data->fetch(DB::FETCH_ASSOC);
-				if (!$data){
-					throw new Exception("Invalid database. Please contact administrator. (ID " . $this->DBid . " not found in extender table " . $extenderValue . ")");
-				}
-			}
-		}
-
-		$this->oldValues = array_merge($this->oldValues, $data);
-		foreach ($extenderOption->extensionFieldOptions[$extenderValue] as $item){
-			/* @var $item DBItemFieldOption */
-			if ($item->extender){
-				$this->loadExtender($item);
-			}
-		}
 	}
 
 	/**
@@ -449,9 +231,9 @@ abstract class DBItem extends ViewableHTML{
 	public function load(){
 		if ($this->DBid === 0){
 			$data = array();
-			foreach (DBItemFieldOption::parseClass(get_class($this)) as $item){
-				/* @var $item DBItemFieldOption */
-				$data[$item->name] = $item->default;
+			foreach (DBItemField::parseClass($this->specifier) as $field){
+				/* @var $field DBItemField */
+				$data[$field->name] = $field->default;
 			}
 			$this->changeable = false;
 		}
@@ -464,39 +246,9 @@ abstract class DBItem extends ViewableHTML{
 			
 		}
 		$this->oldValues = $data;
-		foreach (DBItemFieldOption::parseClass(get_class($this)) as $item){
-			/* @var $item DBItemFieldOption */
-			if ($item->extender){
-				$this->loadExtender($item);
-			}
-		}
-	}
-
-	/**
-	 * Saves the data in the item for the speicfied extender
-	 * @param DBItemFieldOption $extenderOption field option of the extender
-	 */
-	private function saveExtender(DBItemFieldOption $extenderOption){
-		$extenderValue = $this->getRealValue($extenderOption);
-		if ($extenderValue !== null){
-			$prop = array();
-			foreach ($extenderOption->extensionFieldOptions[$extenderValue] as $item){
-				/* @var $item DBItemFieldOption */
-				if (array_key_exists($item->name, $this->newValues)){
-					$name = $item->name;
-					$value = $this->newValues[$name];
-					$prop[] = $this->db->quote($name, DB::PARAM_IDENT) . " = " . ($value === null? "NULL": $this->db->quote($value));
-
-					$this->oldValues[$name] = $value;
-					unset($this->newValues[$name]);
-				}
-				if ($item->extender){
-					$this->saveExtender($item);
-				}
-			}
-			if (count($prop) !== 0){
-				$this->db->query("UPDATE " . $this->db->quote(self::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " SET " . implode(", ", $prop) . " WHERE `id` = " . $this->DBid);
-			}
+		foreach (DBItemField::parseClass($this->specifier) as $field){
+			/* @var $field DBItemField */
+			$field->loadDependencies($this);
 		}
 	}
 	
@@ -506,18 +258,14 @@ abstract class DBItem extends ViewableHTML{
 	public function save(){
 		if ($this->changed && !$this->deleted){
 			$prop = array();
-			foreach (DBItemFieldOption::parseClass(get_class($this)) as $item){
-				/* @var $item DBItemFieldOption */
-				if (array_key_exists($item->name, $this->newValues)){
-					$name = $item->name;
+			foreach (DBItemField::parseClass($this->specifier) as $field){
+				/* @var $field DBItemField */
+				if ($field->saveDependencies($this) && array_key_exists($field->name, $this->newValues)){
+					$name = $field->name;
 					$value = $this->newValues[$name];
 					$prop[] = $this->db->quote($name, DB::PARAM_IDENT) . " = " . ($value === null? "NULL": $this->db->quote($value));
 					
-					$this->oldValues[$name] = $value;
-					unset($this->newValues[$name]);
-				}
-				if ($item->extender){
-					$this->saveExtender($item);
+					$this->makeRealNewValueOld($field);
 				}
 			}
 			if (count($prop) !== 0){
@@ -528,62 +276,18 @@ abstract class DBItem extends ViewableHTML{
 	}
 
 	/**
-	 * Deletes the extender entries of the item in the database. CALL ONLY FORM delete() OR ITSELF!
-	 * @param DBItemFieldOption $extenderOption field option for the extender.
-	 */
-	private function deleteExtender(DBItemFieldOption $extenderOption){
-		$extenderValue = $this->getRealValue($extenderOption);
-		if ($extenderValue !== null){
-			$this->db->query("DELETE FROM  " . $this->db->quote(self::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " WHERE `id` = " . $this->DBid);
-			foreach ($extenderOption->extensionFieldOptions[$extenderValue] as $item){
-				/* @var $item DBItemFieldOption */
-				switch ($item->type){
-					case DBItemFieldOption::DB_ITEM:
-						switch ($item->correlation){
-							case DBItemFieldOption::ONE_TO_ONE: case DBItemFieldOption::N_TO_ONE:
-								$this->{$item->name} = null;
-								break;
-							case DBItemFieldOption::ONE_TO_N: case DBItemFieldOption::N_TO_N:
-								$this->{$item->name} = new DBItemCollection($item->class);
-								break;
-						}
-						break;
-				}
-				if ($item->extender){
-					$this->deleteExtender($item);
-				}
-			}
-		}
-	}
-
-	/**
 	 * Deletes the item from the database. Also all connections to the item are removed.
 	 */
 	public function delete(){
 		if (!$this->deleted){
 			$this->db->query("DELETE FROM  " . $this->table . " WHERE `id` = " . $this->DBid);
 			
-			$class = get_class($this);
-			foreach (DBItemFieldOption::parseClass($class) as $item){
-				/* @var $item DBItemFieldOption */
-				switch ($item->type){
-					case DBItemFieldOption::DB_ITEM:
-						switch ($item->correlation){
-							case DBItemFieldOption::ONE_TO_ONE: case DBItemFieldOption::N_TO_ONE:
-								$this->{$item->name} = null;
-								break;
-							case DBItemFieldOption::ONE_TO_N: case DBItemFieldOption::N_TO_N:
-								$this->{$item->name} = new DBItemCollection($item->class);
-								break;
-						}
-						break;
-				}
-				if ($item->extender){
-					$this->deleteExtender($item);
-				}
+			foreach (DBItemField::parseClass($this->specifier) as $item){
+				/* @var $item DBItemField */
+				$item->deleteDependencies($this);
 			}
 			
-			unset(self::$instances[$class][$this->DBid]);
+			unset(self::$instances[$this->specifier->getSpecifiedName()][$this->DBid]);
 			$this->deleted = true;
 			$this->changed = false;
 		}
@@ -592,37 +296,34 @@ abstract class DBItem extends ViewableHTML{
 	/**
 	 * Searches in the field options for a given name. If $searchInAllExtenders is true not only the actual extenders are searched but
 	 * also all potentional extenders.
-	 * @param string $name Name for the field to be searched.
-	 * @param bool $searchInAllExtenders If the search should also include potentional extenders not only the actual ones.
-	 * @param DBItemFieldOption[] $options DO NOT USE - only for recursive call with the extenders
-	 * @return DBItemFieldOption The field option to the given $name. If the $name is not found null is returned.
+	 *
+	 * @param string $name Name of the field to be searched.
+	 * @param bool $searchAllCollections If the search should also include potentional extenders not only the actual ones.
+	 * @param DBItemFieldCollection $collection DO NOT USE - only for recursive call with the extenders
+	 * @return DBItemField The field option to the given $name. If the $name is not found null is returned.
 	 */
-	private function getFieldOption($name, $searchInAllExtenders = false, $options = null){
-		if ($options === null){
-			$options = DBItemFieldOption::parseClass(get_class($this));
+	private function getField($name, $searchAllCollections = false, $collection = null){
+		if ($collection === null){
+			$collection = DBItemField::parseClass($this->specifier);
 		}
-		foreach ($options as $item){
-			/* @var $item DBItemFieldOption */
+		foreach ($collection as $item){
+			/* @var $item DBItemField */
 			if ($item->name === $name){
 				return $item;
 			}
-			if ($item->extender){
-				if ($searchInAllExtenders){
-					foreach ($item->typeExtension as $extenderValue){
-						$value = $this->getFieldOption(
-							$name, $searchInAllExtenders, $item->extensionFieldOptions[$extenderValue]
-						);
+			if ($item instanceof DBItemFieldHasSearchableSubcollection){
+				if ($searchAllCollections){
+					foreach ($item->getAllSubcollections() as $subcollection){
+						$value = $this->getField($name, $searchAllCollections, $subcollection);
 						if ($value !== null){
 							return $value;
 						}
 					}
 				}
 				else {
-					$extenderValue = $this->getRealValue($item);
-					if ($extenderValue !== null){
-						$value = $this->getFieldOption(
-							$name, $searchInAllExtenders, $item->extensionFieldOptions[$extenderValue]
-						);
+					$subcollection = $item->getSubcollection($this);
+					if ($subcollection !== null){
+						$value = $this->getField($name, $searchAllCollections, $subcollection);
 						if ($value !== null){
 							return $value;
 						}
@@ -634,20 +335,55 @@ abstract class DBItem extends ViewableHTML{
 	}
 	
 	/**
+	 * Checks if the item has a field with a specific name.
+	 *
+	 * @param string $name Name of the field to be searched.
+	 * @param boolean $searchAllCollections If the search should also include potentional extenders not only the actual ones.
+	 * @return boolean If the item has a field with the specific name.
+	 */
+	public function hasField($name, $searchAllCollections = false){
+		return $this->getField($name, $searchAllCollections) !== null;
+	}
+
+	/**
+	 * Checks if the real value of the field has changed.
+	 *
+	 * @param DBItemField $field
+	 * @return boolean
+	 */
+	protected function realValueChanged(DBItemField $field){
+		return array_key_exists($field->name, $this->newValues) &&
+			$this->newValues[$field->name] !== array_read_key($field->name, $this->oldValues, $field->default);
+	}
+
+	/**
+	 * Moves the new real value to the old value array and deletes entry in new value array.
+	 * 
+	 * @param DBItemField $field
+	 */
+	protected function makeRealNewValueOld(DBItemField $field){
+		if ($this->realValueChanged($field)){
+			$this->oldValues[$field->name] = $this->newValues[$field->name];
+		}
+		unset($this->newValues[$field->name]);
+	}
+
+	/**
 	 * Returns the real value in $oldValues resp. $newValues. If it is not present in any of this arrays the default value for this field is returned
-	 * @param DBItemFieldOption $fieldOption the name
+	 * @param DBItemField $field the name
 	 * @return mixed
 	 */
-	private function getRealValue(DBItemFieldOption $fieldOption){
-		$name = $fieldOption->name;
+	protected function getRealValue(DBItemField $field){
+		$name = $field->name;
 		if (array_key_exists($name, $this->newValues)){
 			return $this->newValues[$name];
 		}
-		if (array_key_exists($name, $this->oldValues)){
+		elseif (array_key_exists($name, $this->oldValues)){
 			return $this->oldValues[$name];
 		}
-
-		return $fieldOption->default;
+		else {
+			return $field->default;
+		}
 	}
 
 	/**
@@ -665,42 +401,12 @@ abstract class DBItem extends ViewableHTML{
 			return $this->DBid;
 		}
 		
-		$fieldOption = $this->getFieldOption($name, true);
-		if ($fieldOption === null){
+		$field = $this->getField($name, true);
+		if ($field === null){
 			throw new InvalidArgumentException("No property " . $name . " found.");
 		}
 		else {
-			switch ($fieldOption->type){
-				case DBItemFieldOption::DB_ITEM:
-					switch ($fieldOption->correlation){
-						case DBItemFieldOption::ONE_TO_ONE: case DBItemFieldOption::N_TO_ONE:
-							$value = $this->getRealValue($fieldOption);
-							if ($value !== null){
-								return self::getClass($fieldOption->class, $value);
-							}
-							else{
-								return null;
-							}
-							break;
-						case DBItemFieldOption::ONE_TO_N:
-							return self::getByConditionCLASS(
-								$fieldOption->class,
-								$this->db->quote($fieldOption->correlationName, DB::PARAM_IDENT) . " = " . $this->DBid
-							);
-							break;
-						case DBItemFieldOption::N_TO_N:
-							return self::getByLinkingTable(
-								$fieldOption->class,
-								$fieldOption->name,
-								$fieldOption->correlationName,
-								$this->DBid
-							);
-							break;
-					}
-					break;
-				default:
-					return $this->getRealValue($fieldOption);
-			}
+			return $field->getValue($this);
 		}
 	}
 
@@ -709,8 +415,11 @@ abstract class DBItem extends ViewableHTML{
 	 * @param string $name
 	 * @param mixed $value
 	 */
-	private function setRealValue($name, $value){
-		if (array_key_exists($name, $this->newValues)){
+	protected function setRealValue($name, $value){
+		if (!array_key_exists($name, $this->oldValues)){
+			$this->oldValues[$name] = $value;
+		}
+		elseif (array_key_exists($name, $this->newValues)){
 			$this->newValues[$name] = $value;
 		}
 		elseif ($value !== $this->oldValues[$name]){
@@ -734,102 +443,12 @@ abstract class DBItem extends ViewableHTML{
 			throw new Exception("This item can not be changed.");
 		}
 
-		$fieldOption = $this->getFieldOption($name, false);
-		if ($fieldOption === null){
+		$field = $this->getField($name, false);
+		if ($field === null){
 			throw new InvalidArgumentException("No property " . $name . " found.");
 		}
-		elseif ($fieldOption->extender){
-			throw new InvalidArgumentException("Extenders can not be changed.");
-		}
 		else {
-			switch ($fieldOption->type){
-				case DBItemFieldOption::DB_ITEM:
-					switch ($fieldOption->correlation){
-						case DBItemFieldOption::ONE_TO_ONE:
-							//remove old dependency
-							$valueItem = $this->{$name};
-							if ($valueItem !== null){
-								$valueItem->{$fieldOption->correlationName} = null;
-							}
-							//desired missing break
-						case DBItemFieldOption::N_TO_ONE:
-							if ($value === null){
-								$this->{$name} = null;
-							}
-							elseif ($value instanceof $fieldOption->class){
-								if ($this->getRealValue($fieldOption) !== $value->DBid){
-									$this->setRealValue($name, $value->DBid);
-									if ($fieldOption->correlation === DBItemFieldOption::ONE_TO_ONE){
-										$value->{$fieldOption->correlationName} = null;
-										$value->setRealValue($fieldOption->correlationName, $this->DBid);
-									}
-								}
-							}
-							else {
-								throw new InvalidArgumentException("Property " . $name . " is no " . $fieldOption->class . ".");
-							}
-							break;
-						case DBItemFieldOption::ONE_TO_N:
-							if (is_a($value, "DBItemCollection")){
-								if ($value->getClass() !== $fieldOption->class && is_subclass_of($value->getClass(), $fieldOption->class)){
-									throw new InvalidArgumentException("Property " . $name . " contains a non " . $fieldOption->class . ".");
-								}
-								$oldValues = $this->{$name};
-								$newValue = array();
-
-								foreach ($value as $valueItem){
-									if (($pos = $oldValues->search($valueItem, true)) !== false){
-										$oldValues->splice($pos, 1);
-									}
-									else {
-										$newValue[] = $valueItem;
-									}
-								}
-								foreach ($newValue as $valueItem){
-									$valueItem->{$fieldOption->correlationName} = $this;
-								}
-
-								foreach ($oldValues as $valueItem){
-									$valueItem->{$fieldOption->correlationName} = null;
-								}
-							}
-							else {
-								throw new InvalidArgumentException("Property " . $name . " is not an DBItemCollection.");
-							}
-							break;
-						case DBItemFieldOption::N_TO_N:
-							if (is_a($value, "DBItemCollection")){
-								if ($value->getClass() !== $fieldOption->class && is_subclass_of($value->getClass(), $fieldOption->class)){
-									throw new InvalidArgumentException("Property " . $name . " contains a non " . $fieldOption->class . ".");
-								}
-								$oldValues = $this->{$name};
-								$newValue = array();
-
-								foreach ($value as $valueItem){
-									if (($pos = $oldValues->search($valueItem, true)) !== false){
-										$oldValues->splice($pos, 1);
-									}
-									else {
-										$newValue[] = $valueItem;
-									}
-								}
-								foreach ($newValue as $valueItem){
-									self::setInLinkingTable($name, $fieldOption->correlationName, $this->DBid, $valueItem->DBid);
-								}
-
-								foreach ($oldValues as $valueItem){
-									self::removeInLinkingTable($name, $fieldOption->correlationName, $this->DBid, $valueItem->DBid);
-								}
-							}
-							else {
-								throw new InvalidArgumentException("Property " . $name . " is not an DBItemCollection.");
-							}
-							break;
-					}
-					break;
-				default:
-					$this->setRealValue($name, $value);
-			}
+			$field->setValue($this, $value);
 		}
 	}
 
@@ -842,7 +461,7 @@ abstract class DBItem extends ViewableHTML{
 	 */
 	public function __call($name, $arguments){
 		if (method_exists($this, $name . "CLASS")){
-			array_unshift($arguments, get_class($this));
+			array_unshift($arguments, $this->specifier);
 			return call_user_func_array(array($this, $name . "CLASS"), $arguments);
 		}
 		throw new BadMethodCallException("No method called " . $name);

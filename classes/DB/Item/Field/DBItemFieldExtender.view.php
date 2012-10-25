@@ -1,22 +1,19 @@
 <?php
-/* @var $this DBItemFieldOption */
+/* @var $this DBItemFieldEnum */
 /* @var $args DBItem */
 
 $value = $args->{$this->name};
-if (is_a($value, "Viewable")){
-	$value->view("singleLine", true, $args);
-}
-elseif ($value === null){
+if ($value === null){
 	echo "---";
 }
 else {
 	echo $this->html($value);
 }
 
-if ($this->extender && $value !== null){
+if ($value !== null){
 	echo "<ul>";
 	foreach ($this->extensionFieldOptions[$value] as $subItem){
-		/* @var $subItem DBItemFieldOption */
+		/* @var $subItem DBItemField */
 		if ($subItem->displayable){
 			echo "<li>" . $this->html($subItem->displayName) . ": ";
 			$subItem->view(false, true, $args);

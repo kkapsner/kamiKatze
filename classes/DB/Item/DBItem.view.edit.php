@@ -3,8 +3,8 @@
 <table class="dbItem">
 	<?php
 	/* @var $this DBItem */
-	foreach (DBItemFieldOption::parseClass(get_class($this)) as $item){
-		/* @var $item DBItemFieldOption */
+	foreach (DBItemField::parseClass(get_class($this)) as $item){
+		/* @var $item DBItemField */
 		$item->view($context, true, $this);
 	}
 	?>
