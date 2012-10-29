@@ -27,10 +27,16 @@ class ViewableImplementation implements Viewable{
 			$reflection = new ReflectionClass($name);
 			$path = $reflection->getFileName();
 		}
-		$file = dirname($path) . DIRECTORY_SEPARATOR .
-			$name . ".view" .
-			($context? "." . $context: "") .
-			".php";
+		$contextChain = explode("|", $context);
+		foreach ($contextChain as $currentContext){
+			$file = dirname($path) . DIRECTORY_SEPARATOR .
+				$name . ".view" .
+				($currentContext? "." . $currentContext: "") .
+				".php";
+			if (is_file($file)){
+				break;
+			}
+		}
 		if (!is_file($file)){
 			$parent = get_parent_class($name);
 			if ($parent !== false){
