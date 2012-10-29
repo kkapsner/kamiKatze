@@ -7,6 +7,6 @@ if ($value === null){
 	echo "---";
 }
 else {
-	$value->view("singleLine", true, $args);
+	$value->view("link|singleLine", true, $args);
 }
 ?>
