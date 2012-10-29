@@ -6,7 +6,7 @@ if ($this->count()){
 	foreach ($this as $item){
 		/* @var $item DBItem */
 		echo '<li>';
-		$item->view("singleLine", true, $args);
+		$item->view("link|singleLine", true, $args);
 		echo '</li>';
 	}
 	echo '</ul>';
