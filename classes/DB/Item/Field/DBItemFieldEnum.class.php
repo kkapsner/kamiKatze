@@ -36,7 +36,7 @@ class DBItemFieldEnum extends DBItemField{
 		$errors = parent::validate($values);
 		if (array_key_exists($this->name, $values)){
 			$value = $values[$this->name];
-			if (!in_array($value, $this->typeExtension, true)){
+			if ($value !== null && !in_array($value, $this->typeExtension, true)){
 				$errors[] = new DBItemValidationException(
 					"Field " . $this->displayName . " must be one of " . implode(", ", $this->typeExtension) . " " . $this->regExp . " but '" . $value . "' provided.",
 					DBItemValidationException::WRONG_VALUE,
