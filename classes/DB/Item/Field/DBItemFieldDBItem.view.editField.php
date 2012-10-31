@@ -48,7 +48,7 @@ switch ($this->correlation){
 			if ($hmItems->contains($hmItem, true)){
 				echo ' selected="selected"';
 			}
-			echo '">';
+			echo '>';
 			$hmItem->view("singleLine", true);
 			echo "</option>\n";
 		}
