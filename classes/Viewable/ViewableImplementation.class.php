@@ -9,7 +9,7 @@
  * @author Korbinian Kapsner
  * @package Viewable
  */
-class ViewableImplementation implements Viewable{
+class ViewableImplementation extends EventEmitterImplementation implements Viewable{
 
 	/**
 	 * Similar to Viewable::view() but ability to provide a class name to specify the view which should be used.
