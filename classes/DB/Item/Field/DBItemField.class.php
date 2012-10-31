@@ -117,6 +117,9 @@ class DBItemField extends DBItemFriends{
 		elseif (array_read_key("isFile", $options, false) || array_read_key("file", $options, false)){
 			$type = "file";
 		}
+		elseif (array_read_key("isLink", $options, false) || array_read_key("link", $options, false)){
+			$type = "link";
+		}
 		elseif ($type === "enum" && array_read_key("extender", $options, false)){
 			$type = "extender";
 		}
@@ -142,6 +145,9 @@ class DBItemField extends DBItemFriends{
 			case "mediumtext":
 			case "longtext":
 				$item = new DBItemFieldText($result["Field"]);
+				break;
+			case "link":
+				$item = new DBItemFieldLink($result["Field"]);
 				break;
 			case self::DB_ITEM:
 				$item = new DBItemFieldDBItem($result["Field"]);
