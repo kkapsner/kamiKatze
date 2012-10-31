@@ -7,6 +7,6 @@ if ($value === null){
 	echo "---";
 }
 else {
-	$value->view($context, true);
+	$value->view($context, true, $this);
 }
 ?>

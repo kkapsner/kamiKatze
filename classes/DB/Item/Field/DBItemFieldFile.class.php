@@ -21,7 +21,11 @@ class DBItemFieldFile extends DBItemField{
 	 */
 	public static $urlToFileFolder = "./files/";
 
-	
+	/**
+	 * Flag if the file should be displayed as an image
+	 * @var boolean
+	 */
+	public $image = false;
 	/**
 	 * The class specifier for the file item.
 	 * @var DBItemClassSpecifier
@@ -36,6 +40,7 @@ class DBItemFieldFile extends DBItemField{
 	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
 		parent::parseOptions($classSpecifier, $options);
 		$this->specifier = new DBItemClassSpecifier("DBItemFieldFileItem", array_read_key("fileTable", $options, "Files"));
+		$this->image = array_read_key("image", $options, $this->image);
 	}
 
 	/**
