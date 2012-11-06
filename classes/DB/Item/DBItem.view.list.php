@@ -3,17 +3,16 @@
 ?>
 <article class="DBItem <?php echo $this->specifier->getClassName();?>">
 	<h1><?php $this->view("singleLine", true);?></h1>
-	<table>
+	<ul>
 <?php
 foreach (DBItemField::parseClass(get_class($this)) as $item){
 	/* @var $item DBItemField */
 	if ($item->displayable){
-		echo "<tr><td>" . $this->html($item->displayName) . "</td><td>";
+		echo "<li>" . $this->html($item->displayName) . ": ";
 		$item->view(false, true, $this);
-		echo "</td></tr>";
-		$this->emit(new Event("view.field." . $item->name, $this));
+		echo "</li>";
 	}
 }
 ?>
-	</table>
+	</ul>
 </article>
