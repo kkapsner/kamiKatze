@@ -6,6 +6,7 @@
 	<table>
 <?php
 foreach (DBItemField::parseClass(get_class($this)) as $item){
+	$this->emit(new Event("view.fields.start", $this));
 	/* @var $item DBItemField */
 	if ($item->displayable){
 		echo "<tr><td>" . $this->html($item->displayName) . "</td><td>";
@@ -13,6 +14,7 @@ foreach (DBItemField::parseClass(get_class($this)) as $item){
 		echo "</td></tr>";
 		$this->emit(new Event("view.field." . $item->name, $this));
 	}
+	$this->emit(new Event("view.fields.end", $this));
 }
 ?>
 	</table>
