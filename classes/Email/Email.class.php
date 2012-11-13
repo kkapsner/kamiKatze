@@ -313,7 +313,7 @@ class Email{
 		$head = "";
 		foreach ($this->headers as $h){
 			/* @var $h EmailHeader */
-			if ($h->getName() !== "bcc"){
+			if (strToUpper($h->getName()) !== "BCC"){
 				$head .= $h;
 			}
 		}
