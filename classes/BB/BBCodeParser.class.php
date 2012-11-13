@@ -176,6 +176,7 @@ class BBCodeParser{
 		$start = $this->codeIterator->key();
 		$parameter = array();
 		do {
+			$this->codeIterator->goToNextNot(" \t\n\r");
 			$key = trim($this->parseKey());
 			$this->codeIterator->goToNextNot(" \t\n\r");
 			if ($key){
