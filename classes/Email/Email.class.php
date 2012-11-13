@@ -312,7 +312,10 @@ class Email{
 	public function getHead(){
 		$head = "";
 		foreach ($this->headers as $h){
-			$head .= $h;
+			/* @var $h EmailHeader */
+			if ($h->getName() !== "bcc"){
+				$head .= $h;
+			}
 		}
 		$head .= $this->masterPart->getHead();
 		return $head;

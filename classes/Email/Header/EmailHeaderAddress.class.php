@@ -4,7 +4,7 @@
  */
 
 /**
- * Representation of an email address header (like to: or cc: or bc:)
+ * Representation of an email address header (like to: or cc: or bcc:)
  *
  * @author Korbinian Kapsner
  * @package Email\Header
