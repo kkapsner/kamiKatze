@@ -19,4 +19,27 @@ function array_read_key($key, $array, $default = false){
 		return $default;
 	}
 }
+
+/**
+ * Creates <input type="hidden"> fields to reprocude the $got array.
+ * 
+ * @param array $got
+ * @param string $name
+ * @return string
+ */
+function createHiddenFields($got, $name = ""){
+	$ret = "";
+	foreach($got as $k => $v){
+		if ($name){
+			$k = $name . "[" . $k . "]";
+		}
+		if (is_array($v)){
+			$ret .= createHiddenFields($v, true, $k);
+		}
+		else {
+			$ret .= '<input type="hidden" name="' . $k . '" value="' . $v . '">';
+		}
+	}
+	return $ret;
+}
 ?>
