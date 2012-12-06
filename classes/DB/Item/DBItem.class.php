@@ -121,9 +121,11 @@ abstract class DBItem extends DBItemFriends{
 		if ($orderBy){
 			$sql .= " ORDER BY " . $orderBy;
 		}
-
-		foreach ($db->query($sql) as $row){
-			$ret[] = self::getCLASS($classSpecifier, $row["id"]);
+		$res = $db->query($sql);
+		if ($res){
+			foreach ($res as $row){
+				$ret[] = self::getCLASS($classSpecifier, $row["id"]);
+			}
 		}
 		return $ret;
 	}
