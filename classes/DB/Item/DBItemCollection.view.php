@@ -5,7 +5,7 @@
 		$fields = DBItemField::parseClass($this->getClass());
 		foreach ($fields as $fieldItem){
 			/* @var $fieldItem DBItemField */
-			echo '<col class="' . $fieldItem->name . '">';
+			echo '<col class="' . $this->html($fieldItem->name) . '">';
 		}
 		?>
 	</colgroup>
@@ -14,7 +14,7 @@
 			<?php
 			foreach ($fields as $fieldItem){
 				/* @var $fieldItem DBItemField */
-				echo "<th>" . $fieldItem->name . "</th>";
+				echo "<th>" . $this->html($fieldItem->name) . "</th>";
 			}
 			?>
 		</tr>
@@ -27,7 +27,7 @@
 				echo '<tr>';
 				foreach ($fields as $fieldItem){
 					/* @var $fieldItem DBItemFieldOption */
-					echo '<td class="' . $fieldItem->name . '">';
+					echo '<td class="' . $this->html($fieldItem->name) . '">';
 					$fieldItem->view(false, true, $item);
 					echo "</td>";
 				}
