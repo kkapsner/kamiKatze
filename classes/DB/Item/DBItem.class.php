@@ -10,6 +10,11 @@
  * @package DB\Item
  */
 abstract class DBItem extends DBItemFriends{
+	/**
+	 * Default order for the items if selected by @see DBItem::getByCondition() without third parameter.
+	 * @var String
+	 */
+	public static $defaultOrder = false;
 	
 	/**
 	 * Stores all instances of ANY DBItem.
@@ -120,6 +125,12 @@ abstract class DBItem extends DBItemFriends{
 		}
 		if ($orderBy){
 			$sql .= " ORDER BY " . $orderBy;
+		}
+		else {
+			$classVars = get_class_vars($classSpecifier->getClassName());
+			if (array_read_key("defaultOrder", $classVars, false)){
+				$sql .= " ORDER BY " . $classVars["defaultOrder"];
+			}
 		}
 		$res = $db->query($sql);
 		if ($res){
