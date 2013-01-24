@@ -18,7 +18,10 @@ class DBItemFieldEnum extends DBItemField{
 	 * @return boolean
 	 */
 	public function isValidValue($value){
-		if (!parent::isValidValue($value)){
+		if ($value === null){
+			return $this->null;
+		}
+		elseif (!parent::isValidValue($value)){
 			return false;
 		}
 		else {
