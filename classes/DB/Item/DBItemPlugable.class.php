@@ -40,7 +40,7 @@ abstract class DBItemPlugable extends DBItem{
 		$classSpecifier = DBItemClassSpecifier::make($classSpecifier);
 		$ret = array();
 		foreach (self::$plugins as $plugin){
-			if ($plugin["class"] === $classSpecifier || is_subclass_of($classSpecifier, $plugin["class"])){
+			if ($plugin["class"]->getClassName() === $classSpecifier->getClassName() || is_subclass_of($classSpecifier, $plugin["class"])){
 				$ret[] = $plugin["plugin"];
 			}
 		}
