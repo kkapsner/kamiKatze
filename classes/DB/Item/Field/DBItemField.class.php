@@ -11,6 +11,7 @@
  */
 class DBItemField extends DBItemFriends{
 	const DB_ITEM = "DBItem";
+	const EXTERNAL_ITEM = "externalItem";
 
 	/**
 	 * Cache array for already parsed classes.
@@ -111,6 +112,9 @@ class DBItemField extends DBItemFriends{
 		if (array_key_exists("class", $options)){
 			$type = self::DB_ITEM;
 		}
+		if (array_key_exists("externalClass", $options)){
+			$type = self::EXTERNAL_ITEM;
+		}
 		elseif (array_read_key("isArray", $options, false) || array_read_key("array", $options, false)){
 			$type = "array";
 		}
@@ -151,6 +155,9 @@ class DBItemField extends DBItemFriends{
 				break;
 			case self::DB_ITEM:
 				$item = new DBItemFieldDBItem($result["Field"]);
+				break;
+			case self::EXTERNAL_ITEM:
+				$item = new DBItemFieldExternalItem($result["Field"]);
 				break;
 			case "tinyint":
 				if ($typeExtension == 1){

@@ -5,7 +5,7 @@
 
 foreach ($this as $field){
 	if ($field->displayable){
-		echo "\n\t\t" . '<th>' . $this->html($field->name) . '</th>';
+		echo "\n\t\t" . '<th>' . $this->html($field->displayName) . '</th>';
 	}
 }
 if (is_array($args)){
