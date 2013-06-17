@@ -2,7 +2,18 @@
 	<colgroup>
 		<?php
 		/* @var $this DBItemCollection */
-		$fields = DBItemField::parseClass($this->getClass());
+		$allFields = DBItemField::parseClass($this->getClass());
+		if ($args){
+			$fields = new DBItemFieldCollection();
+			foreach ($allFields as $fieldItem){
+				if (in_array($fieldItem->name, $args)){
+					$fields[] = $fieldItem;
+				}
+			}
+		}
+		else {
+			$fields = $allFields;
+		}
 		foreach ($fields as $fieldItem){
 			/* @var $fieldItem DBItemField */
 			echo '<col class="' . $this->html($fieldItem->name) . '">';
