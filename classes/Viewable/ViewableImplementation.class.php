@@ -63,7 +63,7 @@ class ViewableImplementation extends EventEmitterImplementation implements Viewa
 	}
 
 	/**
-	 * {@inheritdoc]
+	 * {@inheritdoc}
 	 *
 	 * @param string $context
 	 * @param boolean $output
