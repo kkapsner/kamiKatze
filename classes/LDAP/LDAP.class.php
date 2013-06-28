@@ -113,6 +113,7 @@ class LDAP extends LDAPResourceContainer{
 	/**
 	 * Checks if there is a connection to a server.
 	 * @return boolean
+	 * @todo lazy connecting makes this difficult...
 	 */
 	public function isConnected(){
 		return $this->resource !== false;
@@ -182,7 +183,6 @@ class LDAP extends LDAPResourceContainer{
 	 * Gets the rootDSE from the server.
 	 *
 	 * @return LDAPResultEntry|false the rootDSE on success or false on failure
-	 * @todo implement
 	 */
 	public function getRootDSE(){
 		$search = $this->search("", "objectClass=*", LDAP::SCOPE_BASE);
@@ -262,7 +262,7 @@ class LDAP extends LDAPResourceContainer{
 			}
 		}
 		else {
-			throw new BadMethodCallException("Connection options can only be set after connecting.");
+			throw new BadMethodCallException("Connection options can only be read after connecting.");
 		}
 	}
 	/**

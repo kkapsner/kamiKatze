@@ -8,7 +8,6 @@
  *
  * @author Korbinian Kapsner
  * @package LDAP
- * @todo implement iterator
  * @todo references? like in ldap_first_reference
  */
 class LDAPResult extends LDAPResourceContainer implements Countable, Iterator{
