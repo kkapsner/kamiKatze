@@ -185,7 +185,8 @@ class ConfigFile{
 	 * @todo better implementation to hide this function (or remove it)
 	 */
 	public function replaceVariableInValue($m){
-		return $this->valueToCode($this->__get($m[0] . $m[1]));
+		$name = join("", array_slice($m, 1));
+		return $this->valueToCode($this->__get($name));
 	}
 
 	/**
@@ -202,7 +203,7 @@ class ConfigFile{
 		elseif (is_array($value)){
 			return "array(" . implode(",", array_map(array($this, "valueToCode"), $value)) . ")";
 		}
-		elseif (is_boolean($value)){
+		elseif (is_bool($value)){
 			return $value? "true": "false";
 		}
 		elseif (is_numeric($value)){
@@ -211,6 +212,32 @@ class ConfigFile{
 		else {
 			return "''";
 		}
+	}
+	
+	/**
+	 * Tries to register all variables stored in the ConfigFile as constants.
+	 * No error is thrown if something is not ok to register.
+	 *
+	 * @param boolean $case_insensitive if the constants should be case insensitve or not.
+	 */
+	public function registerConstants($case_insensitive = false){
+		foreach ($this->variables as $name => $value){
+			if (!is_array($value) && !defined($name)){
+				try {
+					define($name, $value, $case_insensitive);
+				}
+				catch (Exception $e){}
+			}
+		}
+	}
+	
+	/**
+	 * Getter for an array of all stored variables.
+	 * 
+	 * @return mixed[] Array of all variables
+	 */
+	public function getVariables(){
+		return $this->variables;
 	}
 
 	/**
