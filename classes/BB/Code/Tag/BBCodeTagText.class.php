@@ -53,8 +53,7 @@ class BBCodeTagText extends BBCodeTag{
 				),
 				ENT_QUOTES,
 				$this->getCharset()
-			),
-			$this->XML
+			)
 		);
 	}
 
