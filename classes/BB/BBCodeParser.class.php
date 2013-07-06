@@ -85,7 +85,9 @@ class BBCodeParser{
 	 * Inserts the text buffer in the tree and clears the buffer.
 	 */
 	protected function insertText(){
-		$this->currentNode->appendChild(new BBCodeTagText(array("text" => $this->text)));
+		if ($this->currentNode->canContain("text")){
+			$this->currentNode->appendChild(new BBCodeTagText(array("text" => $this->text)));
+		}
 		$this->text = "";
 	}
 
