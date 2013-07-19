@@ -31,5 +31,18 @@
 	}
 	?>
 </head>
-<?php $this->view($context, true);?>
+<?php
+	if (count($this->lateScript)){
+		$body = $this->view($context, false);
+		$injectedHTML = "";
+		foreach ($this->lateScript as $script){
+			$injectedHTML .= $script->view($context, false);
+		}
+		echo str_replace("</body>", $injectedHTML . "</body>", $body);
+	}
+	else {
+		$this->view($context, true);
+	}
+	
+?>
 </html>

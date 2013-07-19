@@ -29,10 +29,16 @@ abstract class Template extends ViewableHTML{
 	public $stylePlace;
 	
 	/**
-	 * All the scripts that shall be included in the template.
+	 * All the scripts that shall be included in the template header.
 	 * @var ViewableHTMLTagScript[]
 	 */
 	protected $script = array();
+	
+	/**
+	 * All the scripts that shall be included in the template just before the closing </body>.
+	 * @var ViewableHTMLTagScript[]
+	 */
+	protected $lateScript = array();
 
 	/**
 	 * The standard path to script files.
@@ -50,7 +56,7 @@ abstract class Template extends ViewableHTML{
 	 * The meta keys and values.
 	 * @var array
 	 */
-	protected $meta = array();
+	public $meta = array();
 
 	/**
 	 * Path to the favicon. Template::$stylePlace is prepended to it.
@@ -81,18 +87,25 @@ abstract class Template extends ViewableHTML{
 	 * Adds a script to the template.
 	 *
 	 * @param string|ViewableHTMLTagScript $name the script filename or directly a script tag to be added.
-	 * @param boolean $addSCRIPT if the standard script path should be added to the filename.
+	 * @param boolean $addSCRIPT if the standard script path should be added to the filename. Only available if $name is a string.
+	 * @param boolean $late if the script should be added late - i.e. direct before the closing </body>.
 	 * @return ViewableHTMLTagStyle the added script
 	 */
-	public function addScript($name, $addSCRIPT = true){
+	public function addScript($name, $addSCRIPT = true, $late = false){
 		if (!is_a($name, "ViewableHTMLTagScript")){
 			$script = new ViewableHTMLTagScript();
 			$script->setHTMLAttribute("src", ($addSCRIPT? $this->scriptPlace: "") . $name, true);
 		}
 		else {
 			$script = $name;
+			$late = $addSCRIPT;
 		}
-		array_push($this->script, $script);
+		if ($late){
+			array_push($this->lateScript, $script);
+		}
+		else {
+			array_push($this->script, $script);
+		}
 		return $script;
 	}
 	
@@ -117,19 +130,19 @@ abstract class Template extends ViewableHTML{
 		global $error;
 		global $message;
 		
-		$ret = array('<li style="display: none;"></li>', 
+		$ret = array('<li style="display: none;"></li>'/*,
 '<!--[if lte IE 7]> 
 	<li class="warning">
 		<span>Sie verwenden eine veraltete Version des Internet Explorers. Bitte <a href="http://www.microsoft.com/germany/windows/internet-explorer/default.aspx">aktualisieren</a> Sie Ihren Browser um das volle Repertoire dieser Seite auszuschöpfen.</span>
 	</li>
-<![endif]-->'
+<![endif]-->'*/
 		);
 		if (is_array($error)){
 			for ($i = 0; $i < count($error); $i++){
 				array_push($ret,
 '<li class="error">
 	<span>
-' . str_indent($error[$i], 2) . '
+' . $error[$i] . '
 	</span>
 </li>');
 			}
@@ -139,7 +152,7 @@ abstract class Template extends ViewableHTML{
 				array_push($ret,
 '<li class="message">
 	<span>
-' . str_indent($message[$i], 2) . '
+' . $message[$i] . '
 	</span>
 </li>');
 			}
