@@ -43,6 +43,7 @@ class BBCodeAliasses{
 		"tabelle" => "table",
 		#"link" => "link",
 		"bild" => "image",
+		"sektion" => "section",
 
 		"justifier" => "j",
 
