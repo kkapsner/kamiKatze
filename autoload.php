@@ -6,6 +6,7 @@
 /**
  * Import main files.
  */
+include_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "initialise.php");
 include_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "Autoload.class.php");
 include_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "functions.php");
 
