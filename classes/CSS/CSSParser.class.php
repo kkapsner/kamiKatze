@@ -17,7 +17,7 @@ class CSSParser{
 	
 	private
 		$recursion = 0,
-		$version = 1.1,
+		$version = 1.2,
 		$lastModified,
 		$lastContent = ""
 	;
@@ -113,13 +113,19 @@ class CSSParser{
 	}
 	
 	private function parseConstants($content){
-		return preg_replace_callback('/@parser\s+constants\s{((?:[^{}"\']|' . self::$strRegExp . ')+)}\s*/', array($this, "parseConstantsRegExpWrapper"), $content);
+		return preg_replace_callback(
+			'/@parser\s+constants\s*{((?:[^{}"\']+|' . self::$strRegExp . ')*)}\s*/',
+			array($this, "parseConstantsRegExpWrapper"),
+			$content
+		);
 	}
 	
 	private function parseConstantsRegExpWrapper($match){
 		switch(count($match)){
 			// first call
 			case 2:
+				# remove comments
+				$match[1] = preg_replace('/[\r\n\s]*\/\*[\s\S]*?\*\/[\r\n\s]*/', "", $match[1]);
 				return $this->comment(
 						preg_replace_callback("/[\n\r\s]*" .
 											"([\w\d\-]+)" .
@@ -133,7 +139,7 @@ class CSSParser{
 											";[\n\r\s]*/", array($this, __METHOD__), $match[1])
 						);
 				break;
-			// called by itselve
+			// called by itself
 			case 3:
 				if (!array_key_exists($match[1], $this->constants)){
 					$this->constants[$match[1]] = $match[2];
