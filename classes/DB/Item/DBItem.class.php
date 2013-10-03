@@ -464,7 +464,7 @@ abstract class DBItem extends DBItemFriends{
 		if ($field === null){
 			$setterName = "set" . ucfirst($name);
 			if (method_exists($this, $setterName)){
-				call_user_func(array($this, $setterName));
+				call_user_func(array($this, $setterName), $value);
 			}
 			else {
 				throw new InvalidArgumentException("No property " . $name . " found.");
