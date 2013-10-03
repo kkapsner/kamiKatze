@@ -416,6 +416,10 @@ abstract class DBItem extends DBItemFriends{
 		
 		$field = $this->getField($name, true);
 		if ($field === null){
+			$getterName = "get" . ucfirst($name);
+			if (method_exists($this, $getterName)){
+				return call_user_func(array($this, $getterName));
+			}
 			throw new InvalidArgumentException("No property " . $name . " found.");
 		}
 		else {
@@ -458,7 +462,13 @@ abstract class DBItem extends DBItemFriends{
 
 		$field = $this->getField($name, false);
 		if ($field === null){
-			throw new InvalidArgumentException("No property " . $name . " found.");
+			$setterName = "set" . ucfirst($name);
+			if (method_exists($this, $setterName)){
+				call_user_func(array($this, $setterName));
+			}
+			else {
+				throw new InvalidArgumentException("No property " . $name . " found.");
+			}
 		}
 		else {
 			$field->setValue($this, $value);
