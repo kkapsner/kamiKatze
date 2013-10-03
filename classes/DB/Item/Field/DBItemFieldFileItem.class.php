@@ -20,6 +20,22 @@ class DBItemFieldFileItem extends DBItem{
 		unlink($this->path);
 		parent::delete();
 	}
+	
+	/**
+	 * Getter for the files path.
+	 * @return String Returns the path to the file.
+	 */
+	public function getPath(){
+		return DBItemFieldFile::$fileFolder . $this->subpath;
+	}
+	
+	/**
+	 * Getter for the files URL.
+	 * @return String Returns the URL to the file.
+	 */
+	public function getURL(){
+		return DBItemFieldFile::$urlToFileFolder . $this->subpath;
+	}
 }
 
 ?>

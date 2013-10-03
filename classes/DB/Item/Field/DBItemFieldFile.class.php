@@ -128,8 +128,9 @@ class DBItemFieldFile extends DBItemField{
 				$path = realpath(self::$fileFolder) . DIRECTORY_SEPARATOR . $filename;
 				if (move_uploaded_file($info["tmp_name"], $path)){
 					$fileItem = DBItem::createCLASS($this->specifier, array(
-						"URL" => self::$urlToFileFolder . $filename,
-						"path" => $path
+						"subpath" => $filename
+						#"URL" => self::$urlToFileFolder . $filename,
+						#"path" => $path
 					), true);
 					$translatedData[$this->name] = $fileItem;
 				}
