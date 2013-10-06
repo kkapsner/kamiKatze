@@ -25,7 +25,8 @@ class Autoload {
 	 * @see Autoload::getInstance()
 	 */
 	protected function __construct(){
-		$mainScriptDir = realpath(dirname($_SERVER["SCRIPT_FILENAME"])) . DIRECTORY_SEPARATOR;
+//		$mainScriptDir = realpath(dirname($_SERVER["SCRIPT_FILENAME"])) . DIRECTORY_SEPARATOR;
+		$mainScriptDir = realpath(getcwd()) . DIRECTORY_SEPARATOR;
 		$this->addPath($mainScriptDir);
 		$this->addPath($mainScriptDir . "classes");
 		$this->addPath((dirname(__FILE__)) . DIRECTORY_SEPARATOR . "classes");
