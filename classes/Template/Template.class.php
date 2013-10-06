@@ -91,7 +91,7 @@ abstract class Template extends ViewableHTML{
 	 * @param boolean $late if the script should be added late - i.e. direct before the closing </body>.
 	 * @return ViewableHTMLTagStyle the added script
 	 */
-	public function addScript($name, $addSCRIPT = true, $late = false){
+	public function addScript($name, $addSCRIPT = true, $late = true){
 		if (!is_a($name, "ViewableHTMLTagScript")){
 			$script = new ViewableHTMLTagScript();
 			$script->setHTMLAttribute("src", ($addSCRIPT? $this->scriptPlace: "") . $name, true);
