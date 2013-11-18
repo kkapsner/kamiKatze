@@ -66,7 +66,7 @@ class MarkdownParser{
 					$lineNode->line = $matches[1];
 				}
 				else {
-					$lineNode->line = $line;
+					$lineNode->line = trim($line);
 				}
 				
 				$lineNode->newParagraph = $emptyLineBetween;
