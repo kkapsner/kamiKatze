@@ -8,6 +8,7 @@
  * Representation of a parsed Markdown line
  *
  * @author kkapsner
+ * @package Markdown
  */
 class MarkdownLine extends MarkdownElement{
 	/**

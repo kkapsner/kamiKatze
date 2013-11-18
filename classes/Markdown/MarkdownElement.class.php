@@ -8,6 +8,7 @@
  * Description of MarkdownElement
  *
  * @author kkapsner
+ * @package Markdown
  */
 abstract class MarkdownElement extends ViewableHTML{
 	/**

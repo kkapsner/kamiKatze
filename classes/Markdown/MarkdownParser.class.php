@@ -8,6 +8,7 @@
  * MarkdownParser parses a string and returns a line parse structure
  *
  * @author kkapsner
+ * @package Markdown
  */
 class MarkdownParser{
 	
