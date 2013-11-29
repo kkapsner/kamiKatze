@@ -59,12 +59,12 @@ class BBCodeTagList extends BBCodeTag{
 
 		foreach ($this as $child){
 			if ($child instanceof BBCodeTagText){
-				foreach (preg_split('\r\n|\n\|\r', $child->text) as $line){
-					$innerHTML .= '</li><li>';
+				foreach (preg_split('@\\r\\n|\\n|\\r@', $child->text) as $line){
+					$innerHTML .= $line . '</li><li>';
 				}
 			}
 			else {
-				$innerHTML .= $child->toHTML();
+				$innerHTML .= $child->toHTML() . '</li><li>';
 			}
 		}
 		$innerHTML = str_replace("<li></li>", "", "<li>" . $innerHTML . "</li>");
