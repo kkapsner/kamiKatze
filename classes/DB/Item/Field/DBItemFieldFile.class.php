@@ -39,7 +39,10 @@ class DBItemFieldFile extends DBItemField{
 	 */
 	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
 		parent::parseOptions($classSpecifier, $options);
-		$this->specifier = new DBItemClassSpecifier("DBItemFieldFileItem", array_read_key("fileTable", $options, "Files"));
+		$this->specifier = new DBItemClassSpecifier(
+			"DBItemFieldFileItem",
+			DBItemClassSpecifier::$tablePrefix . array_read_key("fileTable", $options, "Files")
+		);
 		$this->image = array_read_key("image", $options, $this->image);
 	}
 
