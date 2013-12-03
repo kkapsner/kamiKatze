@@ -35,6 +35,7 @@ class DB extends PDO{
 	public static function getInstance(){
 		if (self::$instance === null){
 			self::$instance = new self();
+			self::$instance->exec("set names utf8");
 		}
 		return self::$instance;
 	}
