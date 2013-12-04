@@ -109,10 +109,13 @@ class DBItemField extends DBItemFriends{
 		if (!is_array($options)){
 			$options = array();
 		}
-		if (array_key_exists("class", $options)){
+		if (array_key_exists("customField", $options)){
+			$type = "custom";
+		}
+		elseif (array_key_exists("class", $options)){
 			$type = self::DB_ITEM;
 		}
-		if (array_key_exists("externalClass", $options)){
+		elseif (array_key_exists("externalClass", $options)){
 			$type = self::EXTERNAL_ITEM;
 		}
 		elseif (array_read_key("isArray", $options, false) || array_read_key("array", $options, false)){
@@ -129,6 +132,9 @@ class DBItemField extends DBItemFriends{
 		}
 		
 		switch ($type){
+			case "custom":
+				$item = new $options["customField"]($result["Field"]);
+				break;
 			case "array":
 				$item = new DBItemFieldArray($result["Field"]);
 				break;
@@ -255,7 +261,7 @@ class DBItemField extends DBItemFriends{
 				);
 			}
 		}
-		elseif ($this->default === null && !$this->null) {
+		elseif ($this->editable && $this->default === null && !$this->null) {
 			$errors[] = new DBItemValidationException(
 				"Field " . $this->displayName . " is reqired.",
 				DBItemValidationException::WRONG_MISSING,
