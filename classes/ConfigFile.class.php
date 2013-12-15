@@ -70,8 +70,19 @@ class ConfigFile{
 			$line = trim(preg_replace('/("(?:\\\\.|[^"])*"|\'(?:\\\\.|[^\'])*\')|#.*$/', "$1", $line));
 			
 			if (strlen($line) !== 0){
-				$openBracket = strrpos($line, "{");
-				$closeBracket = strrpos($line, "}");
+				$equalSign = strpos($line, "=");
+				$openBracket = strpos($line, "{");
+				$closeBracket = strpos($line, "}");
+				
+				if ($equalSign !== false){
+					if ($openBracket !== false && $equalSign < $openBracket){
+						$openBracket = false;
+					}
+					if ($closeBracket !== false && $equalSign < $closeBracket){
+						$closeBracket = false;
+					}
+				}
+				
 				
 				#take only smaller one
 				if ($openBracket !== false){
