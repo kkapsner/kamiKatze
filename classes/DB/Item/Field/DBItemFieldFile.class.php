@@ -114,8 +114,12 @@ class DBItemFieldFile extends DBItemField{
 	 * @param mixed[] $translatedData
 	 */
 	public function translateRequestData($data, &$translatedData){
-		if (array_key_exists($this->name, $data)){
-			$arrayPath = json_decode($data[$this->name]);
+		if (
+			array_key_exists($this->name, $data) &&
+			is_array($data[$this->name]) &&
+			array_key_exists("path", $data[$this->name])
+		){
+			$arrayPath = json_decode($data[$this->name]["path"]);
 			if (is_array($arrayPath) && ($info = $this->getFileInfo($arrayPath)) !== null && $info["error"] === 0){
 				$filename = str_replace("..", ".", $info["name"]);
 				if (file_exists(self::$fileFolder . $filename)){
@@ -137,6 +141,24 @@ class DBItemFieldFile extends DBItemField{
 					), true);
 					$translatedData[$this->name] = $fileItem;
 				}
+			}
+			elseif (
+				array_key_exists("fileID", $data[$this->name]) &&
+				array_key_exists("filename", $data[$this->name])
+			){
+//				try {
+					$fileItem = DBItem::getCLASS($this->specifier, $data[$this->name]["fileID"]);
+					$filename = $data[$this->name]["filename"];
+					if ($fileItem->filename !== $filename){
+						if ($filename){
+							$fileItem->rename($filename);
+						}
+						else {
+							$translatedData[$this->name] = null;
+						}
+					}
+//				}
+//				catch (Exception $e){}
 			}
 		}
 	}
