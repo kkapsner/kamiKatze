@@ -109,7 +109,10 @@ class DBItemFieldSet extends DBItemField{
 	 */
 	public function validate($values){
 		$errors = parent::validate($values);
-		if (array_key_exists($this->name, $values)){
+		if (
+			array_key_exists($this->name, $values) &&
+			array_key_exists("values", $values[$this->name])
+		){
 			$value = $values[$this->name]["values"];
 			if ($value !== null){
 				if (!is_array($value)){
