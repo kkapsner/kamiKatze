@@ -6,7 +6,7 @@
 ?><a href="<?php echo $this->url($this->URL);?>" target="_blank"><?php
 if (($args instanceof DBItemFieldFile) && $args->image){
 	echo '<img class="DBItemFieldFileItem ' . $this->html($args->name) . '"' .
-		' alt="' . $this->html(basename($this->path)) . '"' .
+		' alt="' . $this->html($this->filename) . '"' .
 		' src="' . $this->url($this->URL) . '">';
 }
 else {
