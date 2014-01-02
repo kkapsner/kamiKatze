@@ -28,7 +28,7 @@ class MarkdownParser{
 			if ($line === ""){
 				$emptyLineBetween = true;
 			}
-			elseif (preg_match("/^(?:=+|\\-+)$/", $line)){
+			elseif (preg_match("/^(?:=+|\\-+)\\s*$/", $line)){
 				if ($lastLine instanceof MarkdownLine){
 					if (!$emptyLineBetween){
 						if (!$lastLine->isHeading){
@@ -67,6 +67,9 @@ class MarkdownParser{
 					$lineNode->line = $matches[1];
 				}
 				else {
+					if (substr($line, -2) === "  "){
+						$lineNode->newLine = true;
+					}
 					$lineNode->line = trim($line);
 				}
 				

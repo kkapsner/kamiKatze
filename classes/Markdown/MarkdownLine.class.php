@@ -24,6 +24,12 @@ class MarkdownLine extends MarkdownElement{
 	public $newParagraph = false;
 	
 	/**
+	 * if the next element should start in a new line
+	 * @var bool
+	 */
+	public $newLine = false;
+	
+	/**
 	 * if the line is a heading
 	 * @var bool
 	 */

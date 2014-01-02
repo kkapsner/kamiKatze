@@ -3,7 +3,7 @@
 
 if ($this->isHeading){
 	echo "<h" . $this->headingLevel . ">" .
-		$this->html($this->line) . 
+		$this->view("html.line", false, $args) . 
 		"</h" . $this->headingLevel . ">\n";
 }
 elseif ($this->isList){
@@ -24,7 +24,7 @@ elseif ($this->isList){
 				break;
 		}
 	}
-	echo "<li>" . $this->html($this->line) . "</li>\n";
+	echo "<li>" . $this->view("html.line", false, $args) . "</li>\n";
 	
 	if (
 		!$this->next instanceof MarkdownLine ||
@@ -48,12 +48,12 @@ else {
 			if ($this->newParagraph){
 				echo "<p>\n";
 			}
-			elseif (!$this->prev->isList){
+			elseif ($this->prev->newLine){
 				echo "<br>\n";
 			}
 		}
 	}
-	echo $this->html($this->line);
+	echo $this->view("html.line", false, $args);
 	echo "\n";
 }
 ?>
