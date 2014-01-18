@@ -23,6 +23,12 @@ class CalendarProperty extends ViewableImplementation implements IteratorAggrega
 	public $value;
 	
 	/**
+	 * Flag if the value is raw and has to be outputted as is
+	 * @var bool
+	 */
+	public $rawValue = false;
+	
+	/**
 	 * Constructor for CalendarProperty
 	 * @param String $name The name of the property
 	 * @param mixed $value The initial value of the property

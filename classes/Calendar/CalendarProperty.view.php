@@ -22,16 +22,18 @@ foreach ($this as $name => $value){
 }
 
 $value = $this->value;
-if (
-	(
-	strpos($value, ",") !== false ||
-	strpos($value, ":") !== false ||
-	strpos($value, ";") !== false
-	)
-	&&
-	strpos($value, '"') === false
-){
-	$value = '"' . $value . '"';
+if (!$this->rawValue){
+	if (
+		(
+		strpos($value, ",") !== false ||
+		strpos($value, ":") !== false ||
+		strpos($value, ";") !== false
+		)
+		&&
+		strpos($value, '"') === false
+	){
+		$value = '"' . $value . '"';
+	}
 }
 
 echo ":" . $value . "\r\n";
