@@ -55,9 +55,9 @@ class Autoload {
 	 * @return bool if the path was added
 	 */
 	public function addPath($path){
-		$path = realpath($path);
+		$path = realpath($path) . DIRECTORY_SEPARATOR;
 		if ($path !== false && is_dir($path) && !in_array($path, $this->searchPath)){
-			$this->searchPath[] = $path . DIRECTORY_SEPARATOR;
+			$this->searchPath[] = $path;
 			return true;
 		}
 		else {
