@@ -54,11 +54,11 @@ class ConfigFile{
 		}
 		else {
 			$path = realpath($path) . DIRECTORY_SEPARATOR . $this->filename;
-			if (!is_file($file)){
+			if (!is_file($path)){
 				throw new ConfigFileNotFoundException("Config File '" . $this->filename . "' not found.");
 			}
 			else {
-				$content = file($file, FILE_IGNORE_NEW_LINES);
+				$content = file($path, FILE_IGNORE_NEW_LINES);
 			}
 		}
 			
