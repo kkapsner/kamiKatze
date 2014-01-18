@@ -10,6 +10,13 @@
  */
 class ConfigFile{
 	/**
+	 * Flag indicating if the value should be parsed (true)
+	 *  or taken as raw string (false).
+	 * @var bool
+	 */
+	public $valueParsing = true;
+	
+	/**
 	 * Storage for the found variables.
 	 * @var mixed[]
 	 */
@@ -184,8 +191,13 @@ class ConfigFile{
 	 * @todo avoid eval
 	 */
 	private function parseValue($value){
-		$value = preg_replace_callback('/<((?:[^<>]|\\.)*)>|{((?:[^{}]|\\.)*)}/', array($this, "replaceVariableInValue"), $value);
-		return eval("return " . $value . ";");
+		if ($this->valueParsing){
+			$value = preg_replace_callback('/<((?:[^<>]|\\.)*)>|{((?:[^{}]|\\.)*)}/', array($this, "replaceVariableInValue"), $value);
+			return eval("return " . $value . ";");
+		}
+		else {
+			return $value;
+		}
 	}
 
 	/**
