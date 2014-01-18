@@ -21,5 +21,18 @@ foreach ($this as $name => $value){
 	echo ";" . strToUpper($name) . "=" . $value;
 }
 
-echo ":" . $this->value . "\r\n";
+$value = $this->value;
+if (
+	(
+	strpos($value, ",") !== false ||
+	strpos($value, ":") !== false ||
+	strpos($value, ";") !== false
+	)
+	&&
+	strpos($value, '"') === false
+){
+	$value = '"' . $value . '"';
+}
+
+echo ":" . $value . "\r\n";
 ?>
