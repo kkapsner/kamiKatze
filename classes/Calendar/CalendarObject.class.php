@@ -18,7 +18,7 @@ class CalendarObject extends ViewableImplementation implements Countable, Iterat
 	private static $elementDefinition = array(
 		"VCALENDAR" => array(
 			"properties" => array(
-				"required" => array("prodid", "version"),
+				"required" => array("version", "prodid"),
 				"optional" => array(
 					"once" => array("calscale", "method"),
 					"onceExclusive" => array(),
