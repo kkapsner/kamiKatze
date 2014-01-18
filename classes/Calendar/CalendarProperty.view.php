@@ -23,17 +23,7 @@ foreach ($this as $name => $value){
 
 $value = $this->value;
 if (!$this->rawValue){
-	if (
-		(
-		strpos($value, ",") !== false ||
-		strpos($value, ":") !== false ||
-		strpos($value, ";") !== false
-		)
-		&&
-		strpos($value, '"') === false
-	){
-		$value = '"' . $value . '"';
-	}
+	$value = preg_replace('/[,:;"]/', '\\\\$0', $value);
 }
 
 echo ":" . $value . "\r\n";
