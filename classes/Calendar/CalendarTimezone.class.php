@@ -32,6 +32,7 @@ class CalendarTimezone extends CalendarObject{
 		$daylight->tzname = "CEST";
 		$daylight->dtstart = "19700329T020000";
 		$daylight->rrule = "FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3";
+		$daylight->rrule->rawValue = true;
 		
 		$standard = $timezone->addChild("STANDARD");
 		$standard->tzoffsetfrom = "+0200";
@@ -39,6 +40,7 @@ class CalendarTimezone extends CalendarObject{
 		$standard->tzname = "CET";
 		$standard->dtstart = "19701025T030000";
 		$standard->rrule = "FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10";
+		$standard->rrule->rawValue = true;
 		
 		$cal->addChild($timezone);
 		
@@ -50,12 +52,14 @@ class CalendarTimezone extends CalendarObject{
 		$daylight->tzoffsetto = "+0200";
 		$daylight->dtstart = "16010101T020000";
 		$daylight->rrule = "FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3";
+		$daylight->rrule->rawValue = true;
 		
 		$standard = $timezone->addChild("STANDARD");
 		$standard->tzoffsetfrom = "+0200";
 		$standard->tzoffsetto = "+0100";
 		$standard->dtstart = "16010101T030000";
 		$standard->rrule = "FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10";
+		$standard->rrule->rawValue = true;
 		
 		$cal->addChild($timezone);
 	}
