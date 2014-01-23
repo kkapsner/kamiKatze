@@ -23,7 +23,7 @@ foreach ($this as $name => $value){
 
 $value = $this->value;
 if (!$this->rawValue){
-	$value = preg_replace('/[,:;"]/', '\\\\$0', $value);
+	$value = preg_replace('/[,;]/', '\\\\$0', $value);
 }
 
 echo ":" . $value . "\r\n";
