@@ -50,13 +50,20 @@ class DB extends PDO{
 	 */
 	public function __construct($dsn = null, $username = null, $password = null, array $driverOptions = null){
 		if (self::$defaultConfig === null){
-			self::$defaultConfig = new ConfigFile("dbConfig.ini");
-			self::$defaultConfig->load();
+			try {
+				self::$defaultConfig = new ConfigFile("dbConfig.ini");
+				self::$defaultConfig->load();
+			}
+			catch (Exception $e){
+				self::$defaultConfig = null;
+			}
 		}
 		
-		foreach (array("dsn", "username", "password", "driverOptions") as $name){
-			if (${$name} === null){
-				${$name} = self::$defaultConfig->{$name};
+		if (self::$defaultConfig !== null){
+			foreach (array("dsn", "username", "password", "driverOptions") as $name){
+				if (${$name} === null){
+					${$name} = self::$defaultConfig->{$name};
+				}
 			}
 		}
 		
