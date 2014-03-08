@@ -49,7 +49,24 @@ class DBItemFieldCollection extends Collection{
 		}
 		return $errors;
 	}
-
+	
+	/**
+	 * Searches in the collection for a field by its name. Returns the found
+	 * field or NULL if no corresponding field is found.
+	 * 
+	 * @param String $name the field name
+	 * @return null|FBItemField
+	 */
+	public function getFieldByName($name){
+		
+		foreach ($this as $field){
+			/* @var $field DBItemField */
+			if ($field->name === $name){
+				return $field;
+			}
+		}
+		return null;
+	}
 }
 
 ?>
