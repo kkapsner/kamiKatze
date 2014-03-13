@@ -49,7 +49,7 @@ class BBCodeTagText extends BBCodeTag{
 			htmlentities(
 				trim(
 					$text,
-					"\n\r"
+					"\t "//"\n\r"
 				),
 				ENT_QUOTES,
 				$this->getCharset()
