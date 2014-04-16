@@ -45,12 +45,17 @@ class BBCodeTagText extends BBCodeTag{
 	 * @return string
 	 */
 	public function encodeHTML($text){
+		$prev = $this->previousNode();
+		$next = $this->nextNode();
+		if ($prev && $prev->type === "block"){
+			$text = preg_replace("/^\\s+/", "", $text);
+		}
+		if ($next && $next->type === "block"){
+			$text = preg_replace("/\\s+$/", "", $text);
+		}
 		return nl2br(
 			htmlentities(
-				trim(
-					$text,
-					"\t "//"\n\r"
-				),
+				$text,
 				ENT_QUOTES,
 				$this->getCharset()
 			)
