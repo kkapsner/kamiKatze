@@ -36,6 +36,12 @@ class MarkdownLine extends MarkdownElement{
 	public $isHeading = false;
 	
 	/**
+	 * base header level that should be added to the header level
+	 * @var int
+	 */
+	public static $baseHeaderLevel = 0;
+	
+	/**
 	 * level of the heading if the line is a heading
 	 * @var int
 	 */

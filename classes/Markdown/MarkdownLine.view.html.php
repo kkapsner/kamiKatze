@@ -2,9 +2,9 @@
 /*@var $this MarkdownLine*/
 
 if ($this->isHeading){
-	echo "<h" . $this->headingLevel . ">" .
+	echo "<h" . ($this->headingLevel + MarkdownLine::$baseHeaderLevel) . ">" .
 		$this->view("html.line", false, $args) . 
-		"</h" . $this->headingLevel . ">\n";
+		"</h" . ($this->headingLevel + MarkdownLine::$baseHeaderLevel) . ">\n";
 }
 elseif ($this->isList){
 	if (
