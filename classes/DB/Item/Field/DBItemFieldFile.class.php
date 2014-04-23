@@ -30,7 +30,7 @@ class DBItemFieldFile extends DBItemField{
 	 * The class specifier for the file item.
 	 * @var DBItemClassSpecifier
 	 */
-	protected $specifier;
+	public $specifier;
 	/**
 	 * {@inheritdoc}
 	 * 
