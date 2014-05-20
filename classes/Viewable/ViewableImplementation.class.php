@@ -21,32 +21,8 @@ class ViewableImplementation extends EventEmitterImplementation implements Viewa
 	 * @return string|boolean
 	 */
 	public function viewByName($name, $context = false, $output = false, $args = false){
-		$al = Autoload::getInstance();
-		$path = $al->getLoadingPoint($name);
-		if ($path === false){
-			$reflection = new ReflectionClass($name);
-			$path = $reflection->getFileName();
-		}
-		$contextChain = explode("|", $context);
-		foreach ($contextChain as $currentContext){
-			$file = dirname($path) . DIRECTORY_SEPARATOR .
-				$name . ".view" .
-				($currentContext? "." . $currentContext: "") .
-				".php";
-			if (is_file($file)){
-				break;
-			}
-		}
-		if (!is_file($file)){
-			$parent = get_parent_class($name);
-			if ($parent !== false){
-				return $this->viewByName($parent, $context, $output, $args);
-			}
-			else {
-				return false;
-			}
-		}
-		else {
+		$file = $this->getViewFile($name, $context);
+		if ($file){
 			if (!$output){
 				ob_start();
 			}
@@ -60,6 +36,35 @@ class ViewableImplementation extends EventEmitterImplementation implements Viewa
 				return true;
 			}
 		}
+		else {
+			return false;
+		}
+	}
+	
+	protected function getViewFile($name, $context){
+		$al = Autoload::getInstance();
+		$contextChain = explode("|", $context? $context: "");
+		foreach ($contextChain as $currentContext){
+			$currentName = $name;
+			while ($currentName){
+				$path = $al->getLoadingPoint($currentName);
+				if ($path === false){
+					$reflection = new ReflectionClass($currentName);
+					$path = $reflection->getFileName();
+				}
+				$file = dirname($path) . DIRECTORY_SEPARATOR .
+					$currentName . ".view" .
+					($currentContext? "." . $currentContext: "") .
+					".php";
+				if (is_file($file)){
+					return $file;
+				}
+				else {
+					$currentName = get_parent_class($currentName);
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
