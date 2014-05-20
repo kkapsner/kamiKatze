@@ -12,7 +12,8 @@
 class ViewableImplementation extends EventEmitterImplementation implements Viewable{
 
 	/**
-	 * Similar to Viewable::view() but ability to provide a class name to specify the view which should be used.
+	 * Similar to Viewable::view() but ability to provide a class name to
+	 *  specify the view which should be used.
 	 *
 	 * @param string $name class name to be used
 	 * @param string $context
@@ -41,6 +42,17 @@ class ViewableImplementation extends EventEmitterImplementation implements Viewa
 		}
 	}
 	
+	/**
+	 * Gets the path to the view file specified by the class name and the
+	 * context. The context can be pipe separated to indicate fallbacks. First
+	 * all parent classes of a class are checked before the next fallback is
+	 * used.
+	 * 
+	 * @param string $name The class name
+	 * @param string $context The context of the view
+	 * @return string|boolean Returns the path to the right view file on success
+	 *	or false on failure.
+	 */
 	protected function getViewFile($name, $context){
 		$al = Autoload::getInstance();
 		$contextChain = explode("|", $context? $context: "");
