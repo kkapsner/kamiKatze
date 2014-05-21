@@ -341,8 +341,7 @@ class Email{
 				$this->to->getFoldedValue(),
 				EmailEncoder::escapeHeaderValue($this->subject->getValue(), 9, $this->charset),
 				$this->getBody(),
-				$this->getHead(),
-				""
+				$this->getHead()
 			);
 		}
 		else {
