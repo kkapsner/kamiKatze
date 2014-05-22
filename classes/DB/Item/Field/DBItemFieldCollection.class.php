@@ -55,7 +55,7 @@ class DBItemFieldCollection extends Collection{
 	 * field or NULL if no corresponding field is found.
 	 * 
 	 * @param String $name the field name
-	 * @return null|FBItemField
+	 * @return null|DBItemField
 	 */
 	public function getFieldByName($name){
 		
