@@ -9,7 +9,7 @@
  * @author Korbinian Kapsner
  * @package DB\Item\Field
  */
-class DBItemFieldText extends DBItemField{
+class DBItemFieldText extends DBItemFieldNative{
 	
 }
 

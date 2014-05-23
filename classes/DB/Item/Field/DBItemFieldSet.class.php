@@ -9,7 +9,7 @@
  * @author Korbinian Kapsner
  * @package DB\Item\Field
  */
-class DBItemFieldSet extends DBItemField{
+class DBItemFieldSet extends DBItemFieldNative{
 
 	/**
 	 * {@inheritdoc}
@@ -137,6 +137,25 @@ class DBItemFieldSet extends DBItemField{
 		}
 		return $errors;
 	}
+
+	/**
+	 * {@inheritdoc}
+	 * 
+	 * @param mixed $value
+	 * @return string
+	 */
+	public function getWhere($value){
+		if (!(count($value))){
+			return "1 = 1";
+		}
+		$db = DB::getInstance();
+		$name = $db->quote($this->name, DB::PARAM_IDENT);
+		foreach ($value as &$v){
+			$v = "FIND_IN_SET(" . $db->quote($v) . ", " . $name . ") > 0";
+		}
+		return implode(" AND ", $v);
+	}
+
 }
 
 ?>

@@ -9,7 +9,7 @@
  * @author Korbinian Kapsner
  * @package DB\Item\Field
  */
-class DBItemFieldDBItem extends DBItemField{
+class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearchable{
 	const ONE_TO_ONE = 0;
 	const ONE_TO_N   = 1;
 	const N_TO_ONE   = 2;
@@ -390,6 +390,35 @@ class DBItemFieldDBItem extends DBItemField{
 				else {
 					throw new InvalidArgumentException("Property " . $this->name . " is not a DBItemCollection.");
 				}
+				break;
+		}
+	}
+
+	/**
+	 * {@inheritdoc}
+	 * 
+	 * @param DBItem $value
+	 */
+	public function getWhere($value){
+		$db = DB::getInstance();
+		$name = $db->quote($this->name, DB::PARAM_IDENT);
+		switch ($this->correlation){
+			case self::ONE_TO_ONE: case self::N_TO_ONE:
+				return $name . " = " . $db->quote($value->DBid);
+			case self::ONE_TO_N:
+			case self::N_TO_N:
+				throw new Exception("Not implemented");
+				return DBItem::getByConditionCLASS(
+					$this->class,
+					DB::getInstance()->quote($this->correlationName, DB::PARAM_IDENT) . " = " . $item->DBid
+				);
+				break;
+				return self::getByLinkingTable(
+					$this->class,
+					$this->name,
+					$this->correlationName,
+					$item->DBid
+				);
 				break;
 		}
 	}

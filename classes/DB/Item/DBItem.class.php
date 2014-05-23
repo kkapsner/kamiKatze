@@ -105,6 +105,21 @@ abstract class DBItem extends DBItemFriends{
 
 		return self::$instances[$specifiedName][$id];
 	}
+	
+	public static function getByValueCLASS($classSpecifier, $name, $value){
+		$classSpecifier = DBItemClassSpecifier::make($classSpecifier);
+		
+		
+		$field = DBItemField::parseClass($classSpecifier)->getFieldByName($name);
+		
+		if ($field instanceof DBItemFieldSearchable){
+			return self::getByConditionCLASS($classSpecifier, $field->getWhere($value));
+		}
+		else {
+			throw new Exception($name . " field can not be searched.");
+		}
+		
+	}
 
 	/**
 	 * Returns items of the $class which forfill the $where condition. 

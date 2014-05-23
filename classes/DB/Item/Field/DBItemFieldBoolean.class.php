@@ -9,7 +9,7 @@
  * @author Korbinian Kapsner
  * @package DB\Item\Field
  */
-class DBItemFieldBoolean extends DBItemField{
+class DBItemFieldBoolean extends DBItemFieldNative{
 
 	/**
 	 * {@inheritdoc}

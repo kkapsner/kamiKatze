@@ -8,7 +8,7 @@
  *
  * @author Korbinian Kapsner
  */
-class DBItemFieldLink extends DBItemField{
+class DBItemFieldLink extends DBItemFieldNative{
 	/**
 	 * Prefix for the link URL. In most cases this is something like "http://"
 	 * @var string

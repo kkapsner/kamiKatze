@@ -171,7 +171,7 @@ class DBItemField extends DBItemFriends{
 					break;
 				}
 			default:
-				$item = new self($result["Field"]);
+				$item = new DBItemFieldNative($result["Field"]);
 		}
 		
 		
