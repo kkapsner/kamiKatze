@@ -6,85 +6,167 @@
 /**
  * Reads CSV files. Accessing data lines is over the ArrayAccess interface.
  *
+ * @link http://tools.ietf.org/html/rfc4180
  * @author Korbinian Kapsner
  * @package CSV
  */
-class CSVReader implements ArrayAccess{
+class CSVReader{
 	/**
-	 * The used delimiter (default ",")
+	 * The separator between two cells.
+	 * @var char
+	 */
+	public $separator = ",";
+
+	/**
+	 * The enclose to enclose cells.
 	 * @var string
 	 */
-	public $delimiter = ",";
-	/**
-	 * The used enclosure (default '"')
-	 * @var string
-	 */
-	public $enclosure = '"';
-	/**
-	 * The used escape (default '\\')
-	 * @var string
-	 */
-	public $escape = '\\';
+	public $enclose = "\"";
 
 	/**
-	 * Constructor for CSVReader
-	 *
-	 * @todo implement
+	 * Parses CSV data to an array.
+	 * 
+	 * @param type $data
 	 */
-	public function __construct(){
+	public function parse($data, $headerLine = false){
+		$lines = $this->splitLines($data);
 		
+		if ($headerLine){
+			$columnKeys = $this->parseLine(array_shift($lines));
+		}
+		else {
+			$columnKeys = null;
+		}
+		$rows = array();
+		foreach ($lines as $line){
+			if (trim($line)){
+				$rows[] = $this->parseLine($line, $columnKeys);
+			}
+		}
+		return $rows;
 	}
-
+	
 	/**
-	 * Destructor for CSVReader
-	 *
-	 * @todo implement
+	 * splits the data in data lines.
+	 * @param string $data
+	 * @return array
 	 */
-	public function __destruct(){
+	protected function splitLines($data){$lines = array();
 		
+		$currentLine = "";
+		$inStr = false;
+		$strlen = strlen($data);
+		for ($i = 0; $i < $strlen; $i++){
+			$c = $data{$i};
+			switch ($c){
+				case $this->enclose:
+					if ($inStr){
+						if ($i + 1 < $strlen && $data{$i + 1} === $this->enclose){
+							$i += 1;
+							$currentLine .= $this->enclose. $this->enclose;
+						}
+						else {
+							$inStr = false;
+							$currentLine .= $this->enclose;
+						}
+					}
+					else {
+						$inStr = true;
+						$currentLine .= $this->enclose;
+					}
+					break;
+				case "\r":
+					if ($i + 1 < $strlen && $data{$i + 1} === "\n"){
+						$i++;
+						$c .= "\n";
+					}
+				case "\n":
+					if ($inStr){
+						$currentLine .= $c;
+					}
+					else {
+						array_push($lines, $currentLine);
+						$currentLine = "";
+					}
+					break;
+				case '\\':
+					if ($i + 1 < $strlen){
+						$i++;
+						$c .= $data{$i};
+						$currentLine .= $c;
+					}
+					break;
+				default:
+					$currentLine .= $c;
+			}
+		}
+		array_push($lines, $currentLine);
+		
+		return $lines;
 	}
-
+	
 	/**
-	 * {@inheritdoc}
-	 *
-	 * @todo implement
-	 * @param type $offset
+	 * splits a data in cells
+	 * @param string $line
+	 * @param null|array $columnKeys optional column keys that will be used as
+	 *	keys in the associative array.
+	 * @return array
 	 */
-	public function offsetExists($offset){
-		
-	}
+	protected function parseLine($line, $columnKeys = null){
+		$row = array();
+			
+		$strlen = strlen($line);
+		$currentCell = "";
+		$columnIdx = 0;
+		for ($i = 0; $i < $strlen; $i++){
 
-	/**
-	 * {@inheritdoc}
-	 *
-	 * @todo implement
-	 * @param type $offset
-	 */
-	public function offsetGet($offset){
+			$c = $line{$i};
+			switch ($c){
+				case $this->enclose:
+					if ($inStr){
+						if ($i + 1 < $strlen && $data{$i + 1} === $this->enclose){
+							$i += 1;
+							$currentCell .= $this->enclose;
+						}
+						else {
+							$inStr = false;
+						}
+					}
+					else {
+						$inStr = true;
+					}
+					break;
+				case '\\':
+					if ($i + 1 < $strlen){
+						$i++;
+						$c .= $data{$i};
+						$currentCell .= $c;
+					}
+					break;
+				case $this->separator:
+					if ($columnKeys && $columnKeys[$columnIdx]){
+						$row[$columnKeys[$columnIdx]] = $currentCell;
+					}
+					else {
+						$row[$columnIdx] = $currentCell;
+					}
+					$columnIdx += 1;
+					$currentCell = "";
+					break;
+				default:
+					$currentCell .= $c;
+			}
+		}
 		
-	}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * @todo implement
-	 * @param type $offset
-	 * @param type $value
-	 */
-	public function offsetSet($offset, $value){
+		if ($columnKeys){
+			$row[$columnKeys[$columnIdx]] = $currentCell;
+		}
+		else {
+			$row[$columnIdx] = $currentCell;
+		}
 		
+		return $row;
 	}
-
-	/**
-	 * {@inheritdoc}
-	 *
-	 * @todo implement
-	 * @param type $offset
-	 */
-	public function offsetUnset($offset){
-		
-	}
-
 }
 
 ?>
