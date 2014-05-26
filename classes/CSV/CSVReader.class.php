@@ -22,6 +22,12 @@ class CSVReader{
 	 * @var string
 	 */
 	public $enclose = "\"";
+	
+	/**
+	 * If empty lines should be skipped.
+	 * @var boolen
+	 */
+	public $skipEmptyLines = true;
 
 	/**
 	 * Parses CSV data to an array.
@@ -30,7 +36,6 @@ class CSVReader{
 	 */
 	public function parse($data, $headerLine = false){
 		$lines = $this->splitLines($data);
-		
 		if ($headerLine){
 			$columnKeys = $this->parseLine(array_shift($lines));
 		}
@@ -51,8 +56,9 @@ class CSVReader{
 	 * @param string $data
 	 * @return array
 	 */
-	protected function splitLines($data){$lines = array();
+	protected function splitLines($data){
 		
+		$lines = array();
 		$currentLine = "";
 		$inStr = false;
 		$strlen = strlen($data);
@@ -85,7 +91,15 @@ class CSVReader{
 						$currentLine .= $c;
 					}
 					else {
-						array_push($lines, $currentLine);
+						if (
+							!$this->skipEmptyLines ||
+							!(
+								strlen($currentLine) === 0 ||
+								preg_match("/^(?:" . preg_quote($this->separator, "/") . ")*$/", $currentLine)
+							)
+						){
+							array_push($lines, $currentLine);
+						}
 						$currentLine = "";
 					}
 					break;
@@ -100,7 +114,15 @@ class CSVReader{
 					$currentLine .= $c;
 			}
 		}
-		array_push($lines, $currentLine);
+		if (
+			!$this->skipEmptyLines ||
+			(
+				strlen($currentLine) !== 0 &&
+				!preg_match("/(?:" . preg_quote($this->separator, "/") . ")*/", $currentLine)
+			)
+		){
+			array_push($lines, $currentLine);
+		}
 		
 		return $lines;
 	}
