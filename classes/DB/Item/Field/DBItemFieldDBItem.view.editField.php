@@ -22,38 +22,39 @@ else {
 
 switch ($this->correlation){
 	case DBItemFieldDBItem::ONE_TO_ONE: case DBItemFieldDBItem::N_TO_ONE:
-							?>
-			<select name="<?php echo $postName;?>">
-				<option></option><?php
-		$value = $args->{$this->name};
-		foreach ($availableItems as $hoItem){
-			?>
-				<option value="<?php
-			echo $hoItem->DBid;
-			if ($value === $hoItem){ echo '" selected="selected';}
-		?>"><?php $hoItem->view("singleLine", true)?></option>
-					<?php
-		}
-		?>
-			</select><?php
+		$this->view(
+			"editField.select",
+			true,
+			array(
+				"postName" => $postName,
+				"availableItems" => $availableItems,
+				"value" => $args->{$this->name}
+			)
+		);
 		break;
-	case DBItemFieldDBItem::ONE_TO_N: case DBItemFieldDBItem::N_TO_N:
-		?>
-			<input type="hidden" name="<?php echo $postName;?>[present]" value="1">
-			<select name="<?php echo $postName;?>[values][]" multiple="multiple"><?php
-		$hmItems = $args->{$this->name};
-		foreach ($availableItems as $hmItem){
-			echo "\n\t\t\t\t" .
-				'<option value="' . $hmItem->DBid . '"';
-			if ($hmItems->contains($hmItem, true)){
-				echo ' selected="selected"';
-			}
-			echo '>';
-			$hmItem->view("singleLine", true);
-			echo "</option>\n";
+	case DBItemFieldDBItem::N_TO_N:
+		if ($this->canHaveMultipleLinks){
+			$this->view(
+				"editField.multipleLinks",
+				true,
+				array(
+					"postName" => $postName,
+					"availableItems" => $availableItems,
+					"value" => $args->{$this->name}
+				)
+			);
+			break;
 		}
-		?>
-			</select><?php
+	case DBItemFieldDBItem::ONE_TO_N:
+		$this->view(
+			"editField.multiSelect",
+			true,
+			array(
+				"postName" => $postName,
+				"availableItems" => $availableItems,
+				"value" => $args->{$this->name}
+			)
+		);
 		break;
 }
 ?>

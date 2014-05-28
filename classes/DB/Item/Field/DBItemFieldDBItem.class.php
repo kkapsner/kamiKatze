@@ -104,10 +104,15 @@ class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearchable{
 	 */
 	public $correlationName = null;
 	/**
-	 * If a change in this field can overwrite this field in an other entry
+	 * If a change in this field can overwrite this field in an other item.
 	 * @var boolean
 	 */
 	public $canOverwriteOthers = false;
+	/**
+	 * If the NtoN correlation can have multiple links between two items.
+	 * @var boolean
+	 */
+	public $canHaveMultipleLinks = false;
 	
 	/**
 	 * {@inheritdoc}
@@ -153,6 +158,7 @@ class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearchable{
 
 		$this->class = array_read_key("class", $options, null);
 		$this->canOverwriteOthers = array_read_key("canOverwriteOthers", $options, $this->canOverwriteOthers);
+		$this->canHaveMultipleLinks = array_read_key("canHaveMultipleLinks", $options, $this->canHaveMultipleLinks);
 
 		// disable default options...
 		$this->searchable = false;

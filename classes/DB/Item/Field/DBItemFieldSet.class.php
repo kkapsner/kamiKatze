@@ -111,6 +111,7 @@ class DBItemFieldSet extends DBItemFieldNative{
 		$errors = parent::validate($values);
 		if (
 			array_key_exists($this->name, $values) &&
+			is_array($values[$this->name]) &&
 			array_key_exists("values", $values[$this->name])
 		){
 			$value = $values[$this->name]["values"];
