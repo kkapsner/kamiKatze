@@ -279,11 +279,19 @@ class Collection extends ViewableHTML implements ArrayAccess, IteratorAggregate,
 	public function contains($needle, $strict = false){
 		return in_array($needle, $this->content, $strict);
 	}
+	
+	/**
+	 * Creates an array out of the collection
+	 * @return array
+	 */
+	public function toArray(){
+		return $this->content;
+	}
 
 	/**
 	 * Creates a Collection out of an array.
 	 * @param array $arr The array containing
-	 * @return DBItemCollection The created collection.
+	 * @return Collection The created collection.
 	 * @throws InvalidArgumentException
 	 */
 	public static function fromArray(array $arr){
