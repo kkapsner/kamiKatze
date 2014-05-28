@@ -116,11 +116,11 @@ class CSVReader{
 		}
 		if (
 			!$this->skipEmptyLines ||
-			(
-				strlen($currentLine) !== 0 &&
-				!preg_match("/(?:" . preg_quote($this->separator, "/") . ")*/", $currentLine)
+			!(
+				strlen($currentLine) === 0 ||
+				preg_match("/^(?:" . preg_quote($this->separator, "/") . ")*$/", $currentLine)
 			)
-		){
+		){var_dump($currentLine);
 			array_push($lines, $currentLine);
 		}
 		
@@ -140,13 +140,14 @@ class CSVReader{
 		$strlen = strlen($line);
 		$currentCell = "";
 		$columnIdx = 0;
+		$inStr = false;
 		for ($i = 0; $i < $strlen; $i++){
 
 			$c = $line{$i};
 			switch ($c){
 				case $this->enclose:
 					if ($inStr){
-						if ($i + 1 < $strlen && $data{$i + 1} === $this->enclose){
+						if ($i + 1 < $strlen && $line{$i + 1} === $this->enclose){
 							$i += 1;
 							$currentCell .= $this->enclose;
 						}
@@ -161,20 +162,22 @@ class CSVReader{
 				case '\\':
 					if ($i + 1 < $strlen){
 						$i++;
-						$c .= $data{$i};
+						$c .= $line{$i};
 						$currentCell .= $c;
 					}
 					break;
 				case $this->separator:
-					if ($columnKeys && $columnKeys[$columnIdx]){
-						$row[$columnKeys[$columnIdx]] = $currentCell;
+						if (!$inStr){
+						if ($columnKeys && array_key_exists($columnIdx, $columnKeys) && $columnKeys[$columnIdx]){
+							$row[$columnKeys[$columnIdx]] = $currentCell;
+						}
+						else {
+							$row[$columnIdx] = $currentCell;
+						}
+						$columnIdx += 1;
+						$currentCell = "";
+						break;
 					}
-					else {
-						$row[$columnIdx] = $currentCell;
-					}
-					$columnIdx += 1;
-					$currentCell = "";
-					break;
 				default:
 					$currentCell .= $c;
 			}
