@@ -58,7 +58,6 @@ class CSSParser{
 	}
 	
 	public function parse($content){
-		$content = $this->resolveConstructs($content);
 		$content = $this->parseConstants($content);
 		
 		$content = preg_replace_callback('/@parser\s+include\s*\(\s*(' .
@@ -150,14 +149,6 @@ class CSSParser{
 				break;
 		}
 		return "";
-	}
-	
-	private function resolveConstructs($content){
-		return $content;
-	}
-	
-	private function parseForRegExp($match){
-		
 	}
 	
 	private function resolveScope($content){
