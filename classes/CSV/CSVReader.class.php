@@ -120,7 +120,7 @@ class CSVReader{
 				strlen($currentLine) === 0 ||
 				preg_match("/^(?:" . preg_quote($this->separator, "/") . ")*$/", $currentLine)
 			)
-		){var_dump($currentLine);
+		){
 			array_push($lines, $currentLine);
 		}
 		
