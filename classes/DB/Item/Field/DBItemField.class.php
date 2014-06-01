@@ -118,6 +118,9 @@ class DBItemField extends DBItemFriends{
 		elseif (array_key_exists("externalClass", $options)){
 			$type = self::EXTERNAL_ITEM;
 		}
+		elseif (array_read_key("computedValue", $options, false)){
+			$type = "computedValue";
+		}
 		elseif (array_read_key("isArray", $options, false) || array_read_key("array", $options, false)){
 			$type = "array";
 		}
@@ -164,6 +167,9 @@ class DBItemField extends DBItemFriends{
 				break;
 			case self::EXTERNAL_ITEM:
 				$item = new DBItemFieldExternalItem($result["Field"]);
+				break;
+			case "computedValue":
+				$item = new DBItemFieldComputedValue($result["Field"]);
 				break;
 			case "tinyint":
 				if ($typeExtension == 1){
