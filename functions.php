@@ -42,4 +42,21 @@ function createHiddenFields($got, $name = ""){
 	}
 	return $ret;
 }
+
+/**
+ * Includes a file and returns the outputed string.
+ * 
+ * @param string $filename
+ * @return boolean|string the output or false on failure.
+ */
+function include_to_string($filename){
+    if (is_file($filename)) {
+        ob_start();
+        include($filename);
+        $contents = ob_get_contents();
+        ob_end_clean();
+        return $contents;
+    }
+    return false;
+}
 ?>
