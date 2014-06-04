@@ -19,7 +19,7 @@ class ViewableImplementation extends EventEmitterImplementation implements Viewa
 	 * @param string $context
 	 * @param boolean $output
 	 * @param mixed $args
-	 * @return string|boolean
+	 * @return string|mixed
 	 */
 	public function viewByName($name, $context = false, $output = false, $args = false){
 		$file = $this->getViewFile($name, $context);
@@ -27,14 +27,14 @@ class ViewableImplementation extends EventEmitterImplementation implements Viewa
 			if (!$output){
 				ob_start();
 			}
-			include($file);
+			$ret = include($file);
 			if (!$output){
 				$contents = ob_get_contents();
 				ob_end_clean();
 				return $contents;
 			}
 			else { 
-				return true;
+				return $ret;
 			}
 		}
 		else {
