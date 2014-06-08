@@ -330,7 +330,7 @@ abstract class DBItem extends DBItemFriends{
 	 * @param DBItemFieldCollection $collection DO NOT USE - only for recursive call with the extenders
 	 * @return DBItemField The field option to the given $name. If the $name is not found null is returned.
 	 */
-	private function getField($name, $searchAllCollections = false, $collection = null){
+	public function getField($name, $searchAllCollections = false, $collection = null){
 		if ($collection === null){
 			$collection = DBItemField::parseClass($this->specifier);
 		}
