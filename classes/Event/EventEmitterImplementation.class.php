@@ -19,22 +19,30 @@ class EventEmitterImplementation implements EventEmitter{
 	/**
 	 * {@inheritdoc}
 	 * 
-	 * @param Event $event
+	 * @param Event|String $event
 	 */
-	public function emit(Event $event){
-		$eventType = $event->getType();
+	public function emit($event){
+		if (!($event instanceof Event)){
+			$event = new Event($event, $this);
+		}
 		$event->setCurrentTarget($this);
-		if (array_key_exists($eventType, $this->events)){
-			foreach ($this->events[$eventType] as $callback){
-				call_user_func($callback, $event);
+		
+		$eventType = "";
+		foreach (explode(".", $event->getType()) as $part){
+			$eventType .= $part;
+			if (array_key_exists($eventType, $this->events)){
+				foreach ($this->events[$eventType] as $callback){
+					call_user_func($callback, $event);
+				}
 			}
+			$eventType .= ".";
 		}
-		elseif ($event instanceof EventError && $event->getType() !== "error"){
-			$this->emit(new EventError("error", $this, $event->getError()));
-		}
+		
 		if (!$event->getPropagationStopped() && $this->getParentEmitter()){
 			$this->getParentEmitter()->emit($event);
 		}
+		
+		return $event;
 	}
 	
 	/**
