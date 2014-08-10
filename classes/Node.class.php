@@ -340,9 +340,9 @@ class Node implements Countable, ArrayAccess, SeekableIterator, EventEmitter{
 	/**
 	 * {@inheritdoc}
 	 * 
-	 * @param Event $event
+	 * @param Event|String $event
 	 */
-	public function emit(Event $event){
+	public function emit($event){
 		if (!($event instanceof Event)){
 			$eventType = $event;
 			$event = new Event($eventType, $this);
@@ -386,9 +386,9 @@ class Node implements Countable, ArrayAccess, SeekableIterator, EventEmitter{
 	/**
 	 * {@inheritdoc}
 	 * 
-	 * @param Event $event
+	 * @param Event|String $event
 	 */
-	public static function emitStatic(Event $event){
+	public static function emitStatic($event){
 
 	}
 	

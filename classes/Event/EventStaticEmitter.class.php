@@ -22,9 +22,9 @@ interface EventStaticEmitter{
 	/**
 	 * fires a event of a specific static type.
 	 *
-	 * @param Event $event the event type
+	 * @param Event|String $event the event type
 	 */
-	public static function emitStatic(Event $event);
+	public static function emitStatic($event);
 
 	/**
 	 * Getter for a parent emitter if a emitter chain is present
