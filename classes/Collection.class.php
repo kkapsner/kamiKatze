@@ -309,6 +309,17 @@ class Collection extends ViewableHTML implements ArrayAccess, IteratorAggregate,
 			throw new InvalidArgumentException("Array must not be empty.");
 		}
 	}
+	
+	public function view($context = false, $output = false, $args = false){
+		$ret = parent::view($context, $output, $args);
+		if (!$ret){
+			$context = "collection|" . preg_replace("/(^|\\|)/", "$1collection.", $context);
+			return parent::viewByName($this->class, $context, $output, $args);
+		}
+		else {
+			return $ret;
+		}
+	}
 }
 
 ?>
