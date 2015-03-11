@@ -24,8 +24,14 @@ class LDAPUser extends LDAPObject implements DBItemExternalClassInterface{
 	public static $all = array();
 	
 	public static function getById($id){
-		$dn = self::$ldap->search(self::$userDN, "uidNumber=" . $id, LDAP::SCOPE_SUBTREE)->getFirstEntry()->dn;
-		return self::getByDN("user", $dn);
+		$entry = self::$ldap->search(self::$userDN, "uidNumber=" . $id, LDAP::SCOPE_SUBTREE);
+		if ($entry && ($entry = $entry->getFirstEntry())){
+			$dn = $entry->dn;
+			return self::getByDN("user", $dn);
+		}
+		else {
+			return null;
+		}
 	}
 	
 	public static function getAll(){

@@ -211,15 +211,15 @@ class LDAP extends LDAPResourceContainer{
 		$baseDN = $this->resolvePath($baseDN);
 		switch ($scope){
 			case LDAP::SCOPE_BASE:
-				$resultResource = ldap_read($this->resource, $baseDN, $filter, $attributes,
+				$resultResource = @ldap_read($this->resource, $baseDN, $filter, $attributes,
 					$attributesOnly, $this->sizeLimit, $this->timeLimit, $this->dereferencing);
 				break;
 			case LDAP::SCOPE_ONE_LEVEL:
-				$resultResource = ldap_list($this->resource, $baseDN, $filter, $attributes,
+				$resultResource = @ldap_list($this->resource, $baseDN, $filter, $attributes,
 					$attributesOnly, $this->sizeLimit, $this->timeLimit, $this->dereferencing);
 				break;
 			case LDAP::SCOPE_SUBTREE:
-				$resultResource = ldap_search($this->resource, $baseDN, $filter, $attributes,
+				$resultResource = @ldap_search($this->resource, $baseDN, $filter, $attributes,
 					$attributesOnly, $this->sizeLimit, $this->timeLimit, $this->dereferencing);
 				break;
 			default:

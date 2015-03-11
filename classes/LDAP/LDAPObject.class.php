@@ -30,8 +30,13 @@ class LDAPObject extends ViewableHTML{
 	 * @return LDAPObject
 	 */
 	public static function getByCN($type, $cn){
-		$dn = self::$ldap->search(",", "(|(cn=$cn)(uid=$cn))", LDAP::SCOPE_SUBTREE)->getFirstEntry()->dn;
-		return self::getByDN($type, $dn);
+		$dn = self::$ldap->search(",", "(|(cn=$cn)(uid=$cn))", LDAP::SCOPE_SUBTREE);
+		if ($dn && ($dn = $dn->getFirstEntry()) && ($dn = $dn->dn)){
+			return self::getByDN($type, $dn);
+		}
+		else {
+			return null;
+		}
 	}
 	
 	/**
