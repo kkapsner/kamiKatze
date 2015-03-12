@@ -28,14 +28,31 @@ class LDAPGroup extends LDAPObject{
 	 */
 	public static $membersByDN = false;
 	
+	/**
+	 * Contains all the DNs of the members.
+	 * @var String[]
+	 */
+	private $memberDNs = null;
+	
+	private function loadMembers(){
+		if ($this->memberDNs === null){
+			$this->memberDNs = $this->getAttribute(self::$memberAttribute);
+		}
+	}
+	
+	public function isMember(LDAPObject $object){
+		$this->loadMembers();
+		return in_array($object->dn, $this->memberDNs);
+	}
+	
 	public function getMembers(){
+		$this->loadMembers();
 		$members = array();
-		$uids = $this->getAttribute(self::$memberAttribute);
-		for ($i = 0; $i < $uids["count"]; $i++){
+		for ($i = 0; $i < $this->memberDNs["count"]; $i++){
 			if (self::$membersByDN){
-				$members[] = LDAPUser::getByDN("user", $uids[$i]);}
+				$members[] = LDAPUser::getByDN("user", $this->memberDNs[$i]);}
 			else {
-				$members[] = LDAPUser::getByCN("user", $uids[$i]);
+				$members[] = LDAPUser::getByCN("user", $this->memberDNs[$i]);
 			}
 		}
 		return $members;

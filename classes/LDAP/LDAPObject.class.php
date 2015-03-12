@@ -82,6 +82,9 @@ class LDAPObject extends ViewableHTML{
 	}
 	
 	public function __get($name){
+		if ($name === "dn"){
+			return $this->dn;
+		}
 		$value = $this->getAttribute($name);
 		if (is_array($value)){
 			if ($value["count"]){
