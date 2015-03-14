@@ -71,14 +71,37 @@ class LDAPObject extends ViewableHTML{
 	}
 	
 	/**
+	 * Cache for attributes
+	 * @var Mixed[]
+	 */
+	protected $attributeCache = array();
+	
+	/**
+	 * Loads attributes from the LDAP into the cache
+	 * @param String[] $attributes
+	 */
+	public function loadAttributes($attributes){
+		$result = self::$ldap->search($this->dn, "(objectclass=*)", LDAP::SCOPE_BASE, $attributes);
+		if ($result && ($entry = $result->getFirstEntry())){
+			foreach ($attributes as $name){
+				$this->attributeCache[$name] = $entry->{$name};
+			}
+		}
+		else {
+			throw new LDAPException("Error retrieving attributes.");
+		}
+	}
+	
+	/**
 	 * Getter for the objects attributes.
 	 * @param String $name The attributes name.
 	 * @return mixed
 	 */
 	public function getAttribute($name){
-		$result = self::$ldap->search($this->dn, "(objectclass=*)", LDAP::SCOPE_BASE, array($name));
-		$value = $result->getFirstEntry()->{$name};
-		return $value;
+		if (!array_key_exists($name, $this->attributeCache)){
+			$this->loadAttributes(array($name));
+		}
+		return $this->attributeCache[$name];
 	}
 	
 	public function __get($name){
