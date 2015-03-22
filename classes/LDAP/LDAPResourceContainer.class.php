@@ -10,7 +10,7 @@
  * @author Korbinian Kapsner
  * @package LDAP
  */
-abstract class LDAPResourceContainer extends EventEmitterImplementation{
+abstract class LDAPResourceContainer extends LDAPFriends{
 	/**
 	 * The native LDAP resource.
 	 * 

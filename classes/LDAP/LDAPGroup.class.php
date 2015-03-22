@@ -10,24 +10,13 @@
  * @author kkapsner
  */
 class LDAPGroup extends LDAPObject{
-	/**
-	 * DN where all the groups are located
-	 * @var String
-	 */
-	public static $groupDN = "cn=groups,";
 	
-	/**
-	 * Attribute of the group that contains the members
-	 * @var String
-	 */
-	public static $memberAttribute = "memberuid";
-	
-	/**
-	 * If the members are menioned by DN not by CN
-	 * @var Boolean
-	 */
-	public static $membersByDN = false;
-	
+	protected function __construct(LDAP $ldap, $dn){
+		parent::__construct($ldap, $dn);
+		if (!$ldap->defaultGroup){
+			$ldap->defaultGroup = $this;
+		}
+	}
 	/**
 	 * Contains all the DNs of the members.
 	 * @var String[]
@@ -36,11 +25,11 @@ class LDAPGroup extends LDAPObject{
 	
 	private function loadMembers(){
 		if ($this->memberDNs === null){
-			$this->memberDNs = $this->getAttribute(self::$memberAttribute);
+			$this->memberDNs = $this->getAttribute($this->ldap->membersAttribute);
 		}
 	}
 	
-	public function isMember(LDAPObject $object){
+	public function isMember(LDAPUser $object){
 		$this->loadMembers();
 		return in_array($object->dn, $this->memberDNs);
 	}
@@ -49,11 +38,7 @@ class LDAPGroup extends LDAPObject{
 		$this->loadMembers();
 		$members = array();
 		for ($i = 0; $i < $this->memberDNs["count"]; $i++){
-			if (self::$membersByDN){
-				$members[] = LDAPUser::getByDN("user", $this->memberDNs[$i]);}
-			else {
-				$members[] = LDAPUser::getByCN("user", $this->memberDNs[$i]);
-			}
+			$members[] = $this->ldap->getUser($this->memberDNs[$i]);
 		}
 		return $members;
 	}

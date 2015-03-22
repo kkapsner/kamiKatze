@@ -9,65 +9,28 @@
  *
  * @author kkapsner
  */
-class LDAPObject extends ViewableHTML{
+class LDAPObject extends LDAPFriends{
 	
 	/**
-	 * LDAP connection to be used to get the user information
+	 * LDAP connection that created the object
 	 * @var LDAP
 	 */
-	public static $ldap = null;
+	protected $ldap = null;
+	
 	
 	/**
-	 * All already generated instances
-	 * @var LDAPObject[]
-	 */
-	protected static $instances = array();
-	
-	/**
-	 * Returns the object with the given type and CN.
-	 * @param String $type the type of the object
-	 * @param String $cn the CN of the object
-	 * @return LDAPObject
-	 */
-	public static function getByCN($type, $cn){
-		$dn = self::$ldap->search(",", "(|(cn=$cn)(uid=$cn))", LDAP::SCOPE_SUBTREE);
-		if ($dn && ($dn = $dn->getFirstEntry()) && ($dn = $dn->dn)){
-			return self::getByDN($type, $dn);
-		}
-		else {
-			return null;
-		}
-	}
-	
-	/**
-	 * Returns the object with the given type and DN.
-	 * @param String $type the type of the object
-	 * @param String $dn the DN of the object
-	 * @return LDAPObject
-	 */
-	public static function getByDN($type, $dn){
-		if (array_key_exists($dn, self::$instances)){
-			return self::$instances[$dn];
-		}
-		else {
-			$type = "LDAP" . $type;
-			return new $type($dn);
-		}
-	}
-	
-	/**
-	 * The DN of the user
+	 * The DN of the object
 	 * @var String
 	 */
 	protected $dn;
 	
 	/**
-	 * Generic constructor. Use the getBy... functions to get an instance of an LDAPObject
+	 * Generic constructor. Use an LDAP instance to create objects.
 	 * @param String $dn
 	 */
-	protected function __construct($dn){
+	protected function __construct(LDAP $ldap, $dn){
+		$this->ldap = $ldap;
 		$this->dn = $dn;
-		self::$instances[$dn] = $this;
 	}
 	
 	/**
@@ -81,7 +44,7 @@ class LDAPObject extends ViewableHTML{
 	 * @param String[] $attributes
 	 */
 	public function loadAttributes($attributes){
-		$result = self::$ldap->search($this->dn, "(objectclass=*)", LDAP::SCOPE_BASE, $attributes);
+		$result = $this->ldap->search($this->dn, "(objectclass=*)", LDAP::SCOPE_BASE, $attributes);
 		if ($result && ($entry = $result->getFirstEntry())){
 			foreach ($attributes as $name){
 				$this->attributeCache[$name] = $entry->{$name};
@@ -120,6 +83,16 @@ class LDAPObject extends ViewableHTML{
 		else {
 			return $value;
 		}
+	}
+	
+	// LDAP friends
+	
+	protected static function createLDAPObject(LDAP $ldap, $type, $dn){
+		$type = "LDAP" . ucfirst(strtolower($type));
+		return new $type($ldap, $dn);
+	}
+	protected function getLDAPObject($type, $dn){
+		throw new BadFunctionCallException("Call only from LDAP object.");
 	}
 }
 

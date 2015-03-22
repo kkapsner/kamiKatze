@@ -11,48 +11,30 @@
  */
 class LDAPUser extends LDAPObject implements DBItemExternalClassInterface{
 	
-	/**
-	 * DN where all the users are located
-	 * @var String
-	 */
-	public static $userDN = "cn=users,";
-	
-	/**
-	 * Array of all available users.
-	 * @var LDAPUser[]
-	 */
-	public static $all = array();
-	
-	/**
-	 * Array matching already requested IDs to DNs.
-	 * @var Int[]
-	 */
-	protected static $idToDN = array();
-	
 	public static function getById($id){
-		if (array_key_exists($id, self::$idToDN)){
-			return self::getByDN("user", self::$idToDN[$id]);
-		}
-		$entry = self::$ldap->search(self::$userDN, "uidNumber=" . $id, LDAP::SCOPE_SUBTREE);
-		if ($entry && ($entry = $entry->getFirstEntry())){
-			$dn = $entry->dn;
-			$user = self::getByDN("user", $dn);
-			self::$idToDN[$id] = $dn;
-			return $user;
-		}
-		else {
-			return null;
-		}
+		return LDAP::$defaultLDAP->getUserById($id);
 	}
 	
 	public static function getAll(){
-		return self::$all;
+		return LDAP::$defaultLDAP->defaultGroup->getMembers();
 	}
 	
 	public function getGroups(){
 		$groups = array();
-		foreach (self::$ldap->search(LDAPGroup::$groupDN, LDAPGroup::$memberAttribute ."=" . $this->uid) as $group){
-			$groups[] = self::getByDN("group", $group->dn);
+		if ($this->ldap->directGroupSearch){
+			foreach ($this->getAttribute($this->ldap->memberofAttribute) as $groupDN){
+				$groups[] = $this->ldap->getGroup($groupDN);
+			}
+		}
+		else {
+			foreach (
+				$this->ldap->search(
+					$this->ldap->groupDN,
+					$this->ldap->membersAttribute . "=" . $this->uid
+				) as $group
+			){
+				$groups[] = $this->ldap->getGroup($group->dn);
+			}
 		}
 		return $groups;
 	}

@@ -30,6 +30,13 @@ class LDAP extends LDAPResourceContainer{
 	const DEREF_ALWAYS = LDAP_DEREF_ALWAYS;
 	
 	/**
+	 * The default LDAP to use. This static field is populated by the first
+	 * created LDAP, but can be changed any time.
+	 * @var LDAP
+	 */
+	public static $defaultLDAP = null;
+	
+	/**
 	 * Time limit (in seconds) for each search.
 	 * Zero means no (client) time limit. Server limits can not be changed.
 	 * @var int
@@ -48,6 +55,51 @@ class LDAP extends LDAPResourceContainer{
 	 * @var int
 	 */
 	public $dereferencing = LDAP::DEREF_NEVER;
+	
+	/**
+	 * The base DN of the LDAP
+	 * @var null|String
+	 */
+	public $baseDN = null;
+	
+	/**
+	 * The DN of the container that contains the users
+	 * @var Sring
+	 */
+	public $userDN = "cn=users,";
+	
+	/**
+	 * The DN of the container that contains the groups
+	 * @var String
+	 */
+	public $groupDN = "cn=groups,";
+	
+	/**
+	 * The default LDAP group to use. This static field is populated by the
+	 * first created LDAP group, but can be changed any time.
+	 * @var LDAPGroup
+	 */
+	public $defaultGroup = null;
+	
+	/**
+	 * Attribute name of a user that contains all the groups she/he belongs to
+	 * @var String
+	 */
+	public $memberofAttribute = "memberof";
+	
+	/**
+	 * Attribute name of a group that contains all the members
+	 * @var String
+	 */
+	public $membersAttribute = "member";
+	
+	/**
+	 * If the groups of a user should be obtained directly of via reverse
+	 * lookup.
+	 * @var boolean
+	 */
+	public $directGroupSearch = true;
+	
 
 	/**
 	 * Array containing the parts of the current working directory
@@ -80,9 +132,11 @@ class LDAP extends LDAPResourceContainer{
 	 * @param int $port
 	 */
 	public function __construct($hostname = null, $port = 389){
+		if (!self::$defaultLDAP){
+			self::$defaultLDAP = $this;
+		}
 		$this->connect($hostname, $port);
 	}
-
 
 	/**
 	 * Connects to a LDAP server
@@ -95,8 +149,12 @@ class LDAP extends LDAPResourceContainer{
 		if ($this->isConnected()){
 			return false;
 		}
-		
-		$this->hostname = $hostname;
+		if ($hostname !== null){
+			$this->hostname = $hostname;
+		}
+		else {
+			$hostname = $this->hostname;
+		}
 		$this->port = $port;
 		$this->resource = ldap_connect($hostname, $port);
 		if ($this->isConnected()){
@@ -193,6 +251,34 @@ class LDAP extends LDAPResourceContainer{
 			return false;
 		}
 	}
+	
+	/**
+	 * Use this to obtian the hostname. If the hostname is an IP-address the
+	 * dnshostname entry of the root DSE ist returned.
+	 * 
+	 * @return String the hostname of the LDAP
+	 */
+	public function getHostname(){
+		if (!preg_match("/(?:^|\\.).*[a-z].*(?:\\.|$)/i", $this->hostname)){
+			$this->getRootDSE()->dnshostname[0];
+		}
+		else {
+			return $this->hostname;
+		}
+	}
+	
+	/**
+	 * Use this to obtain the base DN. If the base DN is not set it will be
+	 * derived from the hostname.
+	 * 
+	 * @return String the base DN
+	 */
+	public function getBaseDN(){
+		if (!$this->baseDN){
+			$this->baseDN = "dc=" . str_replace(".", ",dc=", $this->getHostname());
+		}
+		return $this->baseDN;
+	}
 
 	/**
 	 * Searches in the LDAP.
@@ -265,6 +351,7 @@ class LDAP extends LDAPResourceContainer{
 			throw new BadMethodCallException("Connection options can only be read after connecting.");
 		}
 	}
+	
 	/**
 	 * Magic method __set. Used to set connection options.
 	 * 
@@ -345,8 +432,7 @@ class LDAP extends LDAPResourceContainer{
 		switch ($pathParts[$len - 1]){
 			case "":
 				if ($len > 1){
-					$hostname = $this->getRootDSE()->dnshostname[0];
-					$rootParts = explode(",", "dc=" . str_replace(".", ",dc=", $hostname));
+					$rootParts = explode(",", $this->getBaseDN());
 					$pathParts = array_merge($pathParts, $rootParts);
 				}
 				break;
@@ -376,6 +462,115 @@ class LDAP extends LDAPResourceContainer{
 		else {
 			return implode(",", $pathParts);
 		}
+	}
+	
+	// LDAP object functions
+	
+	/**
+	 * keeps track of all LDAP objects
+	 * @var LDAPObject[]
+	 */
+	protected $objectInstances = array();
+	
+	/**
+	 * keeps track of all id -> DN relations
+	 * @var String[]
+	 */
+	protected $idToDN = array();
+	
+	public function getUser($identifier){
+		return $this->getObject("user", $identifier);
+	}
+	public function getUserById($identifier){
+		return $this->getObjectById("user", $identifier);
+	}
+	public function getUserByCN($identifier){
+		return $this->getObjectByCN("user", $identifier);
+	}
+	public function getUserByDN($identifier){
+		return $this->getObjectByDN("user", $identifier);
+	}
+	
+	public function getGroup($identifier){
+		return $this->getObject("group", $identifier);
+	}
+	public function getGroupById($identifier){
+		return $this->getObjectById("group", $identifier);
+	}
+	public function getGroupByCN($identifier){
+		return $this->getObjectByCN("group", $identifier);
+	}
+	public function getGroupByDN($identifier){
+		return $this->getObjectByDN("group", $identifier);
+	}
+	
+	protected function getObjectById($type, $identifier){
+		if (array_key_exists($identifier, $this->idToDN)){
+			return $this->getLDAPObject($type, $this->idToDN[$identifier]);
+		}
+		switch (strToLower($type)){
+			case "user":
+				$searchBase = $this->userDN;
+				break;
+			case "group":
+				$searchBase = $this->groupDN;
+				break;
+			default:
+				$searchBase = $this->baseDN;
+		}
+		$entry = $this->search($searchBase, "uidNumber=" . $identifier, LDAP::SCOPE_SUBTREE);
+		if ($entry && ($entry = $entry->getFirstEntry())){
+			$dn = $entry->dn;
+			$this->idToDN[$identifier] = $dn;
+			return $this->getObjectByDN($type, $dn);
+		}
+		else {
+			return null;
+		}
+	}
+	
+	protected function getObjectByCN($type, $cn){
+		$dn = $this->search(",", "(|(cn=$cn)(uid=$cn))", LDAP::SCOPE_SUBTREE);
+		if ($dn && ($dn = $dn->getFirstEntry()) && ($dn = $dn->dn)){
+			return $this->getObjectByDN($type, $dn);
+		}
+		else {
+			return null;
+		}
+	}
+	
+	protected function getObjectByDN($type, $dn){
+		return $this->getLDAPObject($type, $dn);
+	}
+	
+	protected function getObject($type, $identifier){
+		if (is_numeric($identifier)){
+			return $this->getObjectById($type, $identifier);
+		}
+		elseif (preg_match("/^(?:cn|dn|ou)=/i", $identifier)){
+			return $this->getObjectByDN($type, $identifier);
+		}
+		else {
+			return $this->getObjectByCN($type, $identifier);
+		}
+	}
+	
+	// LDAP friends
+	protected static function createLDAPObject(LDAP $ldap, $type, $dn){
+		LDAPObject::createLDAPObject($ldap, $type, $dn);
+	}
+	
+	/**
+	 * 
+	 * @param type $type
+	 * @param type $dn
+	 * @return LDAPObject
+	 */
+	protected function getLDAPObject($type, $dn){
+		if (!key_exists($dn, $this->objectInstances)){
+			$this->objectInstances[$dn] = LDAPObject::createLDAPObject($this, $type, $dn);
+		}
+		return $this->objectInstances[$dn];
 	}
 }
 
