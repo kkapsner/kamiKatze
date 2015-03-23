@@ -39,8 +39,11 @@ class ConfigFile{
 	 *
 	 * @param string $filename
 	 */
-	public function __construct($filename){
+	public function __construct($filename, $autoload = false){
 		$this->filename = basename($filename);
+		if ($autoload){
+			$this->load();
+		}
 	}
 
 	/**
