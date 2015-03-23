@@ -11,6 +11,9 @@
  * @todo extend functionality
  */
 class LDAP extends LDAPResourceContainer{
+	
+	// Constants
+	
 	/**
 	 * Search scope base. Only one entry returned.
 	 */
@@ -29,12 +32,16 @@ class LDAP extends LDAPResourceContainer{
 	const DEREF_FINDING = LDAP_DEREF_FINDING;
 	const DEREF_ALWAYS = LDAP_DEREF_ALWAYS;
 	
+	// Static members
+	
 	/**
 	 * The default LDAP to use. This static field is populated by the first
 	 * created LDAP, but can be changed any time.
 	 * @var LDAP
 	 */
 	public static $defaultLDAP = null;
+	
+	// Public members
 	
 	/**
 	 * Time limit (in seconds) for each search.
@@ -106,6 +113,7 @@ class LDAP extends LDAPResourceContainer{
 	 */
 	public $directGroupSearch = true;
 	
+	// Protected members
 
 	/**
 	 * Array containing the parts of the current working directory
@@ -130,20 +138,92 @@ class LDAP extends LDAPResourceContainer{
 	 * @var boolean
 	 */
 	protected $isBound = false;
+	
+	// Methods
 
 	/**
-	 * Constructor of LDAP. Calls {@see LDAP::connect()}.
+	 * Constructor of LDAP.
 	 *
 	 * @param string $hostname
-	 * @param int $port
+	 * @param int $port The port to use. Default is 636 if ldaps is used or 389
+	 * otherwise.
+	 * @param boolean $connect If {@see LDAP::connect()} should be called immediatelly.
 	 */
-	public function __construct($hostname = null, $port = 389){
+	public function __construct($hostname = null, $port = null, $connect = true){
 		if (!self::$defaultLDAP){
 			self::$defaultLDAP = $this;
 		}
-		$this->connect($hostname, $port);
+		if ($port === null){
+			if (preg_match("/^ldaps/", $hostname)){
+				$port = 636;
+			}
+			else {
+				$port = 389;
+			}
+		}
+		if ($connect){
+			$this->connect($hostname, $port);
+		}
+	}
+	
+	/**
+	 * Getter for the last occured error.
+	 * 
+	 * @return LDAPException|null The Exception if there was an error or null
+	 * otherwise.
+	 */
+	
+	public function getException(){
+		$errorNumber = ldap_errno($this->resource);
+		if ($errorNumber !== 0){
+			return new LDAPException(ldap_error($this->resource), $errorNumber);
+		}
+		else {
+			return null;
+		}
 	}
 
+	
+	/**
+	 * Creates a LDAP connection with the settings in a config file.
+	 * @param ConfigFile $config The config file to use.
+	 * @return LDAP|null the created LDAP on success or null on failure.
+	 */
+	public static function createFromConfigFile(ConfigFile $config){
+		$hostname = $config->hostname;
+		if ($hostname){
+			$ldap = new LDAP($hostname, $config->port);
+			$bindDN = $config->bindDN;
+			$bindPwd = $config->bindPassword;
+			if ($bindDN){
+				$ldap->bind($bindDN, $bindPwd);
+			}
+			elseif ($config->anonymousBind){
+				$ldap->bind();
+			}
+			$properties = array(
+				"baseDN", "groupDN", "userDN", "memberofAttribute", "membersAttribute",
+				"caseSensitive", "dereferencing", "directGroupSearch", "sizeLimit", "timeLimit"
+			);
+			foreach ($properties as $prop){
+				$value = $config->{$prop};
+				if ($value !== null){
+					$ldap->{$prop} = $value;
+				}
+			}
+			$defaultGroup = $config->defaultGroup;
+			if ($defaultGroup){
+				$ldap->defaultGroup = $ldap->getGroup($defaultGroup);
+			}
+			return $ldap;
+		}
+		else {
+			return null;
+		}
+	}
+	
+	// Connectivity
+	
 	/**
 	 * Connects to a LDAP server
 	 *
@@ -223,8 +303,7 @@ class LDAP extends LDAPResourceContainer{
 			return false;
 		}
 	}
-
-
+	
 	/**
 	 * Checks if the connection is bound to a user.
 	 *
@@ -234,15 +313,8 @@ class LDAP extends LDAPResourceContainer{
 		return $this->isBound;
 	}
 
-	/**
-	 * Getter for the last occured error.
-	 * 
-	 * @return LDAPException
-	 */
-	public function getException(){
-		return new LDAPException(ldap_error($this->resource), ldap_errno($this->resource));
-	}
-
+	// Search
+	
 	/**
 	 * Gets the rootDSE from the server.
 	 *
@@ -331,6 +403,73 @@ class LDAP extends LDAPResourceContainer{
 	}
 
 	/**
+	 * Changes the LDAP directory.
+	 *
+	 * @see LDAP::resolvePath()
+	 * @param string $path the new path
+	 */
+	public function cd($path){
+		$this->cwd = $this->resolvePath($path, true);
+	}
+
+	/**
+	 * Returns the current LDAP directory.
+	 * 
+	 * @return string
+	 */
+	public function cwd(){
+		return implode(",", $this->cwd);
+	}
+
+	/**
+	 * Resolves a LDAP path.
+	 *
+	 * @param string $path
+	 * @param boolean $arrayReturn
+	 * @return string|string[]
+	 * @todo document exact behaviour
+	 */
+	public function resolvePath($path, $arrayReturn = false){
+		$pathParts = preg_split("/,+/", $path);
+		$len = count($pathParts);
+		switch ($pathParts[$len - 1]){
+			case "":
+				if ($len > 1){
+					$rootParts = explode(",", $this->getBaseDN());
+					$pathParts = array_merge($pathParts, $rootParts);
+				}
+				break;
+			case ".":
+			case "..":
+				$pathParts = array_merge($pathParts, $this->cwd);
+				break;
+		}
+
+		for($i = 0; $i < count($pathParts); $i++){
+			switch ($pathParts[$i]){
+				case "":
+				case ".":
+					array_splice($pathParts, $i, 1);
+					$i--;
+					break;
+				case "..":
+					array_splice($pathParts, $i, 2);
+					$i--;
+					break;
+			}
+		}
+
+		if ($arrayReturn){
+			return $pathParts;
+		}
+		else {
+			return implode(",", $pathParts);
+		}
+	}
+	
+	// Magic functions
+	
+	/**
 	 * Magic method __get. Used to get connection options.
 	 *
 	 * @param string $name
@@ -405,71 +544,6 @@ class LDAP extends LDAPResourceContainer{
 		}
 	}
 
-	/**
-	 * Changes the LDAP directory.
-	 *
-	 * @see LDAP::resolvePath()
-	 * @param string $path the new path
-	 */
-	public function cd($path){
-		$this->cwd = $this->resolvePath($path, true);
-	}
-
-	/**
-	 * Returns the current LDAP directory.
-	 * 
-	 * @return string
-	 */
-	public function cwd(){
-		return implode(",", $this->cwd);
-	}
-
-	/**
-	 * Resolves a LDAP path.
-	 *
-	 * @param string $path
-	 * @param boolean $arrayReturn
-	 * @return string|string[]
-	 * @todo document exact behaviour
-	 */
-	public function resolvePath($path, $arrayReturn = false){
-		$pathParts = preg_split("/,+/", $path);
-		$len = count($pathParts);
-		switch ($pathParts[$len - 1]){
-			case "":
-				if ($len > 1){
-					$rootParts = explode(",", $this->getBaseDN());
-					$pathParts = array_merge($pathParts, $rootParts);
-				}
-				break;
-			case ".":
-			case "..":
-				$pathParts = array_merge($pathParts, $this->cwd);
-				break;
-		}
-
-		for($i = 0; $i < count($pathParts); $i++){
-			switch ($pathParts[$i]){
-				case "":
-				case ".":
-					array_splice($pathParts, $i, 1);
-					$i--;
-					break;
-				case "..":
-					array_splice($pathParts, $i, 2);
-					$i--;
-					break;
-			}
-		}
-
-		if ($arrayReturn){
-			return $pathParts;
-		}
-		else {
-			return implode(",", $pathParts);
-		}
-	}
-	
 	// LDAP object functions
 	
 	/**

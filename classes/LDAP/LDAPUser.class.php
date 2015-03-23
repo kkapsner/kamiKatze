@@ -33,7 +33,7 @@ class LDAPUser extends LDAPObject implements DBItemExternalClassInterface{
 					$this->ldap->membersAttribute . "=" . $this->uid
 				) as $group
 			){
-				$groups[] = $this->ldap->getGroup($group->dn);
+				$groups[] = $this->ldap->getGroupByDN($group->dn);
 			}
 		}
 		return $groups;

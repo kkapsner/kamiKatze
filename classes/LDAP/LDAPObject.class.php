@@ -30,6 +30,9 @@ class LDAPObject extends LDAPFriends{
 	 */
 	protected function __construct(LDAP $ldap, $dn){
 		$this->ldap = $ldap;
+		if (!$ldap->caseSensitive){
+			$dn = strtolower($dn);
+		}
 		$this->dn = $dn;
 	}
 	

@@ -26,6 +26,9 @@ class LDAPGroup extends LDAPObject{
 	private function loadMembers(){
 		if ($this->memberDNs === null){
 			$this->memberDNs = $this->getAttribute($this->ldap->membersAttribute);
+			if (!$this->ldap->caseSensitive){
+				$this->memberDNs = array_map("strtolower", $this->memberDNs);
+			}
 		}
 	}
 	
