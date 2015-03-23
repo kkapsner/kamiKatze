@@ -57,6 +57,12 @@ class LDAP extends LDAPResourceContainer{
 	public $dereferencing = LDAP::DEREF_NEVER;
 	
 	/**
+	 * If the LDAP is case sensitive.
+	 * @var Bool
+	 */
+	public $caseSensitive = false;
+	
+	/**
 	 * The base DN of the LDAP
 	 * @var null|String
 	 */
@@ -478,71 +484,96 @@ class LDAP extends LDAPResourceContainer{
 	 */
 	protected $idToDN = array();
 	
+	/**
+	 * Returns a user by ID, CN or DN.
+	 * @param String|Number $identifier The ID, CN or DN
+	 * @return LDAPUser|null Returns the found user or null on failure.
+	 * @see LDAP::getObject()
+	 */
 	public function getUser($identifier){
 		return $this->getObject("user", $identifier);
 	}
-	public function getUserById($identifier){
-		return $this->getObjectById("user", $identifier);
-	}
-	public function getUserByCN($identifier){
-		return $this->getObjectByCN("user", $identifier);
-	}
-	public function getUserByDN($identifier){
-		return $this->getObjectByDN("user", $identifier);
+	
+	/**
+	 * Return a user by ID.
+	 * @param String|Number $id The ID
+	 * @return LDAPUser|null Returns the found user or null on failure.
+	 * @see LDAP::getObjectById()
+	 */
+	public function getUserById($id){
+		return $this->getObjectById("user", $id);
 	}
 	
+	/**
+	 * Return a user by CN.
+	 * @param String $cn The common name.
+	 * @return LDAPUser|null Returns the found user or null on failure.
+	 * @see LDAP::getObjectByCN()
+	 */
+	public function getUserByCN($cn){
+		return $this->getObjectByCN("user", $cn);
+	}
+	
+	/**
+	 * Return a user by DN.
+	 * @param String $dn The DN.
+	 * @return LDAPUser|null Returns the found user or null on failure.
+	 * @see LDAP::getObjectByDN()
+	 */
+	public function getUserByDN($dn){
+		return $this->getObjectByDN("user", $dn);
+	}
+	
+	/**
+	 * Returns a group by ID, CN or DN.
+	 * @param String|Number $identifier The ID, CN or DN
+	 * @return LDAPGroup|null Returns the found group or null on failure.
+	 * @see LDAP::getObject()
+	 */
 	public function getGroup($identifier){
 		return $this->getObject("group", $identifier);
 	}
-	public function getGroupById($identifier){
-		return $this->getObjectById("group", $identifier);
-	}
-	public function getGroupByCN($identifier){
-		return $this->getObjectByCN("group", $identifier);
-	}
-	public function getGroupByDN($identifier){
-		return $this->getObjectByDN("group", $identifier);
+	
+	/**
+	 * Return a group by ID.
+	 * @param String|Number $id The ID.
+	 * @return LDAPGroup|null Returns the found group or null on failure.
+	 * @see LDAP::getObjectById()
+	 */
+	public function getGroupById($id){
+		return $this->getObjectById("group", $id);
 	}
 	
-	protected function getObjectById($type, $identifier){
-		if (array_key_exists($identifier, $this->idToDN)){
-			return $this->getLDAPObject($type, $this->idToDN[$identifier]);
-		}
-		switch (strToLower($type)){
-			case "user":
-				$searchBase = $this->userDN;
-				break;
-			case "group":
-				$searchBase = $this->groupDN;
-				break;
-			default:
-				$searchBase = $this->baseDN;
-		}
-		$entry = $this->search($searchBase, "uidNumber=" . $identifier, LDAP::SCOPE_SUBTREE);
-		if ($entry && ($entry = $entry->getFirstEntry())){
-			$dn = $entry->dn;
-			$this->idToDN[$identifier] = $dn;
-			return $this->getObjectByDN($type, $dn);
-		}
-		else {
-			return null;
-		}
+	/**
+	 * Return a group by CN.
+	 * @param String $cn The common name.
+	 * @return LDAPGroup|null Returns the found group or null on failure.
+	 * @see LDAP::getObjectByCN()
+	 */
+	public function getGroupByCN($cn){
+		return $this->getObjectByCN("group", $cn);
 	}
 	
-	protected function getObjectByCN($type, $cn){
-		$dn = $this->search(",", "(|(cn=$cn)(uid=$cn))", LDAP::SCOPE_SUBTREE);
-		if ($dn && ($dn = $dn->getFirstEntry()) && ($dn = $dn->dn)){
-			return $this->getObjectByDN($type, $dn);
-		}
-		else {
-			return null;
-		}
+	/**
+	 * Return a group by DN.
+	 * @param String $dn The DN.
+	 * @return LDAPGroup|null Returns the found group or null on failure.
+	 * @see LDAP::getObjectByDN()
+	 */
+	public function getGroupByDN($dn){
+		return $this->getObjectByDN("group", $dn);
 	}
 	
-	protected function getObjectByDN($type, $dn){
-		return $this->getLDAPObject($type, $dn);
-	}
-	
+	/**
+	 * Returns an object by ID, CN or DN. A numeric identifier is treated as ID.
+	 * If it starts with "cn=", "dn=" or "ou=" it is treated as DN and as CN
+	 * otherwise.
+	 * @param String $type Type of the object
+	 * @param String|Number $identifier The ID, CN or DN.
+	 * @return LDAPObject|null Returns the found object or null on failure
+	 * The return type is defined by the $type parameter: "LDAP" . $type
+	 * @see LDAP::getObjectById(), LDAP::getObjectByCN(), LDAP::getObjectByDN()
+	 */
 	protected function getObject($type, $identifier){
 		if (is_numeric($identifier)){
 			return $this->getObjectById($type, $identifier);
@@ -555,18 +586,93 @@ class LDAP extends LDAPResourceContainer{
 		}
 	}
 	
+	/**
+	 * Returns an object by ID.
+	 * @param String $type Type of the object
+	 * @param String|Number $id The ID.
+	 * @return LDAPObject|null Returns the found object or null on failure
+	 * The return type is defined by the $type parameter: "LDAP" . $type
+	 */
+	protected function getObjectById($type, $id){
+		if (array_key_exists($id, $this->idToDN)){
+			return $this->getLDAPObject($type, $this->idToDN[$id]);
+		}
+		switch (strToLower($type)){
+			case "user":
+				$searchBase = $this->userDN;
+				break;
+			case "group":
+				$searchBase = $this->groupDN;
+				break;
+			default:
+				$searchBase = $this->baseDN;
+		}
+		$entry = $this->search($searchBase, "uidNumber=" . $id, LDAP::SCOPE_SUBTREE);
+		if ($entry && ($entry = $entry->getFirstEntry())){
+			$dn = $entry->dn;
+			$this->idToDN[$id] = $dn;
+			return $this->getObjectByDN($type, $dn);
+		}
+		else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Returns an object by CN.
+	 * @param String $type Type of the object
+	 * @param String|Number $cn The CN.
+	 * @return LDAPObject|null Returns the found object or null on failure
+	 * The return type is defined by the $type parameter: "LDAP" . $type
+	 */
+	protected function getObjectByCN($type, $cn){
+		$dn = $this->search(",", "(|(cn=$cn)(uid=$cn))", LDAP::SCOPE_SUBTREE);
+		if ($dn && ($dn = $dn->getFirstEntry()) && ($dn = $dn->dn)){
+			return $this->getObjectByDN($type, $dn);
+		}
+		else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Returns an object by DN.
+	 * @param String $type Type of the object
+	 * @param String|Number $dn The DN
+	 * @return LDAPObject|null Returns the found object or null on failure
+	 * The return type is defined by the $type parameter: "LDAP" . $type
+	 */
+	protected function getObjectByDN($type, $dn){
+		return $this->getLDAPObject($type, $dn);
+	}
+	
 	// LDAP friends
+	/**
+	 * DO NOT USE. Use LDAPObject::createLDAPObject() instead.
+	 * @param LDAP $ldap
+	 * @param type $type
+	 * @param type $dn
+	 */
 	protected static function createLDAPObject(LDAP $ldap, $type, $dn){
 		LDAPObject::createLDAPObject($ldap, $type, $dn);
 	}
 	
 	/**
-	 * 
-	 * @param type $type
-	 * @param type $dn
-	 * @return LDAPObject
+	 * Queries the object cache for the DN and return it if found. In this case
+	 * the $type-parameter is ignored and the object will have the same type as
+	 * stored in cache.
+	 * If the object is not found it is created by LDAPObject::createLDAPObject()
+	 * and then stored in cache.
+	 * @param type $type Type of the object
+	 * @param type $dn The DN of the object
+	 * @return LDAPObject|null Returns the found object or null on failure
+	 * The return type is defined by the $type parameter: "LDAP" . $type
+	 * @see LDAPObject::createLDAPObject()
 	 */
 	protected function getLDAPObject($type, $dn){
+		if (!$this->caseSensitive){
+			$dn = strtolower($dn);
+		}
 		if (!key_exists($dn, $this->objectInstances)){
 			$this->objectInstances[$dn] = LDAPObject::createLDAPObject($this, $type, $dn);
 		}
