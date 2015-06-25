@@ -195,7 +195,15 @@ class ConfigFile{
 	 */
 	private function parseValue($value){
 		if ($this->valueParsing){
-			$value = preg_replace_callback('/<((?:[^<>]|\\.)*)>|{((?:[^{}]|\\.)*)}/', array($this, "replaceVariableInValue"), $value);
+			$value = preg_replace_callback(
+				'/' . 
+					'("(?:[^"]|\\\\.)*"|\'(?:[^\']|\\\\.)*\')|' .
+					'<((?:[^<>]|\\\\.)*)>|' .
+					'{((?:[^{}]|\\\\.)*)}' .
+				'/',
+				array($this, "replaceVariableInValue"),
+				$value
+			);
 			return eval("return " . $value . ";");
 		}
 		else {
@@ -211,8 +219,13 @@ class ConfigFile{
 	 * @todo better implementation to hide this function (or remove it)
 	 */
 	public function replaceVariableInValue($m){
-		$name = join("", array_slice($m, 1));
-		return $this->valueToCode($this->__get($name));
+		if ($m[1]){
+			return $m[0];
+		}
+		else {
+			$name = join("", array_slice($m, 2));
+			return $this->valueToCode($this->__get($name));
+		}
 	}
 
 	/**
