@@ -35,6 +35,10 @@ class EmailAddress implements EmailAddressInterface{
 	 * @param string $name the name
 	 */
 	public function __construct($address, $name = ""){
+		if (!$name && preg_match("/^\\s*(.*)\\s*<\\s*([^>]+)\\s*>\\s*/", $address, $matches)){
+			$name = $matches[1];
+			$address = $matches[2];
+		}
 		$this->address = $address;
 		$this->name = $name;
 	}

@@ -35,6 +35,12 @@ class EmailSMTP{
 	 * @var string
 	 */
 	public $ehlo;
+	
+	/**
+	 * Default email address for the FROM-header if it is not set.
+	 * @var EmailAddress
+	 */
+	public $defaultFrom;
 
 	/**
 	 * The socket resource
@@ -137,7 +143,7 @@ class EmailSMTP{
 		}
 		if ($address instanceof EmailAddressGroup){
 			foreach ($address as $member){
-				$this->sendLine("RCPT TO:<" . $address->address . ">");
+				$this->sendLine("RCPT TO:<" . $member->address . ">");
 			}
 		}
 	}
@@ -151,8 +157,13 @@ class EmailSMTP{
 	public function sendMail(Email $mail){
 		$from = $mail->getHeaders("FROM");
 		foreach ($from as $fromHeader){
+			$value = $fromHeader->getValue();
+			if (!count($value)){
+				$fromHeader->addAddress($this->defaultFrom);
+				$value = $fromHeader->getValue();
+			}
 			/* @var $fromHeader EmailHeaderAddress */
-			foreach ($fromHeader->getValue() as $address){
+			foreach ($value as $address){
 				$this->sendLine("MAIL FROM:<" . $address->address . ">");
 			}
 		}
@@ -196,6 +207,33 @@ class EmailSMTP{
 		} while ($m && $m[2] === "-");
 		#var_dump($answer);
 		return $answer;
+	}
+	
+	/**
+	 * Creates a SMTP connection with the settings in a config file.
+	 * @param ConfigFile $config The config file to use.
+	 * @return EmailSMTP|null the created SMTP on success or null on failure.
+	 */
+	public static function createFromConfigFile(ConfigFile $config){
+		$hostname = $config->hostname;
+		if ($hostname){
+			$smtp = new EmailSMTP($hostname, $config->port);
+			$username = $config->username;
+			$password = $config->password;
+			if ($username){
+				$smtp->connect();
+				$smtp->authenticate($username, $password);
+			}
+			
+			$defaultFrom = $config->defaultFrom;
+			if ($defaultFrom){
+				$smtp->defaultFrom = new EmailAddress($defaultFrom);
+			}
+			return $smtp;
+		}
+		else {
+			return null;
+		}
 	}
 }
 
