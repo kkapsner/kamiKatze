@@ -24,23 +24,28 @@ class DBItemCollection extends Collection{
 	/**
 	 * Creates a DBItemCollection out of an array.
 	 * @param array $arr The array containing
+	 * @param string|null $class The class of the Colletion. If null is provided
+	 *	the class of the first array item is used.
 	 * @return DBItemCollection The created collection.
 	 * @throws InvalidArgumentException
 	 */
-	public static function fromArray(array $arr){
-		if (count($arr)){
-			$values = array_values($arr);
-			$collection = new DBItemCollection(get_class($values[0]));
-
-			foreach ($values as $item){
-				$collection[] = $item;
+	public static function fromArray(array $arr, $class = null){
+		$values = array_values($arr);
+		if ($class === null){
+			if (count($values)){
+				$class = get_class($values[0]);
 			}
+			else {
+				throw new InvalidArgumentException("Array must not be empty.");
+			}
+		}
+		$collection = new DBItemCollection($class);
 
-			return $collection;
+		foreach ($values as $item){
+			$collection[] = $item;
 		}
-		else {
-			throw new InvalidArgumentException("Array must not be empty.");
-		}
+
+		return $collection;
 	}
 }
 
