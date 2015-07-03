@@ -291,23 +291,28 @@ class Collection extends ViewableHTML implements ArrayAccess, IteratorAggregate,
 	/**
 	 * Creates a Collection out of an array.
 	 * @param array $arr The array containing
+	 * @param string|null $class The class of the Colletion. If null is provided
+	 *	the class of the first array item is used.
 	 * @return Collection The created collection.
 	 * @throws InvalidArgumentException
 	 */
-	public static function fromArray(array $arr){
-		if (count($arr)){
-			$values = array_values($arr);
-			$collection = new Collection(get_class($values[0]));
-
-			foreach ($values as $item){
-				$collection[] = $item;
+	public static function fromArray(array $arr, $class = null){
+		$values = array_values($arr);
+		if ($class === null){
+			if (count($values)){
+				$class = get_class($values[0]);
 			}
+			else {
+				throw new InvalidArgumentException("Array must not be empty.");
+			}
+		}
+		$collection = new Collection($class);
 
-			return $collection;
+		foreach ($values as $item){
+			$collection[] = $item;
 		}
-		else {
-			throw new InvalidArgumentException("Array must not be empty.");
-		}
+
+		return $collection;
 	}
 	
 	public function view($context = false, $output = false, $args = false){
