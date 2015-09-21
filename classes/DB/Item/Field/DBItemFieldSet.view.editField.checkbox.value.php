@@ -10,7 +10,7 @@ if (is_numeric($value)){
 	$value = $this->typeExtension[$value];
 }
 if (in_array($value, $this->typeExtension)){
-	$values = $args->{$this->name};
+	$values = $this->getValue($args);
 	$args->emit($eventBase . ".checkbox.start." . $value);
 	
 	echo "\n\t\t\t";

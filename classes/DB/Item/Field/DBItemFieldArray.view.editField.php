@@ -4,7 +4,7 @@
 /* @var $args DBItem */
 
 $postName = $this->getPostName($args);
-$values = $args->{$this->name};
+$values = $this->getValue($args);
 $this->currentItem = $args;
 echo "<table>\n";
 $this->arrayFields->view("table.header", true, array("delete"));

@@ -4,7 +4,7 @@
 /* @var $args DBItem */
 
 $postName = $this->getPostName($args);
-$value = $args->{$this->name};
+$value = $this->getValue($args);
 if ($value !== null){
 	echo '<input type="hidden" name="' . $postName . '[fileID]" value="' . $this->html($value->DBid) . '">' .
 		'<input name="' . $postName . '[filename]" value="'  . $this->html($value->filename) . '" title="clear to delete file">' .

@@ -11,7 +11,7 @@ $availableItems = call_user_func(array($this->class, "getAll"));
 				if ($this->null){
 					echo "<option></option>";
 				}
-$value = $args->{$this->name};
+$value = $this->getValue($args);
 foreach ($availableItems as $item){
 	?>
 				<option value="<?php

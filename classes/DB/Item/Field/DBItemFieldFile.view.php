@@ -2,7 +2,7 @@
 /* @var $this DBItemField */
 /* @var $args DBItem */
 
-$value = $args->{$this->name};
+$value = $this->getValue($args);
 if ($value === null){
 	echo "---";
 }

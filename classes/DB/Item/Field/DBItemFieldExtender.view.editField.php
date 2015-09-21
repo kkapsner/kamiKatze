@@ -33,7 +33,7 @@ if ($args->DBid === 0){
 	}
 }
 else {
-	$value = $args->{$this->name};
+	$value = $this->getValue($args);
 
 	echo "\n\t\t\t" .'<table class="dbItemExtender" data-extension="' . $this->html($value) . '">' .
 		'<caption>' . $this->html($value) . "</caption>";

@@ -10,7 +10,7 @@ $args->emit($eventBase . ".beforeHidden");
 echo "\n\t\t\t" . '<input type="hidden" name="' . $postName . '[present]" value="1" >';
 $args->emit($eventBase . ".afterHidden");
 
-$values = $args->{$this->name};
+$values = $this->getValue($args);
 foreach ($this->typeExtension as $value){
 	$args->emit($eventBase . ".checkbox.start." . $value);
 	

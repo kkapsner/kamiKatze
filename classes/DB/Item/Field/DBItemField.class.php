@@ -185,9 +185,76 @@ class DBItemField extends DBItemFriends{
 		$item->default = $result["Default"];
 		$item->type = $type;
 		$item->typeExtension = $typeExtension;
+		$item->displayName = array_read_key("DisplayName", $result, $item->displayName);
 		
 		$item->parseOptions($classSpecifier, $options);
 		return $item;
+	}
+	
+	/**
+	 * Generates the field options from a group of DB results.
+	 * @param string $classSpecifier The class specifier
+	 * @param array $group The array of results to parse
+	 * @return slef
+	 */
+	protected static function parseGroupResults($classSpecifier, $groupName, $group){
+		$options = array();
+		foreach ($group as $result){
+			$newOptions = json_decode($result["Comment"], true);
+			if (is_array($newOptions)){
+				$options = array_merge($options, $newOptions);
+			}
+		}
+//		if (array_key_exists("groupFieldClass", $options)){
+//			$item = new $options["groupFieldClass"]($groupName);
+//			$item->parseGroup($classSpecifier, $group);
+//			$item->parseOptions($classSpecifier, $options);
+//		}
+//		else {
+			$item = new DBItemFieldGroup($groupName);
+			$item->parseGroup($classSpecifier, $group);
+//		}
+		return $item;
+	}
+
+	/**
+	 * Performs the iterator for parseClass.
+	 * @param Iterator $iter
+	 * @param DBItemClassSpecifier $classSpecifier
+	 * @return DBItemFieldCollection
+	 */
+	protected static function iterateForParseClass($classSpecifier, $iter){
+		$ret = new DBItemFieldCollection();
+		$groups = array();
+
+		foreach ($iter as $result){
+			$name = $result["Field"];
+			if ($name === "id"){
+				continue;
+			}
+			if (($pos = strpos($name, ">", array_read_key("groupNameOffset", $result, 0))) !== false){
+				$groupName = substr($name, 0, $pos);
+				$result["groupNameOffset"] = $pos + 1;
+				$result["DisplayName"] = substr($name, $pos + 1);
+				
+				if (!array_key_exists($groupName, $groups)){
+					$groups[$groupName] = array(
+						"index" => count($ret),
+						"columns" => array()
+					);
+					$ret[] = new DBItemField("");
+				}
+				
+				$groups[$groupName]["columns"][] = $result;
+			}
+			else {
+				$ret[] = self::parseResult($classSpecifier, $result);
+			}
+		}
+		foreach ($groups as $groupName => $group){
+			$ret[$group["index"]] = self::parseGroupResults($classSpecifier, $groupName, $group["columns"]);
+		}
+		return $ret;
 	}
 
 	/**
@@ -202,17 +269,10 @@ class DBItemField extends DBItemFriends{
 
 		if (!array_key_exists($specifiedName, self::$classOptions)){
 			$db = DB::getInstance();
-			$ret = new DBItemFieldCollection();
-
-			foreach ($db->query("SHOW FULL COLUMNS FROM " . $db->quote($classSpecifier->getTableName(), DB::PARAM_IDENT)) as $result){
-				$name = $result["Field"];
-				if ($name === "id"){
-					continue;
-				}
-
-				$ret[] = self::parseResult($classSpecifier, $result);
-			}
-			self::$classOptions[$specifiedName] = $ret;
+			self::$classOptions[$specifiedName] = self::iterateForParseClass(
+				$classSpecifier,
+				$db->query("SHOW FULL COLUMNS FROM " . $db->quote($classSpecifier->getTableName(), DB::PARAM_IDENT))
+			);
 		}
 		return self::$classOptions[$specifiedName];
 	}
@@ -350,6 +410,43 @@ class DBItemField extends DBItemFriends{
 		else {
 			return DB::getInstance()->quote($value, DB::PARAM_STR);
 		}
+	}
+	
+	/**
+	 * Translates the name to the representaiton appropriate for the DB.
+	 * @return string|null if null is returned the field has no value to be stored in the original table.
+	 */
+	public function translateNameToDB(){
+		return DB::getInstance()->quote($this->name, DB::PARAM_IDENT);
+	}
+	
+	/**
+	 * Appends the DB query strings to the input strings $nameOut and $vlaueOut.
+	 * @param mixed $value
+	 * @param string $nameOut
+	 * @param string|null $valueOut (optional) if this parameter is null the 
+	 *        "name = value" string is appended to $nameOut.
+	 */
+	public function appendDBNameAndValueForCreate($value, &$nameOut, &$valueOut = null){
+		$trValue = $this->translateToDB($value);
+		if ($trValue !== null){
+			if ($valueOut === null){
+				$nameOut .= ($nameOut? ",": "") . $this->translateNameToDB() . "=" . $trValue;
+			}
+			else {
+				$nameOut .= ($nameOut? ",": "") . $this->translateNameToDB();
+				$valueOut .= ($valueOut? ",": "") . $trValue;
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param mixed $value
+	 * @param string $propsOut
+	 */
+	public function appendDBNameAndValueForUpdate($value, &$propsOut){
+		$this->appendDBNameAndValueForCreate($value, $propsOut);
 	}
 
 	/**

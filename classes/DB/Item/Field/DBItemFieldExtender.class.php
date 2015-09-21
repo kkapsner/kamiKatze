@@ -73,21 +73,17 @@ class DBItemFieldExtender extends DBItemFieldEnum implements DBItemFieldHasSearc
 	 */
 	protected function createDependencies($id, $values){
 		$db = DB::getInstance();
-		$keys = array($db->quote('id', DB::PARAM_IDENT));
-		$dbValues = array($id);
+		$keys = $db->quote('id', DB::PARAM_IDENT);
+		$dbValues = $id;
 		$extenderValue = array_read_key($this->name, $values, $this->default);
 		if ($extenderValue !== null){
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
 				/* @var $field DBItemField */
 				if (array_key_exists($field->name, $values)){
-					$value = $field->translateToDB($values[$field->name]);
-					if ($value !== null){
-						$keys[] = $db->quote($field->name, DB::PARAM_IDENT);
-						$dbValues[] = $value;
-					}
+					$field->appendDBNameAndValueForCreate($values[$field->name], $keys, $dbValues);
 				}
 			}
-			$db->query("INSERT INTO " . $db->quote(DBItemClassSpecifier::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $dbValues) . ")");
+			$db->query("INSERT INTO " . $db->quote(DBItemClassSpecifier::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " (" . $keys . ") VALUES (" . $dbValues . ")");
 
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
 				$field->createDependencies($id, $values);
@@ -158,19 +154,16 @@ class DBItemFieldExtender extends DBItemFieldEnum implements DBItemFieldHasSearc
 		$extenderValue = $item->getRealValue($this);
 		if ($extenderValue !== null){
 			$db = DB::getInstance();
-			$prop = array();
+			$prop = "";
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
 				/* @var $field DBItemField */
 				if ($field->saveDependencies($item) && $item->realValueChanged($field)){
-					$name = $field->name;
-					$value = $item->getRealValue($field);
-					$prop[] = $db->quote($name, DB::PARAM_IDENT) . " = " . ($value === null? "NULL": $db->quote($value));
-
+					$field->appendDBNameAndValueForUpdate($item->getRealValue($field), $prop);
 					$item->makeRealNewValueOld($field);
 				}
 			}
 			if (count($prop) !== 0){
-				$db->query("UPDATE " . $db->quote(DBItemClassSpecifier::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " SET " . implode(", ", $prop) . " WHERE `id` = " . $item->DBid);
+				$db->query("UPDATE " . $db->quote(DBItemClassSpecifier::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " SET " . $prop . " WHERE `id` = " . $item->DBid);
 			}
 		}
 		return false;

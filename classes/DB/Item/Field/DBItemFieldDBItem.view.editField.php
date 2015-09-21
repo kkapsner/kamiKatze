@@ -28,7 +28,7 @@ switch ($this->correlation){
 			array(
 				"postName" => $postName,
 				"availableItems" => $availableItems,
-				"value" => $args->{$this->name}
+				"value" => $this->getValue($args)
 			)
 		);
 		break;
@@ -40,7 +40,7 @@ switch ($this->correlation){
 				array(
 					"postName" => $postName,
 					"availableItems" => $availableItems,
-					"value" => $args->{$this->name}
+					"value" => $this->getValue($args)
 				)
 			);
 			break;
@@ -52,7 +52,7 @@ switch ($this->correlation){
 			array(
 				"postName" => $postName,
 				"availableItems" => $availableItems,
-				"value" => $args->{$this->name}
+				"value" => $this->getValue($args)
 			)
 		);
 		break;

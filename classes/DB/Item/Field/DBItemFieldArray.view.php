@@ -2,7 +2,7 @@
 /* @var $this DBItemFieldArray */
 /* @var $args DBItem */
 
-$values = $args->{$this->name};
+$values = $this->getValue($args);
 
 if (count($values)){
 	echo "<table>\n";

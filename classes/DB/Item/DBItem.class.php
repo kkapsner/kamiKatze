@@ -192,19 +192,15 @@ abstract class DBItem extends DBItemFriends{
 		}
 
 		$db = DB::getInstance();
-		$keys = array();
-		$values = array();
+		$keys = "";
+		$values = "";
 		foreach (DBItemField::parseClass($classSpecifier) as $field){
 			/* @var $field DBItemField */
 			if (array_key_exists($field->name, $fieldValues)){
-				$value = $field->translateToDB($fieldValues[$field->name]);
-				if ($value !== null){
-					$keys[] = $db->quote($field->name, DB::PARAM_IDENT);
-					$values[] = $value;
-				}
+				$field->appendDBNameAndValueForCreate($fieldValues[$field->name], $keys, $values);
 			}
 		}
-		$query = "INSERT INTO " . $db->quote($classSpecifier->getTableName(), DB::PARAM_IDENT) . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $values) . ")";
+		$query = "INSERT INTO " . $db->quote($classSpecifier->getTableName(), DB::PARAM_IDENT) . " (" . $keys . ") VALUES (" . $values . ")";
 		if ($db->query($query) === false){
 			echo $query;
 			var_dump($db->errorInfo());
@@ -285,19 +281,23 @@ abstract class DBItem extends DBItemFriends{
 	 */
 	public function save(){
 		if ($this->changed && !$this->deleted){
-			$prop = array();
-			foreach (DBItemField::parseClass($this->specifier) as $field){
-				/* @var $field DBItemField */
-				if ($field->saveDependencies($this) && array_key_exists($field->name, $this->newValues)){
-					$name = $field->name;
-					$value = $this->newValues[$name];
-					$prop[] = $this->db->quote($name, DB::PARAM_IDENT) . " = " . ($value === null? "NULL": $this->db->quote($value));
-					
+			$prop = "";
+			foreach ($this->newValues as $name => $value){
+				$field = $this->getField($name);
+				if ($field && $field->saveDependencies($this)){
+					$field->appendDBNameAndValueForUpdate($value, $prop);
 					$this->makeRealNewValueOld($field);
 				}
 			}
+//			foreach (DBItemField::parseClass($this->specifier) as $field){
+//				/* @var $field DBItemField */
+//				if ($field->saveDependencies($this) && array_key_exists($field->name, $this->newValues)){
+//					$field->appendDBNameAndValueForUpdate($this->newValues[$field->name], $prop);
+//					$this->makeRealNewValueOld($field);
+//				}
+//			}
 			if (count($prop) !== 0){
-				$this->db->query("UPDATE " . $this->table . " SET " . implode(", ", $prop) . " WHERE `id` = " . $this->DBid);
+				$this->db->query("UPDATE " . $this->table . " SET " . $prop . " WHERE `id` = " . $this->DBid);
 			}
 			$this->changed = false;
 		}

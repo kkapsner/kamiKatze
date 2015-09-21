@@ -1,7 +1,7 @@
 <?php
 /* @var $this DBItemFieldLink */
 /* @var $args DBItem */
-$value = $args->{$this->name};
+$value = $this->getValue($args);
 if ($value !== null){
 	echo '<a href="' . $this->url($this->linkPrefix . $value . $this->linkPostfix) . '"';
 	if ($this->externalLink){

@@ -8,7 +8,7 @@ echo "\n\t\t\t" . '<select name="' . $postName . '">';
 if ($this->null){
 	echo "\n\t\t\t\t" .
 		'<option value=""' .
-			($args->{$this->name} === null? ' selected="selected"': '') .
+			($this->getValue($args) === null? ' selected="selected"': '') .
 		'>' .
 			'---' .
 		'</option>';
@@ -16,7 +16,7 @@ if ($this->null){
 foreach ($this->typeExtension as $value){
 	echo "\n\t\t\t\t" .
 		'<option value="' . $this->html($value) . '"' .
-			($args->{$this->name} === $value? ' selected="selected"': '') . '>' .
+			($this->getValue($args) === $value? ' selected="selected"': '') . '>' .
 			$this->html($value) .
 		'</option>';
 }

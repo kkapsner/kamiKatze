@@ -104,6 +104,11 @@ class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearchable{
 	 */
 	public $correlationName = null;
 	/**
+	 * The condition that the correlated DBItems have to fulfill. Only used in 1toN.
+	 * @var string
+	 */
+	public $correlationCondition = null;
+	/**
 	 * If a change in this field can overwrite this field in an other item.
 	 * @var boolean
 	 */
@@ -182,6 +187,13 @@ class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearchable{
 				$this->correlation = self::ONE_TO_ONE;
 		}
 		$this->correlationName = array_read_key("correlationName", $options, $classSpecifier->getClassName());
+		if ($this->correlation === self::ONE_TO_N){
+			$this->correlationCondition = array_read_key("correlationCondition", $options, $this->correlationCondition);
+			if ($this->correlationCondition){
+				$this->editable = false;
+			}
+		}
+		
 	}
 
 	/**
@@ -219,16 +231,25 @@ class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearchable{
 
 	/**
 	 * {@inheritdoc}
-	 *
-	 * DBItem field should only be set by member assignments.
+	 * 
 	 * @param mixed $value
-	 * @return null
+	 * @param string $nameOut
+	 * @param string|null $valueOut
 	 */
-	public function translateToDB($value){
-		return null;
+	public function appendDBNameAndValueForCreate($value, &$nameOut, &$valueOut = null){
 	}
 
 	/**
+	 * {@inheritdoc}
+	 * 
+	 * @param type $value
+	 * @param string $propsOut
+	 */
+	public function appendDBNameAndValueForUpdate($value, &$propsOut){
+		parent::appendDBNameAndValueForCreate($value, $propsOut);
+	}
+
+			/**
 	 * {@inheritdoc}
 	 *
 	 * @param DBItem $item
@@ -276,7 +297,8 @@ class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearchable{
 			case self::ONE_TO_N:
 				return DBItem::getByConditionCLASS(
 					$this->class,
-					DB::getInstance()->quote($this->correlationName, DB::PARAM_IDENT) . " = " . $item->DBid
+					DB::getInstance()->quote($this->correlationName, DB::PARAM_IDENT) . " = " . $item->DBid .
+					($this->correlationCondition? " AND " . $this->correlationCondition: "")
 				);
 				break;
 			case self::N_TO_N:
