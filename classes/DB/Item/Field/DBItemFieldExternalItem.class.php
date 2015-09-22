@@ -34,12 +34,12 @@ class DBItemFieldExternalItem extends DBItemField{
 	 * {@inheritdoc}
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param mixed[] $options
+	 * @param mixed[] $properties
 	 */
-	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
-		parent::parseOptions($classSpecifier, $options);
+	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		parent::adoptProperties($classSpecifier, $properties);
 
-		$this->class = array_read_key("externalClass", $options, null);
+		$this->class = array_read_key("externalClass", $properties, null);
 		
 		// disable default options...
 		$this->searchable = false;

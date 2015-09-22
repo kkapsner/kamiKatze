@@ -9,27 +9,9 @@
  * @author Korbinian Kapsner
  * @package DB\Item\Field
  */
-class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSubcollection{
-	/**
-	 * An array with the field options for the array entries.
-	 * @var DBItemFieldCollection
-	 */
-	protected $groupFields;
+class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSubcollection, DBItemFieldGroupInterface{
+	use DBItemFieldGroupTrait;	
 
-	/**
-	 * {@inheritdoc}
-	 * 
-	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param array $options
-	 */
-	protected function parseGroup($classSpecifier, $group){
-		$this->groupFields = self::iterateForParseClass($classSpecifier, $group);
-		foreach ($this->groupFields as $field){
-			/* @var $field DBItemField */
-			$field->parentField = $this;
-		}
-	}
-	
 	/**
 	 * {@inheritdoc}
 	 * 
@@ -144,25 +126,6 @@ class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSu
 		if (array_key_exists($this->name, $data)){
 			$translatedData[$this->name] = $this->groupFields->translateRequestData($data[$this->name]);
 		}
-	}
-
-	/**
-	 * {@inheritdoc}
-	 * 
-	 * @param mixed $value
-	 * @return null
-	 */
-	public function translateToDB($value){
-		return null;
-	}
-
-	/**
-	 * {@inheritdoc}
-	 * 
-	 * @return null
-	 */
-	public function translateNameToDB(){
-		return null;
 	}
 
 	/**

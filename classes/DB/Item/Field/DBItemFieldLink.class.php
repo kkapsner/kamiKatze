@@ -31,14 +31,14 @@ class DBItemFieldLink extends DBItemFieldNative{
 	 * {@inheritdoc}
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param mixed[] $options
+	 * @param mixed[] $properties
 	 */
-	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
-		parent::parseOptions($classSpecifier, $options);
+	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		parent::adoptProperties($classSpecifier, $properties);
 
-		$this->linkPrefix = array_read_key("linkPrefix", $options, $this->linkPrefix);
-		$this->linkPostfix = array_read_key("linkPostfix", $options, $this->linkPostfix);
-		$this->externalLink = array_read_key("externalLink", $options, $this->externalLink);
+		$this->linkPrefix = array_read_key("linkPrefix", $properties, $this->linkPrefix);
+		$this->linkPostfix = array_read_key("linkPostfix", $properties, $this->linkPostfix);
+		$this->externalLink = array_read_key("externalLink", $properties, $this->externalLink);
 	}
 
 }

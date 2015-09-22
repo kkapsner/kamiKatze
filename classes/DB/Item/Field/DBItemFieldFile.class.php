@@ -35,15 +35,15 @@ class DBItemFieldFile extends DBItemField{
 	 * {@inheritdoc}
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param mixed[] $options
+	 * @param mixed[] $properties
 	 */
-	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
-		parent::parseOptions($classSpecifier, $options);
+	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		parent::adoptProperties($classSpecifier, $properties);
 		$this->specifier = new DBItemClassSpecifier(
 			"DBItemFieldFileItem",
-			DBItemClassSpecifier::$tablePrefix . array_read_key("fileTable", $options, "Files")
+			DBItemClassSpecifier::$tablePrefix . array_read_key("fileTable", $properties, "Files")
 		);
-		$this->image = array_read_key("image", $options, $this->image);
+		$this->image = array_read_key("image", $properties, $this->image);
 	}
 
 	/**

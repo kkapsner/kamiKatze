@@ -9,10 +9,7 @@
  * @author Korbinian Kapsner
  * @package DB\Item\Field
  */
-class DBItemField extends DBItemFriends{
-	const DB_ITEM = "DBItem";
-	const EXTERNAL_ITEM = "externalItem";
-
+class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	/**
 	 * Cache array for already parsed classes.
 	 * @var array
@@ -40,7 +37,8 @@ class DBItemField extends DBItemFriends{
 	 */
 	public $type = null;
 	/**
-	 * The type extension (part in the brackets). If the field is an enum or set ths is an array of the possible values.
+	 * The type extension (part in the brackets). If the field is an enum or set
+	 * this is an array of the possible values.
 	 * @var mixed
 	 */
 	public $typeExtension = null;
@@ -76,15 +74,22 @@ class DBItemField extends DBItemFriends{
 	 */
 	protected $parentField = null;
 
-
 	/**
-	 * Generates the field options from a DB result.
-	 * @param string $classSpecifier The class specifier
-	 * @param array $result The results to parse
-	 * @return self
+	 * Returns the properties of a filed providing the properties of the field
+	 * in the DB.
+	 * 
+	 * @param string[] $dbProperties
+	 * @return mixed[] the parsed properties
 	 */
-	protected static function parseResult($classSpecifier, $result){
-		if (preg_match('/^(.+?)\((.*)\)$/', $result["Type"], $m)){
+	protected static function getProperties($dbProperties){
+		$properties = json_decode($dbProperties["Comment"], true);
+		if (!is_array($properties)){
+			$properties = array();
+		}
+		$properties["rawDBOptions"] = $dbProperties;
+		$properties["name"] = $dbProperties["Field"];
+		
+		if (preg_match('/^(.+?)\((.*)\)$/', $dbProperties["Type"], $m)){
 			$type = $m[1];
 			$typeExtension = $m[2];
 			
@@ -101,94 +106,89 @@ class DBItemField extends DBItemFriends{
 			}
 		}
 		else {
-			$type = $result['Type'];
+			$type = $dbProperties['Type'];
 			$typeExtension = null;
 		}
+		$properties["typeExtension"] = $typeExtension;
 		
-		$options = json_decode($result["Comment"], true);
-		if (!is_array($options)){
-			$options = array();
+		$properties["originalType"] = $type;
+		
+		$properties["null"] = $dbProperties["Null"] === "YES";
+		$properties["default"] = $dbProperties["Default"];
+		if (
+			!array_key_exists("displayName", $properties) &&
+			array_key_exists("DisplayName", $dbProperties)
+		){
+			$properties["displayName"] = $dbProperties["DisplayName"];
 		}
-		if (array_key_exists("customField", $options)){
+		
+		$properties["type"] = self::getType($properties, $type);
+		
+		return $properties;
+	}
+	
+	/**
+	 * Returns the desired type for a field providing the properties and the
+	 * original type in the database.
+	 * 
+	 * @param array $properties The properties of the field.
+	 * @param string $type The type of the field in the DB
+	 * @return string The proper type to use.
+	 */
+	protected static function getType(array $properties, $type){
+		if (array_key_exists("customField", $properties)){
 			$type = "custom";
 		}
-		elseif (array_key_exists("class", $options)){
-			$type = self::DB_ITEM;
+		elseif (array_key_exists("class", $properties)){
+			$type = "DBItem";
 		}
-		elseif (array_key_exists("externalClass", $options)){
-			$type = self::EXTERNAL_ITEM;
+		elseif (array_key_exists("externalClass", $properties)){
+			$type = "externalItem";
 		}
-		elseif (array_read_key("computedValue", $options, false)){
+		elseif (array_read_key("computedValue", $properties, false)){
 			$type = "computedValue";
 		}
-		elseif (array_read_key("isArray", $options, false) || array_read_key("array", $options, false)){
+		elseif (array_read_key("isArray", $properties, false) || array_read_key("array", $properties, false)){
 			$type = "array";
 		}
-		elseif (array_read_key("isFile", $options, false) || array_read_key("file", $options, false)){
+		elseif (array_read_key("isFile", $properties, false) || array_read_key("file", $properties, false)){
 			$type = "file";
 		}
-		elseif (array_read_key("isLink", $options, false) || array_read_key("link", $options, false)){
+		elseif (array_read_key("isLink", $properties, false) || array_read_key("link", $properties, false)){
 			$type = "link";
 		}
-		elseif ($type === "enum" && array_read_key("extender", $options, false)){
+		elseif ($type === "enum" && array_read_key("extender", $properties, false)){
 			$type = "extender";
 		}
-		
-		switch ($type){
-			case "custom":
-				$item = new $options["customField"]($result["Field"]);
-				break;
-			case "array":
-				$item = new DBItemFieldArray($result["Field"]);
-				break;
-			case "enum":
-				$item = new DBItemFieldEnum($result["Field"]);
-				break;
-			case "extender":
-				$item = new DBItemFieldExtender($result["Field"]);
-				break;
-			case "file":
-				$item = new DBItemFieldFile($result["Field"]);
-				break;
-			case "set":
-				$item = new DBItemFieldSet($result["Field"]);
-				break;
-			case "tinytext":
-			case "text":
-			case "mediumtext":
-			case "longtext":
-				$item = new DBItemFieldText($result["Field"]);
-				break;
-			case "link":
-				$item = new DBItemFieldLink($result["Field"]);
-				break;
-			case self::DB_ITEM:
-				$item = new DBItemFieldDBItem($result["Field"]);
-				break;
-			case self::EXTERNAL_ITEM:
-				$item = new DBItemFieldExternalItem($result["Field"]);
-				break;
-			case "computedValue":
-				$item = new DBItemFieldComputedValue($result["Field"]);
-				break;
-			case "tinyint":
-				if ($typeExtension == 1){
-					$item = new DBItemFieldBoolean($result["Field"]);
-					break;
-				}
-			default:
-				$item = new DBItemFieldNative($result["Field"]);
+		elseif ($type === "tinyint" && $properties["typeExtension"] == 1) {
+			$type = "boolean";
+		}
+		elseif (preg_match ("/(?:tiny||medium|long)text$/i", $type)){
+			$type = "text";
 		}
 		
+		return $type;
+	}
+	
+	/**
+	 * Generates the field from a DB result.
+	 * 
+	 * @param string $classSpecifier The class specifier
+	 * @param array $result The results to parse
+	 * @return self
+	 */
+	protected static function parseResult($classSpecifier, $result){
+		$options = self::getProperties($result);
 		
-		$item->null = $result['Null'] === "YES";
-		$item->default = $result["Default"];
-		$item->type = $type;
-		$item->typeExtension = $typeExtension;
-		$item->displayName = array_read_key("DisplayName", $result, $item->displayName);
-		
-		$item->parseOptions($classSpecifier, $options);
-		return $item;
+		$className = $options["type"] === "custom"?
+			$options["customField"]:
+			"DBItemField" . ucfirst($options["type"]);
+		if (is_a($className, "DBItemFieldInterface", true)){
+			return $className::create($classSpecifier, $options);
+		}
+		else {
+			return DBItemFieldNative::create($classSpecifier, $options);
+		}
 	}
 	
 	/**
@@ -198,29 +198,32 @@ class DBItemField extends DBItemFriends{
 	 * @return slef
 	 */
 	protected static function parseGroupResults($classSpecifier, $groupName, $group){
-		$options = array();
+		$properties = array();
 		foreach ($group as $result){
 			$newOptions = json_decode($result["Comment"], true);
 			if (is_array($newOptions)){
-				$options = array_merge($options, $newOptions);
+				$properties = array_merge($properties, $newOptions);
 			}
 		}
-//		if (array_key_exists("groupFieldClass", $options)){
-//			$item = new $options["groupFieldClass"]($groupName);
-//			$item->parseGroup($classSpecifier, $group);
-//			$item->parseOptions($classSpecifier, $options);
-//		}
-//		else {
+		if (
+			array_key_exists("groupFieldClass", $properties) &&
+			is_a($properties["groupFieldClass"], "DBItemFieldGroupInterface", true)
+		){
+			$item = new $properties["groupFieldClass"]($groupName);
+			$item->parseGroup($classSpecifier, $group);
+			$item->adoptProperties($classSpecifier, $properties);
+		}
+		else {
 			$item = new DBItemFieldGroup($groupName);
 			$item->parseGroup($classSpecifier, $group);
-//		}
+		}
 		return $item;
 	}
 
 	/**
 	 * Performs the iterator for parseClass.
+	 * @param DBItemClassSpecifire $classSpecifier
 	 * @param Iterator $iter
-	 * @param DBItemClassSpecifier $classSpecifier
 	 * @return DBItemFieldCollection
 	 */
 	protected static function iterateForParseClass($classSpecifier, $iter){
@@ -278,7 +281,7 @@ class DBItemField extends DBItemFriends{
 	}
 
 	/**
-	 * Protected constructor of DBItemFieldOption.
+	 * Protected constructor of DBItemField. DO NOT USE!
 	 *
 	 * @param type $name
 	 */
@@ -286,20 +289,36 @@ class DBItemField extends DBItemFriends{
 		$this->name = $name;
 		$this->displayName = $name;
 	}
+	
+	/**
+	 * Factory function to create fields.
+	 * 
+	 * @param DBItemClassSpecifier $classSpecifier
+	 * @param mixed[] $properties
+	 * @return DBItemField
+	 */
+	protected static function create(DBItemClassSpecifier $classSpecifier, $properties){
+		$item = new static($properties["name"]);
+		$item->adoptProperties($classSpecifier, $properties);
+		return $item;
+	}
 
 	/**
-	 * Parses the field options according to its type.
-	 * 
+	 * Parses the field properties according to its type.
 	 * Overwrite this function for the specific types.
+	 * 
+	 * IMPORTANT: This functions has to be called if overwriten.
 	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param array $options
+	 * @param array $properties
 	 */
-	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
-		$this->regExp = array_read_key("regExp", $options, null);
-		$this->displayable = array_read_key("displayable", $options, $this->displayable);
-		$this->editable = array_read_key("editable", $options, $this->editable);
-		$this->searchable = array_read_key("searchable", $options, $this->searchable);
-		$this->displayName = array_read_key("displayName", $options, $this->displayName);
+	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		$props = array(
+			"null", "default", "type", "typeExtension", "displayName", "regExp",
+			"displayable", "editable", "searchable", "displayName"
+		);
+		foreach ($props as $prop){
+			$this->{$prop} = array_read_key($prop, $properties, $this->{$prop});
+		}
 	}
 
 	/**

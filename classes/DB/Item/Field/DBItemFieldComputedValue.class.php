@@ -25,10 +25,10 @@ class DBItemFieldComputedValue extends DBItemField{
 	 * {@inheritdoc}
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param mixed[] $options
+	 * @param mixed[] $properties
 	 */
-	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
-		parent::parseOptions($classSpecifier, $options);
+	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		parent::adoptProperties($classSpecifier, $properties);
 		
 		// disable default options...
 		$this->searchable = false;

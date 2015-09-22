@@ -60,14 +60,14 @@ class DBItemFieldArray extends DBItemField{
 	 * {@inheritdoc}
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param array $options
+	 * @param array $properties
 	 */
-	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
-		parent::parseOptions($classSpecifier, $options);
+	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		parent::adoptProperties($classSpecifier, $properties);
 
-		$this->linkTable = array_read_key("linkTable", $options, $classSpecifier . "_" . $this->name . "ArrayData");
+		$this->linkTable = array_read_key("linkTable", $properties, $classSpecifier . "_" . $this->name . "ArrayData");
 		$this->linkSpecifier = new DBItemClassSpecifier("DBItemFieldArrayItem", $this->linkTable);
-		$this->linkField = array_read_key("linkField", $options, "link_id");
+		$this->linkField = array_read_key("linkField", $properties, "link_id");
 		$this->arrayFields = DBItemField::parseClass($this->linkTable);
 		foreach ($this->arrayFields as $field){
 			/* @var $field DBItemField */

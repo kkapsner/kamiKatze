@@ -26,13 +26,13 @@ class DBItemFieldBoolean extends DBItemFieldNative{
 	 * {@inheritdoc}
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param mixed[] $options
+	 * @param mixed[] $properties
 	 */
-	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
-		parent::parseOptions($classSpecifier, $options);
+	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		parent::adoptProperties($classSpecifier, $properties);
 
-		$this->trueString = array_read_key("trueString", $options, $this->trueString);
-		$this->falseString = array_read_key("falseString", $options, $this->falseString);
+		$this->trueString = array_read_key("trueString", $properties, $this->trueString);
+		$this->falseString = array_read_key("falseString", $properties, $this->falseString);
 	}
 	
 	/**

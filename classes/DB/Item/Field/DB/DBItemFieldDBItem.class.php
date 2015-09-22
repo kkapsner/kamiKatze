@@ -156,21 +156,21 @@ class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearchable{
 	 * {@inheritdoc}
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param mixed[] $options
+	 * @param mixed[] $properties
 	 */
-	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
-		parent::parseOptions($classSpecifier, $options);
+	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		parent::adoptProperties($classSpecifier, $properties);
 
-		$this->class = array_read_key("class", $options, null);
-		$this->canOverwriteOthers = array_read_key("canOverwriteOthers", $options, $this->canOverwriteOthers);
-		$this->canHaveMultipleLinks = array_read_key("canHaveMultipleLinks", $options, $this->canHaveMultipleLinks);
+		$this->class = array_read_key("class", $properties, $this->class);
+		$this->canOverwriteOthers = array_read_key("canOverwriteOthers", $properties, $this->canOverwriteOthers);
+		$this->canHaveMultipleLinks = array_read_key("canHaveMultipleLinks", $properties, $this->canHaveMultipleLinks);
 
 		// disable default options...
 		$this->searchable = false;
 		$this->regExp = null;
 
 		# determine correlation
-		switch (strtolower(array_read_key("correlation", $options, "1to1"))){
+		switch (strtolower(array_read_key("correlation", $properties, "1to1"))){
 			case "1to1": case "onetoone":
 				$this->correlation = self::ONE_TO_ONE;
 				break;
@@ -186,9 +186,9 @@ class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearchable{
 			default:
 				$this->correlation = self::ONE_TO_ONE;
 		}
-		$this->correlationName = array_read_key("correlationName", $options, $classSpecifier->getClassName());
+		$this->correlationName = array_read_key("correlationName", $properties, $classSpecifier->getClassName());
 		if ($this->correlation === self::ONE_TO_N){
-			$this->correlationCondition = array_read_key("correlationCondition", $options, $this->correlationCondition);
+			$this->correlationCondition = array_read_key("correlationCondition", $properties, $this->correlationCondition);
 			if ($this->correlationCondition){
 				$this->editable = false;
 			}
@@ -344,7 +344,7 @@ class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearchable{
 				if ($value === null){
 					$item->setRealValue($this->name, null);
 				}
-				elseif ($value instanceof $this->class){
+				elseif (is_a($value, $this->class)){
 					if ($oldValue !== $value){
 						$item->setRealValue($this->name, $value->DBid);
 						if ($this->correlation === self::ONE_TO_ONE){

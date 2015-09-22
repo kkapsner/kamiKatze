@@ -40,10 +40,10 @@ class DBItemFieldExtender extends DBItemFieldEnum implements DBItemFieldHasSearc
 	 * {@inheritdoc}
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param array $options
+	 * @param array $properties
 	 */
-	protected function parseOptions(DBItemClassSpecifier $classSpecifier, $options){
-		parent::parseOptions($classSpecifier, $options);
+	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		parent::adoptProperties($classSpecifier, $properties);
 		
 		foreach ($this->typeExtension as $value){
 			$this->extensionFieldOptions[$value] = DBItemField::parseClass($value);

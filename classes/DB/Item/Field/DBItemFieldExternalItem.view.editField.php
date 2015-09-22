@@ -1,5 +1,5 @@
 <?php
-/* @var $this DBItemFieldDBItem */
+/* @var $this DBItemFieldExternalItem */
 /* @var $context string */
 /* @var $args DBItem */
 
