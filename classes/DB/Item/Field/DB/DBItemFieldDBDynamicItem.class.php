@@ -85,12 +85,14 @@ class DBItemFieldDBDynamicItem extends DBItemFieldDBItem implements DBItemFieldG
 
 	public function translateRequestData($data, &$translatedData){
 		if (
-			array_key_exists($this->name, $data) &&
-			is_array($data[$this->name]) &&
-			array_key_exists($this->classField->name, $data[$this->name])
+			array_key_exists($this->name, $data)
 		){
-			$className = $data[$this->name][$this->classField->name];
-			$translatedData[$this->name] = DBItem::getCLASS($className, array_read_key($className, $data[$this->name], null));
+			if (preg_match("/^([a-z_]+)#(\\d+)$/i", $data[$this->name], $matches) && class_exists($matches[1])){
+				$translatedData[$this->name] = DBItem::getCLASS($matches[1], $matches[2]);
+			}
+			else {
+				$translatedData[$this->name] = null;
+			}
 		}
 	}
 
