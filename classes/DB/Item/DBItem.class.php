@@ -282,6 +282,10 @@ abstract class DBItem extends DBItemFriends{
 	public function save(){
 		if ($this->changed && !$this->deleted){
 			$prop = "";
+			foreach (DBItemField::parseClass($this->specifier) as $field){
+//				/* @var $field DBItemField */
+				$field->saveDependencies($this);
+			}
 			foreach ($this->newValues as $name => $value){
 				$field = $this->getField($name);
 				if ($field && $field->saveDependencies($this)){
@@ -289,15 +293,9 @@ abstract class DBItem extends DBItemFriends{
 					$this->makeRealNewValueOld($field);
 				}
 			}
-//			foreach (DBItemField::parseClass($this->specifier) as $field){
-//				/* @var $field DBItemField */
-//				if ($field->saveDependencies($this) && array_key_exists($field->name, $this->newValues)){
-//					$field->appendDBNameAndValueForUpdate($this->newValues[$field->name], $prop);
-//					$this->makeRealNewValueOld($field);
-//				}
-//			}
-			if (count($prop) !== 0){
+			if (strlen($prop) !== 0){
 				$this->db->query("UPDATE " . $this->table . " SET " . $prop . " WHERE `id` = " . $this->DBid);
+				var_dump($this->db->errorInfo());
 			}
 			$this->changed = false;
 		}

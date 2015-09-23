@@ -162,7 +162,7 @@ class DBItemFieldExtender extends DBItemFieldEnum implements DBItemFieldHasSearc
 					$item->makeRealNewValueOld($field);
 				}
 			}
-			if (count($prop) !== 0){
+			if (strlen($prop) !== 0){
 				$db->query("UPDATE " . $db->quote(DBItemClassSpecifier::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " SET " . $prop . " WHERE `id` = " . $item->DBid);
 			}
 		}
