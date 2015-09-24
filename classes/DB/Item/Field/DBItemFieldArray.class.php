@@ -21,7 +21,7 @@ class DBItemFieldArray extends DBItemField{
 	 */
 	protected $linkField;
 	/**
-	 * The class specifier for the linke table.
+	 * The class specifier for the link table.
 	 * @var DBItemClassSpecifier
 	 */
 	protected $linkSpecifier;

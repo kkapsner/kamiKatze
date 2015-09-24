@@ -38,7 +38,7 @@ class DBItemFieldDBItemOneToN extends DBItemFieldDBItemXToN{
 	 */
 	public function getValue(DBItem $item){
 		return DBItem::getByConditionCLASS(
-			$this->class,
+			$this->classSpecifier,
 			DB::getInstance()->quote($this->correlationName, DB::PARAM_IDENT) . " = " . $item->DBid .
 			($this->correlationCondition? " AND " . $this->correlationCondition: "")
 		);

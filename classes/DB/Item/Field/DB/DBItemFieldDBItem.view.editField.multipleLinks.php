@@ -27,7 +27,7 @@ foreach ($args["value"] as $value){
 				array(
 					"postName" => $postName . "[values][]",
 					"availableItems" => $args["availableItems"],
-					"value" => DBItem::getCLASS($this->class, 0)
+					"value" => DBItem::fastGetCLASS($this->classSpecifier, 0)
 				)
 			);
 		?></script>

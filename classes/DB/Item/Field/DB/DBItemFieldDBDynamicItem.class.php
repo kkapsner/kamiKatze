@@ -71,7 +71,7 @@ class DBItemFieldDBDynamicItem extends DBItemFieldDBItemNToOne implements DBItem
 		if ($value !== null){
 			$newClass = get_class($value);
 			if ($this->classField->isValidValue($newClass)){
-				$this->class = $newClass;
+				$this->setClass($newClass);
 				return parent::isValidValue($value);
 			}
 			else {
@@ -121,12 +121,12 @@ class DBItemFieldDBDynamicItem extends DBItemFieldDBItemNToOne implements DBItem
 				parent::setValue($item, null);
 				$this->classField->setValue($item, $newClass);
 			}
-			$this->class = $newClass;
+			$this->setClass($newClass);
 		}
 		$this->name = $this->idField->name;
 		parent::setValue($item, $value);
 		
-		$this->class = $oldClass;
+		$this->setClass($oldClass);
 		$this->name = $oldName;
 	}
 	
@@ -134,11 +134,11 @@ class DBItemFieldDBDynamicItem extends DBItemFieldDBItemNToOne implements DBItem
 		$oldClass = $this->class;
 		$oldName = $this->name;
 		
-		$this->class = $this->classField->getValue($item);
+		$this->setClass($this->classField->getValue($item));
 		$this->name = $this->idField->name;
 		$ret = parent::getValue($item);
 		
-		$this->class = $oldClass;
+		$this->setClass($oldClass);
 		$this->name = $oldName;
 		return $ret;
 	}
@@ -152,5 +152,3 @@ class DBItemFieldDBDynamicItem extends DBItemFieldDBItemNToOne implements DBItem
 	}
 
 }
-
-?>

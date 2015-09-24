@@ -49,13 +49,22 @@ abstract class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearc
 		$item->adoptProperties($classSpecifier, $properties);
 		return $item;
 	}
-
+	
+	/**
+	 * The specifier of the connected DBItem.
+	 * @var DBItemClassSpecifier
+	 */
+	protected $classSpecifier = null;
 	
 	/**
 	 * If this is not null this field represents another DBItem with this class.
 	 * @var string
 	 */
 	public $class = null;
+	public function setClass($newClass){
+		$this->class = $newClass;
+		$this->classSpecifier = DBItemClassSpecifier::make($newClass);
+	}
 	/**
 	 * The correlation between this DBItem and the other one.
 	 * @var int
@@ -80,8 +89,8 @@ abstract class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearc
 	 */
 	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
 		parent::adoptProperties($classSpecifier, $properties);
-
-		$this->class = array_read_key("class", $properties, $this->class);
+		
+		$this->setClass(array_read_key("class", $properties, $this->class));
 		$this->canOverwriteOthers = array_read_key("canOverwriteOthers", $properties, $this->canOverwriteOthers);
 
 		// disable default options...

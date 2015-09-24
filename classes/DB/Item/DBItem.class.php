@@ -41,6 +41,12 @@ abstract class DBItem extends DBItemFriends{
 	protected $specifier;
 	
 	/**
+	 * The collection of all fields.
+	 * @var DBItemFieldCollection
+	 */
+	protected $fields;
+	
+	/**
 	 * ID of the item in the DB
 	 * @var int
 	 */
@@ -76,6 +82,12 @@ abstract class DBItem extends DBItemFriends{
 	 */
 	protected $newValues = array();
 	
+	/**
+	 * Cache for already processed values.
+	 * @var mixed[]
+	 */
+	protected $processedValueCache = array();
+	
 	// static class functions
 	
 	/**
@@ -86,16 +98,24 @@ abstract class DBItem extends DBItemFriends{
 	 */
 	public static function getCLASS($classSpecifier, $id){
 		#check for valid ID
-		if (!is_int($id) && !ctype_digit($id)) return null;
-		$id = (int) $id;
+		if (!is_int($id) && !ctype_digit($id)){
+			return null;
+		}
 		
 		$classSpecifier = DBItemClassSpecifier::make($classSpecifier);
 		$className = $classSpecifier->getClassName();
-		$specifiedName = $classSpecifier->getSpecifiedName();
 
 		#check if $class is an DBItem
-		if (!is_subclass_of($className, "DBItem")) return null;
-
+		if (!is_subclass_of($className, "DBItem")){
+			return null;
+		}
+		
+		return self::fastGetCLASS($classSpecifier, (int) $id);
+	}
+	
+	protected static function fastGetCLASS(DBItemClassSpecifier $classSpecifier, $id){
+		$specifiedName = $classSpecifier->getSpecifiedName();
+		$className = $classSpecifier->getClassName();
 		if (!array_key_exists($specifiedName, self::$instances)){
 			self::$instances[$specifiedName] = array();
 		}
@@ -150,7 +170,7 @@ abstract class DBItem extends DBItemFriends{
 		$res = $db->query($sql);
 		if ($res){
 			foreach ($res as $row){
-				$ret[] = self::getCLASS($classSpecifier, $row["id"]);
+				$ret[] = self::fastGetCLASS($classSpecifier, $row["id"]);
 			}
 		}
 		return $ret;
@@ -210,7 +230,7 @@ abstract class DBItem extends DBItemFriends{
 		foreach (DBItemField::parseClass($classSpecifier) as $field){
 			$field->createDependencies($newId, $fieldValues);
 		}
-		$item = self::getCLASS($classSpecifier, $newId);
+		$item = self::fastGetCLASS($classSpecifier, $newId);
 		
 		foreach (DBItemField::parseClass($classSpecifier) as $field){
 			/* @var $field DBItemField */
@@ -240,10 +260,12 @@ abstract class DBItem extends DBItemFriends{
 	 * @see DBItem::getCLASS()
 	 * @param DBItemClassSpecifier $classSpecifier
 	 * @param int $DBid
+	 * @param string[]|null $data
 	 */
-	protected function __construct(DBItemClassSpecifier $classSpecifier, $DBid){
+	protected function __construct(DBItemClassSpecifier $classSpecifier, $DBid, $data = null){
 		$this->db = DB::getInstance();
 		$this->specifier = $classSpecifier;
+		$this->fields = DBItemField::parseClass($this->specifier);
 		$this->table = $this->db->quote($this->specifier->getTableName(), DB::PARAM_IDENT);
 		$this->DBid = $DBid;
 		$this->load();
@@ -255,7 +277,7 @@ abstract class DBItem extends DBItemFriends{
 	public function load(){
 		if ($this->DBid === 0){
 			$data = array();
-			foreach (DBItemField::parseClass($this->specifier) as $field){
+			foreach ($this->fields as $field){
 				/* @var $field DBItemField */
 				$data[$field->name] = $field->default;
 			}
@@ -270,7 +292,7 @@ abstract class DBItem extends DBItemFriends{
 			
 		}
 		$this->oldValues = $data;
-		foreach (DBItemField::parseClass($this->specifier) as $field){
+		foreach ($this->fields as $field){
 			/* @var $field DBItemField */
 			$field->loadDependencies($this);
 		}
@@ -282,7 +304,7 @@ abstract class DBItem extends DBItemFriends{
 	public function save(){
 		if ($this->changed && !$this->deleted){
 			$prop = "";
-			foreach (DBItemField::parseClass($this->specifier) as $field){
+			foreach ($this->fields as $field){
 //				/* @var $field DBItemField */
 				$field->saveDependencies($this);
 			}
@@ -307,7 +329,7 @@ abstract class DBItem extends DBItemFriends{
 		if (!$this->deleted){
 			$this->db->query("DELETE FROM  " . $this->table . " WHERE `id` = " . $this->DBid);
 			
-			foreach (DBItemField::parseClass($this->specifier) as $item){
+			foreach ($this->fields as $item){
 				/* @var $item DBItemField */
 				$item->deleteDependencies($this);
 			}
@@ -329,13 +351,15 @@ abstract class DBItem extends DBItemFriends{
 	 */
 	public function getField($name, $searchAllCollections = false, $collection = null){
 		if ($collection === null){
-			$collection = DBItemField::parseClass($this->specifier);
+			$collection = $this->fields;
 		}
+		$item = $collection->getFieldByName($name);
+		if ($item){
+			return $item;
+		}
+		
 		foreach ($collection as $item){
 			/* @var $item DBItemField */
-			if ($item->name === $name){
-				return $item;
-			}
 			if ($item instanceof DBItemFieldHasSearchableSubcollection){
 				if ($searchAllCollections){
 					foreach ($item->getAllSubcollections() as $subcollection){
@@ -425,6 +449,9 @@ abstract class DBItem extends DBItemFriends{
 		if ($name === "DBid"){
 			return $this->DBid;
 		}
+		if (array_key_exists($name, $this->processedValueCache)){
+			return $this->processedValueCache[$name];
+		}
 		
 		$field = $this->getField($name, true);
 		if ($field === null){
@@ -435,7 +462,9 @@ abstract class DBItem extends DBItemFriends{
 			throw new InvalidArgumentException("No property " . $name . " found.");
 		}
 		else {
-			return $field->getValue($this);
+			$ret = $field->getValue($this);
+			$this->processedValueCache[$name] = $ret;
+			return $ret;
 		}
 	}
 
@@ -471,6 +500,8 @@ abstract class DBItem extends DBItemFriends{
 		if (!$this->changeable){
 			throw new Exception("This item can not be changed.");
 		}
+		
+		unset($this->processedValueCache[$name]);
 
 		$field = $this->getField($name, false);
 		if ($field === null){

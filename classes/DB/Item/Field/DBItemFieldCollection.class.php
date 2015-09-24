@@ -12,6 +12,12 @@
  */
 class DBItemFieldCollection extends Collection{
 	/**
+	 * Cache to get the field by name faster.
+	 * @var DBItemField[]
+	 */
+	private $nameToField = array();
+	
+	/**
 	 * {@inheritdoc}
 	 *
 	 * @throws InvalidArgumentException
@@ -58,15 +64,38 @@ class DBItemFieldCollection extends Collection{
 	 * @return null|DBItemField
 	 */
 	public function getFieldByName($name){
-		
-		foreach ($this as $field){
-			/* @var $field DBItemField */
-			if ($field->name === $name){
-				return $field;
-			}
-		}
-		return null;
+		return array_read_key($name, $this->nameToField, null);
 	}
-}
+	
+	public function offsetSet($offset, $value){
+		parent::offsetSet($offset, $value);
+		$this->nameToField[$value->name] = $value;
+	}
+	
+	public function offsetUnset($offset){
+		$item = $this[$offset];
+		unset($this->nameToField[$item->name]);
+		parent::offsetUnset($offset);
+	}
 
-?>
+	public function pop(){
+		throw new BadMethodCallException("Pop is not available for DBItemFieldCollections.");
+	}
+
+	public function shift(){
+		throw new BadMethodCallException("Shift is not available for DBItemFieldCollections.");
+	}
+
+	public function push($var){
+		throw new BadMethodCallException("Push is not available for DBItemFieldCollections.");
+	}
+
+	public function splice($offset, $length = null, $replacement = null){
+		throw new BadMethodCallException("Splice is not available for DBItemFieldCollections.");
+	}
+
+	public function unshift($var){
+		throw new BadMethodCallException("Unshift is not available for DBItemFieldCollections.");
+	}
+
+}

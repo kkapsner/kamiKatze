@@ -17,7 +17,7 @@ if (count($values)){
 		<td>
 			<button type="button">create new</button>
 			<script type="text/data"><?php
-				$this->view("editRow", true, array($postName, DBItem::getCLASS($this->linkSpecifier, 0)));
+				$this->view("editRow", true, array($postName, DBItem::fastGetCLASS($this->linkSpecifier, 0)));
 			?></script>
 			<script type="text/javascript">
 				(function(){

@@ -63,6 +63,16 @@ abstract class DBItemFriends extends ViewableHTML{
 	 * @param DBItemField $field
 	 * @throws BadFunctionCallException
 	 */
+	protected static function fastGetCLASS(DBItemClassSpecifier $classSpecifier, $id){
+		throw new BadFunctionCallException("Not callable!");
+	}
+
+	/**
+	 * Only to implement in DBItem!
+	 *
+	 * @param DBItemField $field
+	 * @throws BadFunctionCallException
+	 */
 	protected function realValueChanged(DBItemField $field){
 		throw new BadFunctionCallException("Not callable!");
 	}

@@ -49,7 +49,7 @@ abstract class DBItemFieldDBItemXToN extends DBItemFieldDBItem{
 				$value = new DBItemCollection($this->class);
 				if (array_key_exists("values", $data)){
 					foreach ($data["values"] as $id){
-						$value[] = DBItem::getCLASS($this->class, $id);
+						$value[] = DBItem::getCLASS($this->classSpecifier, $id);
 					}
 				}
 				$translatedData[$this->name] = $value;

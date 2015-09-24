@@ -69,7 +69,7 @@ class DBItemFieldFile extends DBItemField{
 			return null;
 		}
 		else {
-			return DBItem::getCLASS($this->specifier, $item->getRealValue($this));
+			return DBItem::fastGetCLASS($this->specifier, $item->getRealValue($this));
 		}
 	}
 

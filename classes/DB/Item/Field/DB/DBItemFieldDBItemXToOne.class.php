@@ -58,7 +58,7 @@ abstract class DBItemFieldDBItemXToOne extends DBItemFieldDBItem{
 	public function getValue(DBItem $item){
 		$value = $item->getRealValue($this);
 		if ($value !== null){
-			return DBItem::getClass($this->class, $value);
+			return DBItem::fastGetClass($this->classSpecifier, $value);
 		}
 		else{
 			return null;
