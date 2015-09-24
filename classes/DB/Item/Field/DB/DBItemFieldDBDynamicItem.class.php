@@ -9,7 +9,7 @@
  *
  * @author kkapsner
  */
-class DBItemFieldDBDynamicItem extends DBItemFieldDBItem implements DBItemFieldGroupInterface, DBItemFieldHasSearchableSubcollection{
+class DBItemFieldDBDynamicItem extends DBItemFieldDBItemNToOne implements DBItemFieldGroupInterface, DBItemFieldHasSearchableSubcollection{
 	use DBItemFieldGroupTrait {
 		DBItemFieldGroupTrait::parseGroup as traitParseGroup;
 	}
@@ -97,6 +97,9 @@ class DBItemFieldDBDynamicItem extends DBItemFieldDBItem implements DBItemFieldG
 	}
 
 	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		$properties["correlation"] = self::unifyCorrelation(
+			array_read_key("correlation", $properties, "1to1")
+		);
 		parent::adoptProperties($classSpecifier, $properties);
 		
 		$this->null = true;
