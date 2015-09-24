@@ -205,19 +205,17 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 				$properties = array_merge($properties, $newOptions);
 			}
 		}
+		$properties["group"] = $group;
+		$properties["name"] = $groupName;
 		if (
 			array_key_exists("groupFieldClass", $properties) &&
 			is_a($properties["groupFieldClass"], "DBItemFieldGroupInterface", true)
 		){
-			$item = new $properties["groupFieldClass"]($groupName);
-			$item->parseGroup($classSpecifier, $group);
-			$item->adoptProperties($classSpecifier, $properties);
+			return $properties["groupFieldClass"]::create($classSpecifier, $properties);
 		}
 		else {
-			$item = new DBItemFieldGroup($groupName);
-			$item->parseGroup($classSpecifier, $group);
+			return DBItemFieldGroup::create($classSpecifier, $properties);
 		}
-		return $item;
 	}
 
 	/**
@@ -292,6 +290,9 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	
 	/**
 	 * Factory function to create fields.
+	 * 
+	 * If this function is overwritten do not forget do add a call to
+	 * $item->adoptProperties()
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
 	 * @param mixed[] $properties

@@ -10,12 +10,28 @@
  * @author kkapsner
  */
 trait DBItemFieldGroupTrait{
+
 	
 	/**
 	 * An array with the field options for the array entries.
 	 * @var DBItemFieldCollection
 	 */
 	protected $groupFields = null;
+	
+	/**
+	 * {@inheritdoc}
+	 * 
+	 * @param DBItemClassSpecifier $classSpecifier
+	 * @param type $properties
+	 */
+	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		if (array_key_exists("group", $properties)){
+			$this->parseGroup($classSpecifier, $properties["group"]);
+		}
+		else {
+			throw new BadMethodCallException("A DBItemFieldGroup needs a group property.");
+		}
+	}
 
 	/**
 	 * {@inheritdoc}

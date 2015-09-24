@@ -295,7 +295,6 @@ abstract class DBItem extends DBItemFriends{
 			}
 			if (strlen($prop) !== 0){
 				$this->db->query("UPDATE " . $this->table . " SET " . $prop . " WHERE `id` = " . $this->DBid);
-				var_dump($this->db->errorInfo());
 			}
 			$this->changed = false;
 		}

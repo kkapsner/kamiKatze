@@ -10,8 +10,8 @@
  * @package DB\Item\Field
  */
 class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSubcollection, DBItemFieldGroupInterface{
-	use DBItemFieldGroupTrait;	
-
+	use DBItemFieldGroupTrait;
+	
 	/**
 	 * {@inheritdoc}
 	 * 
