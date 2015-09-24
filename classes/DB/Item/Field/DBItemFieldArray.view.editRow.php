@@ -7,12 +7,17 @@ echo "<tr>";
 $subID = $args[1]->DBid === 0? "<new>": $args[1]->DBid;
 $this->currentSubID = $subID;
 foreach ($this->arrayFields as $field){
+	$oldParent = $field->parentField;
+	$field->parentField = $this;
+	
 	/* @var $field DBItemField */
-	if ($field->displayable){
+	if ($field !== $this->linkField && $field->displayable){
 		echo '<td>';
 		$field->view("editField", true, $args[1]);
 		echo '</td>';
 	}
+	
+	$field->parentField = $oldParent;
 }
 $this->currentSubID = null;
 if ($args[1]->DBid !== 0){

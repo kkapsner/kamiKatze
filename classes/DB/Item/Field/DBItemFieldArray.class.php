@@ -51,7 +51,7 @@ class DBItemFieldArray extends DBItemField{
 	 */
 	protected function createSubitem($id, $values){
 		$subItem = DBItem::createCLASS($this->linkSpecifier, $values, true);
-		$subItem->{$this->linkField} = $id;
+		$subItem->setRealValue($this->linkField->name, $id);
 		$subItem->save();
 		return $subItem;
 	}
@@ -67,15 +67,12 @@ class DBItemFieldArray extends DBItemField{
 
 		$this->linkTable = array_read_key("linkTable", $properties, $classSpecifier . "_" . $this->name . "ArrayData");
 		$this->linkSpecifier = new DBItemClassSpecifier("DBItemFieldArrayItem", $this->linkTable);
-		$this->linkField = array_read_key("linkField", $properties, "link_id");
 		$this->arrayFields = DBItemField::parseClass($this->linkTable);
-		foreach ($this->arrayFields as $field){
-			/* @var $field DBItemField */
-			$field->parentField = $this;
-			if ($field->name === $this->linkField){
-				$field->editable = false;
-				$field->displayable = false;
-			}
+		$this->linkField = $this->arrayFields->getFieldByName(
+			array_read_key("linkField", $properties, "link_id")
+		);
+		if (!$this->linkField){
+			throw new BadMethodCallException("Linking field not found.");
 		}
 	}
 	
@@ -139,7 +136,7 @@ class DBItemFieldArray extends DBItemField{
 	public function getValue(DBItem $item){
 		return DBItem::getByConditionCLASS(
 			$this->linkSpecifier,
-			DB::getInstance()->quote($this->linkField, DB::PARAM_IDENT) . " = " . $item->DBid
+			DB::getInstance()->quote($this->linkField->name, DB::PARAM_IDENT) . " = " . $item->DBid
 		);
 	}
 
@@ -237,6 +234,23 @@ class DBItemFieldArray extends DBItemField{
 	public function translateToDB($value){
 		return null;
 	}
+	
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param string $context
+	 * @param boolean $output
+	 * @param mixed $args
+	 * @return string|boolean
+	 */
+	public function view($context = false, $output = false, $args = false){
+		$oldDisplayable = $this->linkField->displayable;
+		$this->linkField->displayable = false;
+		$ret = parent::view($context, $output, $args);
+		$this->linkField->displayable = $oldDisplayable;
+		return $ret;
+	}
+
 }
 
 ?>
