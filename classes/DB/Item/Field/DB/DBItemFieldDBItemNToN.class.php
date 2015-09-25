@@ -18,71 +18,36 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 	 */
 	protected static function getLinkingTableName($name1, $name2){
 		$db = DB::getInstance();
-		if ($name1 < $name2){
-			return $db->quote(DBItemClassSpecifier::$tablePrefix . $name1 . "_" . $name2, DB::PARAM_IDENT);
-		}
-		elseif ($name1 == $name2){
-			return $db->quote(DBItemClassSpecifier::$tablePrefix . $name1 . "_" . $name2, DB::PARAM_IDENT);
+		if ($name1 <= $name2){
+			$tableName = DBItemClassSpecifier::$tablePrefix . $name1 . "_" . $name2;
 		}
 		else {
-			return $db->quote(DBItemClassSpecifier::$tablePrefix . $name2 . "_" . $name1, DB::PARAM_IDENT);
+			$tableName = DBItemClassSpecifier::$tablePrefix . $name2 . "_" . $name1;
 		}
+		
+		return $db->quote($tableName, DB::PARAM_IDENT);
 	}
 
+	
 	/**
-	 * Gets all connected items by a linking table.
-	 * @param string $class Classname of the instances that should be received
-	 * @param string $name Name of the field that contains the received instances
-	 * @param string $linkedName Name of the field on the other side
-	 * @param int $linkedId ID of the instance that links to the instances
-	 * @return DBItemCollection with $class
+	 * Name of the linking table.
+	 * @var string
 	 */
-	protected static function getByLinkingTable($class, $name, $linkedName, $linkedId){
-		$ret = new DBItemCollection($class);
-		$db = DB::getInstance();
-
-		$table = self::getLinkingTableName($name, $linkedName);
-
-		$sql = "SELECT " . $db->quote($name . "_id", DB::PARAM_IDENT) .
-			" FROM " . $table .
-			" WHERE " . $db->quote($linkedName . "_id", DB::PARAM_IDENT) . " = " . $linkedId;
-		$res = $db->query($sql);
-		foreach ($res as $row){
-			$ret[] = DBItem::getCLASS($class, $row[$name . '_id']);// PHP 5.3: $class::get($row[$class . '_id']);
-		}
-		return $ret;
-	}
-
+	public $linkingTableName = null;
+	
 	/**
-	 * Sets a connection in a linking table.
-	 * @param string $name
-	 * @param string $linkedName
-	 * @param int $linkedId
-	 * @param int $id
+	 * Name of the field in the linking table that stores the id of the linked
+	 * other item.
+	 * @var string
 	 */
-	protected static function setInLinkingTable($name, $linkedName, $linkedId, $id){
-		$db = DB::getInstance();
-
-		$table = self::getLinkingTableName($name, $linkedName);
-
-		$db->query("INSERT INTO " . $table . " (" . $db->quote($linkedName . "_id", DB::PARAM_IDENT) . ", " . $db->quote($name . "_id", DB::PARAM_IDENT) . ") VALUES (" . $linkedId . ", " . $id . ")");
-	}
-
+	public $fromFieldInLinkingTable = null;
+	
 	/**
-	 * Removes a connection in a linking table.
-	 * @param string $name
-	 * @param string $linkedName
-	 * @param int $linkedId
-	 * @param int $id
+	 * Name of the field in the linking table that stores the id of this item.
+	 * @var string
 	 */
-	protected static function removeInLinkingTable($name, $linkedName, $linkedId, $id){
-		$db = DB::getInstance();
-
-		$table = self::getLinkingTableName($name, $linkedName);
-
-		$db->query("DELETE FROM " . $table . " WHERE " . $db->quote($linkedName . "_id", DB::PARAM_IDENT) . " = " . $linkedId . " AND " . $db->quote($name . "_id", DB::PARAM_IDENT) . " = " . $id);
-	}
-
+	public $toFieldInLinkingTable = null;
+	
 	/**
 	 * If the NtoN correlation can have multiple links between two items.
 	 * @var boolean
@@ -99,6 +64,13 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 		parent::adoptProperties($classSpecifier, $properties);
 		
 		$this->canHaveMultipleLinks = array_read_key("canHaveMultipleLinks", $properties, $this->canHaveMultipleLinks);
+		$this->toFieldInLinkingTable = array_read_key("selfLinkedField", $properties, $this->name . "_id");
+		$this->fromFieldInLinkingTable = array_read_key("otherLinkedField", $properties, $this->correlationName . "_id");
+		$this->linkingTableName = array_read_key(
+			"linkingTableName",
+			$properties,
+			self::getLinkingTableName($this->name, $this->correlationName)
+		);
 	}
 
 	/**
@@ -108,12 +80,17 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 	 * @return null
 	 */
 	public function getValue(DBItem $item){
-		return self::getByLinkingTable(
-			$this->class,
-			$this->name,
-			$this->correlationName,
-			$item->DBid
-		);
+		$ret = new DBItemCollection($this->class);
+		$db = DB::getInstance();
+
+		$sql = "SELECT " . $db->quote($this->toFieldInLinkingTable, DB::PARAM_IDENT) .
+			" FROM " . $this->linkingTableName .
+			" WHERE " . $db->quote($this->fromFieldInLinkingTable, DB::PARAM_IDENT) . " = " . $item->DBid;
+		$res = $db->query($sql);
+		foreach ($res as $row){
+			$ret[] = DBItem::fastGetCLASS($this->classSpecifier, $row[$this->toFieldInLinkingTable]);// PHP 5.3: $class::get($row[$class . '_id']);
+		}
+		return $ret;
 	}
 
 	/**
@@ -130,22 +107,36 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 			if ($value->getClass() !== $this->class && is_subclass_of($value->getClass(), $this->class)){
 				throw new InvalidArgumentException("Property " . $this->name . " contains a non " . $this->class . ".");
 			}
-			$newValue = array();
+			
+			$db = DB::getInstance();
+			$insertStatement = $db->prepare("INSERT INTO" . $this->linkingTableName . "
+				(
+					" . $db->quote($this->fromFieldInLinkingTable, DB::PARAM_IDENT) . ",
+					" . $db->quote($this->toFieldInLinkingTable, DB::PARAM_IDENT) . "
+				) VALUES (
+					:from,
+					:to
+				)");
+			$insertStatement->bindValue(":from", $item->DBid, DB::PARAM_INT);
 
 			foreach ($value as $valueItem){
 				if (($pos = $oldValue->search($valueItem, true)) !== false){
 					$oldValue->splice($pos, 1);
 				}
 				else {
-					$newValue[] = $valueItem;
+					$insertStatement->bindValue(":to", $valueItem->DBid, DB::PARAM_INT);
+					$insertStatement->execute();
 				}
 			}
-			foreach ($newValue as $valueItem){
-				self::setInLinkingTable($this->name, $this->correlationName, $item->DBid, $valueItem->DBid);
-			}
-
+			
+			$removeStatement = $db->prepare("DELETE FROM " . $this->linkingTableName . "
+				WHERE 
+					" . $db->quote($this->fromFieldInLinkingTable, DB::PARAM_IDENT) . " = :from AND
+					" . $db->quote($this->toFieldInLinkingTable, DB::PARAM_IDENT) . " = :to");
+			$removeStatement->bindValue(":from", $item->DBid, DB::PARAM_INT);
 			foreach ($oldValue as $valueItem){
-				self::removeInLinkingTable($this->name, $this->correlationName, $item->DBid, $valueItem->DBid);
+				$removeStatement->bindValue(":to", $valueItem->DBid, DB::PARAM_INT);
+				$removeStatement->execute();
 			}
 		}
 		else {
