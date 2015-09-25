@@ -40,6 +40,14 @@ abstract class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearc
 		}
 	}
 	
+	/**
+	 * {@inheritdoc}
+	 * 
+	 * @param DBItemClassSpecifier $classSpecifier
+	 * @param array $properties
+	 * @return DBItemFieldDBItem
+	 */
+	
 	protected static function create(DBItemClassSpecifier $classSpecifier, $properties){
 		$properties["correlation"] = self::unifyCorrelation(
 			array_read_key("correlation", $properties, "1to1")

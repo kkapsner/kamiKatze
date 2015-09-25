@@ -9,9 +9,28 @@
  *
  * @author kkapsner
  */
-class DBItemFieldDBDynamicItem extends DBItemFieldDBItemNToOne implements DBItemFieldGroupInterface, DBItemFieldHasSearchableSubcollection{
+abstract class DBItemFieldDBDynamicItem extends DBItemFieldDBItemNToOne implements DBItemFieldGroupInterface, DBItemFieldHasSearchableSubcollection{
 	use DBItemFieldGroupTrait {
 		DBItemFieldGroupTrait::parseGroup as traitParseGroup;
+		DBItemFieldGroupTrait::adoptProperties as traitAdoptProperties;
+	}
+	
+	private static $classNames = array(
+		"DBItemFieldDBDynamicItemOneToOne",
+		"DBItemFieldDBDynamicItemOneToN",
+		"DBItemFieldDBDynamicItemNToOne",
+		"DBItemFieldDBDynamicItemNToN",
+	);
+	
+	
+	protected static function create(DBItemClassSpecifier $classSpecifier, $properties){
+		$properties["correlation"] = self::unifyCorrelation(
+			array_read_key("correlation", $properties, "1to1")
+		);
+		$className = self::$classNames[$properties["correlation"]];
+		$item = new $className($properties["name"]);
+		$item->adoptProperties($classSpecifier, $properties);
+		return $item;
 	}
 	
 	/**
@@ -97,10 +116,8 @@ class DBItemFieldDBDynamicItem extends DBItemFieldDBItemNToOne implements DBItem
 	}
 
 	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
-		$properties["correlation"] = self::unifyCorrelation(
-			array_read_key("correlation", $properties, "1to1")
-		);
 		parent::adoptProperties($classSpecifier, $properties);
+		$this->traitAdoptProperties($classSpecifier, $properties);
 		
 		$this->null = true;
 		$this->searchable = false;

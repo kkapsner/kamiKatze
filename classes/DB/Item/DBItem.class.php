@@ -114,6 +114,9 @@ abstract class DBItem extends DBItemFriends{
 	}
 	
 	protected static function fastGetCLASS(DBItemClassSpecifier $classSpecifier, $id){
+		if (!is_int($id) && !ctype_digit($id)){
+			return null;
+		}
 		$specifiedName = $classSpecifier->getSpecifiedName();
 		$className = $classSpecifier->getClassName();
 		if (!array_key_exists($specifiedName, self::$instances)){
