@@ -144,24 +144,4 @@ class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSu
 			$field->appendDBNameAndValueForCreate($value[$field->name], $nameOut, $valueOut);
 		}
 	}
-	
-	/*  */
-	
-	/**
-	 * {@inheritdoc}
-	 * 
-	 */
-	public function getAllSubcollections(){
-		return array($this->groupFields);
-	}
-	
-	/**
-	 * {@inheritdoc}
-	 * 
-	 * @param DBItem $item
-	 */
-	public function getSubcollection(DBItem $item){
-		return $this->groupFields;
-	}
-
 }

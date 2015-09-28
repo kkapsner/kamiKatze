@@ -1,5 +1,5 @@
 <?php
-/* @var $this DBItemFieldDBDynamicItem */
+/* @var $this DBItemFieldDBDynamicItemNToOne */
 /* @var $context string */
 /* @var $args DBItem */
 
@@ -10,7 +10,8 @@ $groups = array();
 foreach ($this->classField->typeExtension as $class){
 	$groups[$class] = DBItem::getByConditionCLASS($class);
 }
-$this->view(
+$this->viewByName(
+	"DBItemFieldDBDynamicItem",
 	"editField.select",
 	true,
 	array(

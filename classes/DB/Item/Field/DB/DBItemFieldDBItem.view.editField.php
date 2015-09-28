@@ -14,7 +14,15 @@ if (
 ){
 	$db = DB::getInstance();
 	$fieldName = $db->quote($this->correlationName, DB::PARAM_IDENT);
-	$availableItems = DBItem::getByConditionCLASS($this->classSpecifier, $fieldName . " IS NULL OR " . $fieldName . " = " . $args->DBid);
+	$availableItems = DBItem::getByConditionCLASS(
+		$this->classSpecifier, $fieldName . " IS NULL OR (" . $fieldName . " = " . $args->DBid .
+		(
+			($this->correlation === DBItemFieldDBItem::ONE_TO_N && $this->correlationCondition)?
+			" AND " . $this->correlationCondition:
+			""
+		) .
+		")"
+	);
 }
 else {
 	$availableItems = DBItem::getByConditionCLASS($this->classSpecifier);

@@ -10,7 +10,7 @@
 				<option></option><?php
 		$value = $args["value"];
 		foreach ($args["groups"] as $groupName => $group){
-			if ($groupName){
+			if ($groupName && count($args["groups"]) > 1){
 				echo "<optgroup label=\"" . $this->html($groupName) . "\">";
 
 			}

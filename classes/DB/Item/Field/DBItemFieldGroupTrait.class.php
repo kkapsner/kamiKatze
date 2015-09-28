@@ -68,6 +68,21 @@ trait DBItemFieldGroupTrait{
 	public function translateNameToDB(){
 		return null;
 	}
+	
+	/**
+	 * {@inheritdoc}
+	 * 
+	 */
+	public function getAllSubcollections(){
+		return array($this->groupFields);
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 * 
+	 * @param DBItem $item
+	 */
+	public function getSubcollection(DBItem $item){
+		return $this->groupFields;
+	}
 }
-
-?>
