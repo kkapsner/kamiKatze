@@ -15,6 +15,14 @@ abstract class BBCodeTag extends Node{
 	 * @var string
 	 */
 	protected static $type = "block";
+	/**
+	 * Getter for the static property type.
+	 *
+	 * @return string
+	 */
+	public function getType(){
+		return static::$type;
+	}
 
 	/**
 	 * Array of allowed children.
