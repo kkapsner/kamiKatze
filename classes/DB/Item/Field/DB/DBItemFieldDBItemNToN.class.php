@@ -53,6 +53,12 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 	 * @var boolean
 	 */
 	public $canHaveMultipleLinks = false;
+	
+	/**
+	 * If the field describes a loop that points to itself.
+	 * @var boolean
+	 */
+	public $isLoop = false;
 
 	/**
 	 * {@inheritdoc}
@@ -66,10 +72,17 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 		$this->canHaveMultipleLinks = array_read_key("canHaveMultipleLinks", $properties, $this->canHaveMultipleLinks);
 		$this->toFieldInLinkingTable = array_read_key("selfLinkedField", $properties, $this->name . "_id");
 		$this->fromFieldInLinkingTable = array_read_key("otherLinkedField", $properties, $this->correlationName . "_id");
-		$this->linkingTableName = array_read_key(
-			"linkingTableName",
-			$properties,
-			self::getLinkingTableName($this->name, $this->correlationName)
+		$this->linkingTableName = array_read_key("linkingTableName", $properties, false);
+		if (!$this->linkingTableName){
+			$this->linkingTableName = self::getLinkingTableName($this->name, $this->correlationName);
+		}
+		else {
+			$this->linkingTableName = DB::getInstance()->quote($this->linkingTableName, DB::PARAM_IDENT);
+		}
+		
+		$this->isLoop = (
+			$classSpecifier->getSpecifiedName() === $this->classSpecifier->getSpecifiedName() &&
+			$this->name === $this->correlationName
 		);
 	}
 
@@ -86,6 +99,12 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 		$sql = "SELECT " . $db->quote($this->toFieldInLinkingTable, DB::PARAM_IDENT) .
 			" FROM " . $this->linkingTableName .
 			" WHERE " . $db->quote($this->fromFieldInLinkingTable, DB::PARAM_IDENT) . " = " . $item->DBid;
+		if ($this->isLoop){
+			$sql .= " UNION " .
+				"SELECT " . $db->quote($this->fromFieldInLinkingTable, DB::PARAM_IDENT) .
+			" FROM " . $this->linkingTableName .
+			" WHERE " . $db->quote($this->toFieldInLinkingTable, DB::PARAM_IDENT) . " = " . $item->DBid;
+		}
 		$res = $db->query($sql);
 		foreach ($res as $row){
 			$ret[] = DBItem::fastGetCLASS($this->classSpecifier, $row[$this->toFieldInLinkingTable]);// PHP 5.3: $class::get($row[$class . '_id']);
@@ -120,23 +139,35 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 			$insertStatement->bindValue(":from", $item->DBid, DB::PARAM_INT);
 
 			foreach ($value as $valueItem){
+				/*@var DBItem $valueItem*/
 				if (($pos = $oldValue->search($valueItem, true)) !== false){
 					$oldValue->splice($pos, 1);
 				}
 				else {
 					$insertStatement->bindValue(":to", $valueItem->DBid, DB::PARAM_INT);
 					$insertStatement->execute();
+					$valueItem->clearProcessedValueCache($this->correlationName);
 				}
 			}
 			
 			$removeStatement = $db->prepare("DELETE FROM " . $this->linkingTableName . "
-				WHERE 
-					" . $db->quote($this->fromFieldInLinkingTable, DB::PARAM_IDENT) . " = :from AND
-					" . $db->quote($this->toFieldInLinkingTable, DB::PARAM_IDENT) . " = :to");
+				WHERE
+					(
+						" . $db->quote($this->fromFieldInLinkingTable, DB::PARAM_IDENT) . " = :from AND
+						" . $db->quote($this->toFieldInLinkingTable, DB::PARAM_IDENT) . " = :to
+					)" . ($this->isLoop?
+					" OR (
+						" . $db->quote($this->fromFieldInLinkingTable, DB::PARAM_IDENT) . " = :to AND
+						" . $db->quote($this->toFieldInLinkingTable, DB::PARAM_IDENT) . " = :from
+					)":
+						""
+					));
 			$removeStatement->bindValue(":from", $item->DBid, DB::PARAM_INT);
 			foreach ($oldValue as $valueItem){
+				/*@var DBItem $valueItem*/
 				$removeStatement->bindValue(":to", $valueItem->DBid, DB::PARAM_INT);
 				$removeStatement->execute();
+				$valueItem->clearProcessedValueCache($this->correlationName);
 			}
 		}
 		else {

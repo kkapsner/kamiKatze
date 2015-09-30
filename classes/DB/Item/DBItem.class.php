@@ -488,6 +488,20 @@ abstract class DBItem extends DBItemFriends{
 			$this->changed = true;
 		}
 	}
+	
+	/**
+	 * Clears the processed value cache.
+	 * 
+	 * @param string|null $name
+	 */
+	protected function clearProcessedValueCache($name = null){
+		if ($name === null){
+			$this->processedValueCache = array();
+		}
+		else {
+			unset ($this->processedValueCache[$name]);
+		}
+	}
 
 	/**
 	 * Magic function __set
@@ -504,7 +518,7 @@ abstract class DBItem extends DBItemFriends{
 			throw new Exception("This item can not be changed.");
 		}
 		
-		unset($this->processedValueCache[$name]);
+		$this->clearProcessedValueCache($name);
 
 		$field = $this->getField($name, false);
 		if ($field === null){

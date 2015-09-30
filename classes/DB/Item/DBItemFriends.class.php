@@ -106,6 +106,14 @@ abstract class DBItemFriends extends ViewableHTML{
 	protected function setRealValue($name, $value){
 		throw new BadFunctionCallException("Not callable!");
 	}
-}
 
-?>
+	/**
+	 * Only to implement in DBItem!
+	 * 
+	 * @param type $name
+	 * @throws BadFunctionCallException
+	 */
+	protected function clearProcessedValueCache($name = null){
+		throw new BadFunctionCallException("Not callable!");
+	}
+}

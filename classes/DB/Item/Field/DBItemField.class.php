@@ -73,6 +73,12 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 * @var DBItemField
 	 */
 	protected $parentField = null;
+	
+	/**
+	 * The class specifier of the class that has the field.
+	 * @var DBItemClassSpecifier
+	 */
+	protected $parentClassSpecifier = null;
 
 	/**
 	 * Returns the properties of a filed providing the properties of the field
@@ -316,6 +322,8 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 * @param array $properties
 	 */
 	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
+		$this->parentClassSpecifier = $classSpecifier;
+		
 		$props = array(
 			"null", "default", "type", "typeExtension", "displayName", "regExp",
 			"displayable", "editable", "searchable", "displayName"
