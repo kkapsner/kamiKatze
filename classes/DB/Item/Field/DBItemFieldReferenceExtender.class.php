@@ -9,6 +9,6 @@
  * @author Korbinian Kapsner
  * @package DB\Item\Field
  */
-class DBItemFieldExtender extends DBItemFieldEnum implements DBItemFieldHasSearchableSubcollection{
+class DBItemFieldReferenceExtender extends DBItemFieldReferenceEnum implements DBItemFieldHasSearchableSubcollection{
 	use DBItemFieldExtenderTrait;
 }

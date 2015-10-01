@@ -156,6 +156,9 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 		}
 		elseif (array_read_key("isEnum", $properties, false) || array_read_key("enum", $properties, false)){
 			$type = "referenceEnum";
+			if (array_read_key("extender", $properties, false)){
+				$type = "referenceExtender";
+			}
 		}
 		elseif (array_read_key("isArray", $properties, false) || array_read_key("array", $properties, false)){
 			$type = "array";
