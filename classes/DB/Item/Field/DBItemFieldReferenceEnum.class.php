@@ -72,7 +72,18 @@ class DBItemFieldReferenceEnum extends DBItemFieldEnum{
 	public function getValue(DBItem $item){
 		return $this->idToValue(parent::getValue($item));
 	}
-
+	
+	/**
+	 * {@inheritdoc}
+	 * 
+	 * @param mixed $value
+	 * @param string $nameOut
+	 * @param string|null $valueOut
+	 */
+	public function appendDBNameAndValueForCreate($value, &$nameOut, &$valueOut = null){
+		parent::appendDBNameAndValueForCreate($this->valueToId($value), $nameOut, $valueOut);
+	}
+	
 	/**
 	 * {@inheritdoc}
 	 * 

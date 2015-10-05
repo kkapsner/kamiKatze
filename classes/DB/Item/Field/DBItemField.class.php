@@ -156,7 +156,7 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 		}
 		elseif (array_read_key("isEnum", $properties, false) || array_read_key("enum", $properties, false)){
 			$type = "referenceEnum";
-			if (array_read_key("extender", $properties, false)){
+			if (array_read_key("extender", $properties, false) || array_read_key("isExtender", $properties, false)){
 				$type = "referenceExtender";
 			}
 		}
@@ -169,7 +169,9 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 		elseif (array_read_key("isLink", $properties, false) || array_read_key("link", $properties, false)){
 			$type = "link";
 		}
-		elseif ($type === "enum" && array_read_key("extender", $properties, false)){
+		elseif ($type === "enum" && 
+			(array_read_key("extender", $properties, false) || array_read_key("isExtender", $properties, false))
+		){
 			$type = "extender";
 		}
 		elseif ($type === "tinyint" && $properties["typeExtension"] == 1) {
@@ -480,7 +482,10 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 * @param string $propsOut
 	 */
 	public function appendDBNameAndValueForUpdate($value, &$propsOut){
-		$this->appendDBNameAndValueForCreate($value, $propsOut);
+		$trValue = $this->translateToDB($value);
+		if ($trValue !== null){
+			$propsOut .= ($propsOut? ",": "") . $this->translateNameToDB() . "=" . $trValue;
+		}
 	}
 
 	/**

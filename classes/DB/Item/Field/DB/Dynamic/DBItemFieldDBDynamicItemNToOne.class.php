@@ -19,13 +19,13 @@ class DBItemFieldDBDynamicItemNToOne extends DBItemFieldDBItemNToOne implements 
 	 * The field that holds the class.
 	 * @var DBItemFieldEnum 
 	 */
-	protected $classField = null;
+	public $classField = null;
 	
 	/**
 	 * The field that holds the id.
 	 * @var DBItemField
 	 */
-	protected $idField = null;
+	public $idField = null;
 	
 	/**
 	 * {@inheritdoc}

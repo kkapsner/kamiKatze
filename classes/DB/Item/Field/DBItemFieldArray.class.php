@@ -17,7 +17,7 @@ class DBItemFieldArray extends DBItemField{
 	protected $linkTable;
 	/**
 	 * The field in the linking table that contains the DBItems id.
-	 * @var string
+	 * @var DBItemField
 	 */
 	protected $linkField;
 	/**
@@ -51,7 +51,15 @@ class DBItemFieldArray extends DBItemField{
 	 */
 	protected function createSubitem($id, $values){
 		$subItem = DBItem::createCLASS($this->linkSpecifier, $values, true);
-		$subItem->setRealValue($this->linkField->name, $id);
+		if ($this->linkField instanceof DBItemFieldDBDynamicItemNToOne){
+			/* @var DBItemFieldDBDynamicItemNToOne $linkField */
+			$linkField = $this->linkField;
+			$subItem->setRealValue($linkField->idField->name, $id);
+			$subItem->setRealValue($linkField->classField->name, $this->parentClassSpecifier->getClassName());
+		}
+		else {
+			$subItem->setRealValue($this->linkField->name, $id);
+		}
 		$subItem->save();
 		return $subItem;
 	}
@@ -134,10 +142,24 @@ class DBItemFieldArray extends DBItemField{
 	 * @return DBItemCollection
 	 */
 	public function getValue(DBItem $item){
-		return DBItem::getByConditionCLASS(
-			$this->linkSpecifier,
-			DB::getInstance()->quote($this->linkField->name, DB::PARAM_IDENT) . " = " . $item->DBid
-		);
+		$db = DB::getInstance();
+		if ($this->linkField instanceof DBItemFieldDBDynamicItemNToOne){
+			/* @var DBItemFieldDBDynamicItemNToOne $linkField */
+			
+			return DBItem::getByConditionCLASS(
+				$this->linkSpecifier,
+				$db->quote($this->linkField->idField->name, DB::PARAM_IDENT) . " = " .
+				$item->DBid . " AND " .
+				$db->quote($this->linkField->classField->name, DB::PARAM_IDENT) . " = " .
+				$db->quote(get_class($item), DB::PARAM_STR)
+			);
+		}
+		else {
+			return DBItem::getByConditionCLASS(
+				$this->linkSpecifier,
+				DB::getInstance()->quote($this->linkField->name, DB::PARAM_IDENT) . " = " . $item->DBid
+			);
+		}
 	}
 
 	/**

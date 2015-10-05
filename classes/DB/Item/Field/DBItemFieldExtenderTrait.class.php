@@ -36,7 +36,7 @@ trait DBItemFieldExtenderTrait{
 		return $errors;
 	}
 
-		/**
+	/**
 	 * {@inheritdoc}
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
@@ -113,7 +113,7 @@ trait DBItemFieldExtenderTrait{
 	 * @param DBItem $item
 	 */
 	protected function loadDependencies(DBItem $item){
-		$extenderValue = $item->{$this->name};
+		$extenderValue = $this->getValue($item);
 		if ($item->DBid === 0){
 			$data = array();
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
@@ -151,7 +151,7 @@ trait DBItemFieldExtenderTrait{
 	 * @return boolean
 	 */
 	protected function saveDependencies(DBItem $item){
-		$extenderValue = $item->getRealValue($this);
+		$extenderValue = $this->getValue($item);
 		if ($extenderValue !== null){
 			$db = DB::getInstance();
 			$prop = "";
@@ -175,7 +175,7 @@ trait DBItemFieldExtenderTrait{
 	 * @param DBItem $item
 	 */
 	protected function deleteDependencies(DBItem $item){
-		$extenderValue = $item->getRealValue($this);
+		$extenderValue = $this->getValue($item);
 		$db = DB::getInstance();
 		if ($extenderValue !== null){
 			$db->query("DELETE FROM  " . $db->quote(DBItemClassSpecifier::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " WHERE `id` = " . $item->DBid);
