@@ -137,4 +137,22 @@ class DBItemFieldDBDynamicItemNToOne extends DBItemFieldDBItemNToOne implements 
 		$this->name = $oldName;
 		return $ret;
 	}
+	
+	/**
+	 * @{inheritdoc}
+	 * 
+	 * @param DBItem $value
+	 * @return string
+	 */
+	public function getWhere($value){
+		if ($value instanceof DBItem){
+			return
+				$this->idField->getWhere($value->DBid) .
+				" AND " .
+				$this->classField->getWhere(get_class($value));
+		}
+		else {
+			throw new BadMethodCallException("Expected DBItem.");
+		}
+	}
 }

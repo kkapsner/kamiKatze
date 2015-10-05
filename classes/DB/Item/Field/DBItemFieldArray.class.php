@@ -142,24 +142,10 @@ class DBItemFieldArray extends DBItemField{
 	 * @return DBItemCollection
 	 */
 	public function getValue(DBItem $item){
-		$db = DB::getInstance();
-		if ($this->linkField instanceof DBItemFieldDBDynamicItemNToOne){
-			/* @var DBItemFieldDBDynamicItemNToOne $linkField */
-			
-			return DBItem::getByConditionCLASS(
-				$this->linkSpecifier,
-				$db->quote($this->linkField->idField->name, DB::PARAM_IDENT) . " = " .
-				$item->DBid . " AND " .
-				$db->quote($this->linkField->classField->name, DB::PARAM_IDENT) . " = " .
-				$db->quote(get_class($item), DB::PARAM_STR)
-			);
-		}
-		else {
-			return DBItem::getByConditionCLASS(
-				$this->linkSpecifier,
-				DB::getInstance()->quote($this->linkField->name, DB::PARAM_IDENT) . " = " . $item->DBid
-			);
-		}
+		return DBItem::getByConditionCLASS(
+			$this->linkSpecifier,
+			$this->linkField->getWhere($item)
+		);
 	}
 
 	/**
