@@ -17,7 +17,12 @@ class DBItemFieldNative extends DBItemField implements DBItemFieldSearchable{
 	 */
 	public function getWhere($value){
 		$db = DB::getInstance();
-		return $db->quote($this->name, DB::PARAM_IDENT) . " = " . $db->quote($value);
+		if ($this->null && $value === null){
+			return $db->quote($this->name, DB::PARAM_IDENT) . " IS NULL";
+		}
+		else {
+			return $db->quote($this->name, DB::PARAM_IDENT) . " = " . $db->quote($value);
+		}
 	}
 }
 

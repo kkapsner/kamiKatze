@@ -17,6 +17,23 @@ class DBItemFieldDBItemOneToN extends DBItemFieldDBItemXToN{
 	public $correlationCondition = null;
 	
 	/**
+	 * The field of the correlation in the other table.
+	 * @var DBItemField
+	 */
+	public $correlationField = null;
+	
+	/**
+	 * {@inheritdoc}
+	 * 
+	 * @param string $newClass
+	 */
+	public function setClass($newClass){
+		parent::setClass($newClass);
+		$this->correlationField = self::parseClass($this->classSpecifier)->getFieldByName($this->correlationName);
+	}
+
+	
+	/**
 	 * {@inheritdoc}
 	 * 
 	 * @param DBItemClassSpecifier $classSpecifier
@@ -39,8 +56,8 @@ class DBItemFieldDBItemOneToN extends DBItemFieldDBItemXToN{
 	public function getValue(DBItem $item){
 		return DBItem::getByConditionCLASS(
 			$this->classSpecifier,
-			DB::getInstance()->quote($this->correlationName, DB::PARAM_IDENT) . " = " . $item->DBid .
-			($this->correlationCondition? " AND " . $this->correlationCondition: "")
+			"(" . $this->correlationField->getWhere($item) . ")" .
+			($this->correlationCondition? " AND (" . $this->correlationCondition . ")": "")
 		);
 	}
 

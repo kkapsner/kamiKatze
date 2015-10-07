@@ -36,6 +36,10 @@ class DBItemFieldDBDynamicItemOneToN extends DBItemFieldDBItemOneToN {
 			$this->class = $newClass;
 		}
 		$this->classSpecifier = array_map(array("DBItemClassSpecifier", "make"), $this->class);
+		$this->correlationField = array();
+		foreach ($this->classSpecifier as $i => $classSpecifier){
+			$this->correlationField[$i] = self::parseClass($classSpecifier)->getFieldByName($this->correlationName);
+		}
 	}
 	
 	/**
@@ -158,17 +162,10 @@ class DBItemFieldDBDynamicItemOneToN extends DBItemFieldDBItemOneToN {
 	public function getValue(DBItem $item){
 		$ret = new Collection("DBItemCollection");
 		$db = DB::getInstance();
-		foreach ($this->classSpecifier as $classSpecifier){
+		foreach ($this->classSpecifier as $i => $classSpecifier){
 			$ret[] = DBItem::getByConditionCLASS(
 				$classSpecifier,
-				$db->quote($this->correlationIdName, DB::PARAM_IDENT) . " = " . $item->DBid .
-				(
-					$this->correlationClassName !== null?
-					" AND " .
-					$db->quote($this->correlationClassName, DB::PARAM_IDENT) . " = " .
-					$db->quote(get_class($item), DB::PARAM_STR):
-					""
-				)
+				$this->correlationField[$i]->getWhere($item)
 			);
 		}
 		return $ret;

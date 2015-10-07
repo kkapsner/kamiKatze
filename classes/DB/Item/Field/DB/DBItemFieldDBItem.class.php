@@ -98,14 +98,15 @@ abstract class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearc
 	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
 		parent::adoptProperties($classSpecifier, $properties);
 		
-		$this->setClass(array_read_key("class", $properties, $this->class));
+		$this->correlation = $properties["correlation"];
+		$this->correlationName = array_read_key("correlationName", $properties, $classSpecifier->getClassName());
 		$this->canOverwriteOthers = array_read_key("canOverwriteOthers", $properties, $this->canOverwriteOthers);
+		
+		$this->setClass(array_read_key("class", $properties, $this->class));
 
 		// disable default options...
 		$this->searchable = false;
 		$this->regExp = null;
-		$this->correlation = $properties["correlation"];
-		$this->correlationName = array_read_key("correlationName", $properties, $classSpecifier->getClassName());
 	}
 
 	/**

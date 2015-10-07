@@ -105,7 +105,12 @@ abstract class DBItemFieldDBItemXToOne extends DBItemFieldDBItem{
 	public function getWhere($value){
 		$db = DB::getInstance();
 		$name = $db->quote($this->name, DB::PARAM_IDENT);
-		return $name . " = " . $db->quote($value->DBid);
+		if ($value === null){
+			return $name . " IS NULL";
+		}
+		else {
+			return $name . " = " . $db->quote($value->DBid);
+		}
 	}
 
 }

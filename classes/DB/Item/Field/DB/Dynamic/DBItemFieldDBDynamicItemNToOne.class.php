@@ -145,7 +145,10 @@ class DBItemFieldDBDynamicItemNToOne extends DBItemFieldDBItemNToOne implements 
 	 * @return string
 	 */
 	public function getWhere($value){
-		if ($value instanceof DBItem){
+		if ($value === null){
+			return $this->idField->getWhere($value);
+		}
+		elseif ($value instanceof DBItem){
 			return
 				$this->idField->getWhere($value->DBid) .
 				" AND " .

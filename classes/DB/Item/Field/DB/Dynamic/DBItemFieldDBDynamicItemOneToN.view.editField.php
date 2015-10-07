@@ -13,21 +13,9 @@ if ($this->canOverwriteOthers){
 	}
 }
 else {
-	$db = DB::getInstance();
-	$fieldName = $db->quote($this->correlationIdName, DB::PARAM_IDENT);
-	if ($this->correlationClassName){
-		$classFieldName = $db->quote($this->correlationClassName, DB::PARAM_IDENT);
-		$correlationCondition = " AND " . $classFieldName . " = " . $db->quote(get_class($args), DB::PARAM_STR);
-	}
-	else {
-		$correlationCondition = "";
-	}
 	foreach ($this->class as $i => $class){
 		$groups[$class] = DBItem::getByConditionCLASS($this->classSpecifier[$i], 
-		$fieldName . " IS NULL OR (" .
-			$fieldName . " = " . $args->DBid .
-			$correlationCondition . "
-		)");
+		"(" . $this->correlationField[$i]->getWhere(null) . ") OR (" . $this->correlationField[$i]->getWhere($args) . ")");
 	}
 }
 $this->viewByName(
