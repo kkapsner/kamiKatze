@@ -10,19 +10,6 @@
  * @author kkapsner
  */
 class DBItemFieldDBDynamicItemOneToN extends DBItemFieldDBItemOneToN {
-	
-	/**
-	 * Field in the correlation table where the class name is saved.
-	 * @var string 
-	 */
-	public $correlationClassName = null;
-	
-	/**
-	 * Field in the correlation table where the id is saved.
-	 * @var string 
-	 */
-	public $correlationIdName = null;
-	
 	/**
 	 * {@inheritdoc}
 	 * 
@@ -41,24 +28,6 @@ class DBItemFieldDBDynamicItemOneToN extends DBItemFieldDBItemOneToN {
 			$this->correlationField[$i] = self::parseClass($classSpecifier)->getFieldByName($this->correlationName);
 		}
 	}
-	
-	/**
-	 * {@inheritdoc}
-	 * 
-	 * @param DBItemClassSpecifier $classSpecifier
-	 * @param mixed[] $properties
-	 */
-	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
-		parent::adoptProperties($classSpecifier, $properties);
-		$this->correlationClassName = array_read_key("correlationClassName", $properties, $this->correlationName . ">class");
-		if ($this->correlationClassName){
-			$this->correlationIdName = array_read_key("correlationIdName", $properties, $this->correlationName . ">id");
-		}
-		else {
-			$this->correlationIdName = $this->correlationName;
-		}
-	}
-	
 	
 	/**
 	 * {@inheritdoc}
