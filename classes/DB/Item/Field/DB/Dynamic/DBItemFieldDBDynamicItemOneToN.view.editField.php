@@ -19,8 +19,8 @@ else {
 	}
 }
 $this->viewByName(
-	"DBItemFieldDBDynamicItem",
-	"editField.multiSelect",
+	"DBItemFieldDBItem",
+	"editField.grouped.multiSelect",
 	true,
 	array(
 		"postName" => $postName,

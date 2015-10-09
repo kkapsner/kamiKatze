@@ -11,8 +11,8 @@ foreach ($this->classField->typeExtension as $class){
 	$groups[$class] = DBItem::getByConditionCLASS($class);
 }
 $this->viewByName(
-	"DBItemFieldDBDynamicItem",
-	"editField.select",
+	"DBItemFieldDBItem",
+	"editField.grouped.select",
 	true,
 	array(
 		"postName" => $postName,

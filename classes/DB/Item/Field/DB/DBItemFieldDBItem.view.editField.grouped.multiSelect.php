@@ -5,14 +5,41 @@
  *		"postName" => post name,
  *		"groups" => available items in groups,
  *		"value" =>  current items) */
+
+$groups = array();
+$values = array();
+$removedGroup = false;
+$i = 0;
+foreach ($args["groups"] as $groupName => $group){
+	if (count($group) > 0){
+		$groups[$groupName] = $group;
+		$values[] = $args["value"][$i];
+	}
+	else {
+		$removedGroup = true;
+	}
+	$i += 1;
+}
+
+if (!$removedGroup && count($groups) === 1){
+	$args["availableItems"] = array_values($groups)[0];
+	$args["value"] = $args["value"][0];
+	$this->viewByName(
+		"DBItemFieldDBItem",
+		"editField.multiSelect",
+		true,
+		$args
+	);
+}
+else {
 ?>
 			<input type="hidden" name="<?php echo $args["postName"];?>[present]" value="1">
 			<select name="<?php echo $args["postName"];?>[values][]" multiple="multiple">
 				<?php
 		$hmItems = $args["value"];
 		$i = 0;
-		foreach ($args["groups"] as $groupName => $group){
-			if ($groupName && count($args["groups"]) > 1){
+		foreach ($groups as $groupName => $group){
+			if ($groupName){
 				echo "<optgroup label=\"" . $this->html($groupName) . "\">";
 
 			}
@@ -31,4 +58,5 @@
 			$i += 1;
 		}
 		?>
-			</select>
+			</select><?php
+}?>
