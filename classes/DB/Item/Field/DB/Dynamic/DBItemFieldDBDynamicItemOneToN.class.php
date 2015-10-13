@@ -139,4 +139,17 @@ class DBItemFieldDBDynamicItemOneToN extends DBItemFieldDBItemOneToN {
 		}
 		return $ret;
 	}
+	
+	/**
+	 * {@inheritdoc}
+	 * 
+	 * @param DBItem $item
+	 */
+	protected function deleteDependencies(DBItem $item){
+		$col = new Collection("DBItemCollection");
+		foreach ($this->class as $class){
+			$col[] = new DBItemCollection($class);
+		}
+		$this->setValue($item, $col);
+	}
 }

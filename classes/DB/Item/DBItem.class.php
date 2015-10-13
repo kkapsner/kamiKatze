@@ -330,12 +330,12 @@ abstract class DBItem extends DBItemFriends{
 	 */
 	public function delete(){
 		if (!$this->deleted){
-			$this->db->query("DELETE FROM  " . $this->table . " WHERE `id` = " . $this->DBid);
-			
 			foreach ($this->fields as $item){
 				/* @var $item DBItemField */
 				$item->deleteDependencies($this);
 			}
+			
+			$this->db->query("DELETE FROM  " . $this->table . " WHERE `id` = " . $this->DBid);
 			
 			unset(self::$instances[$this->specifier->getSpecifiedName()][$this->DBid]);
 			$this->deleted = true;
