@@ -316,10 +316,10 @@ class Collection extends ViewableHTML implements ArrayAccess, IteratorAggregate,
 	}
 	
 	public function view($context = false, $output = false, $args = false){
-		$ret = parent::view($context, $output, $args);
+		$expandedContext = ($context? preg_replace("/(^|\\|)/", "$1collection.", $context) . "|": "") . "collection";
+		$ret = parent::viewByName($this->class, $expandedContext, $output, $args);
 		if (!$ret){
-			$context = "collection|" . preg_replace("/(^|\\|)/", "$1collection.", $context);
-			return parent::viewByName($this->class, $context, $output, $args);
+			return parent::view($context, $output, $args);
 		}
 		else {
 			return $ret;
