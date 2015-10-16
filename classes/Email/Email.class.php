@@ -307,13 +307,15 @@ class Email{
 
 	/**
 	 * Generates the mail head and returns it.
+	 * 
+	 * @param string[] $ignoredHeaders
 	 * @return string
 	 */
-	public function getHead(){
+	public function getHead($ignoredHeaders = array("BCC")){
 		$head = "";
 		foreach ($this->headers as $h){
 			/* @var $h EmailHeader */
-			if (strToUpper($h->getName()) !== "BCC"){
+			if (!in_array(strToUpper($h->getName()), $ignoredHeaders)){
 				$head .= $h;
 			}
 		}
@@ -341,7 +343,7 @@ class Email{
 				$this->to->getFoldedValue(),
 				EmailEncoder::escapeHeaderValue($this->subject->getValue(), 9, $this->charset),
 				$this->getBody(),
-				$this->getHead()
+				$this->getHead(array("TO"))
 			);
 		}
 		else {
