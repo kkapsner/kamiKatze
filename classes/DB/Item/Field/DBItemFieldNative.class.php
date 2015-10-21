@@ -21,6 +21,9 @@ class DBItemFieldNative extends DBItemField implements DBItemFieldSearchable{
 			return $db->quote($this->name, DB::PARAM_IDENT) . " IS NULL";
 		}
 		else {
+			if ($value instanceof DBItem){
+				$value = $value->DBid;
+			}
 			return $db->quote($this->name, DB::PARAM_IDENT) . " = " . $db->quote($value);
 		}
 	}
