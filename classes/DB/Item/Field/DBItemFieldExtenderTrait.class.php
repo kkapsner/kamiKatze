@@ -26,7 +26,7 @@ trait DBItemFieldExtenderTrait{
 	 */
 	public function validate($values){
 		$errors = parent::validate($values);
-		$extenderValue = array_read_key($this->name, $values, $this->default);
+		$extenderValue = array_read_key($this->name, $values, $this->getDefault());
 		if ($extenderValue !== null){
 			$errors = array_merge(
 				$errors,

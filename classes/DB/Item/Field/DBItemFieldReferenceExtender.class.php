@@ -11,4 +11,8 @@
  */
 class DBItemFieldReferenceExtender extends DBItemFieldReferenceEnum implements DBItemFieldHasSearchableSubcollection{
 	use DBItemFieldExtenderTrait;
+	
+	public function getDefault(){
+		return $this->idToValue($this->default);
+	}
 }
