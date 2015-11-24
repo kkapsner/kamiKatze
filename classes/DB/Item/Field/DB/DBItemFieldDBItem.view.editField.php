@@ -53,6 +53,18 @@ switch ($this->correlation){
 			);
 			break;
 		}
+		if ($this->editWithCheckboxes){
+			$this->view(
+				"editField.multiCheckbox",
+				true,
+				array(
+					"postName" => $postName,
+					"availableItems" => $availableItems,
+					"value" => $this->getValue($args)
+				)
+			);
+			break;
+		}
 	case DBItemFieldDBItem::ONE_TO_N:
 		$this->view(
 			"editField.multiSelect",
@@ -65,4 +77,3 @@ switch ($this->correlation){
 		);
 		break;
 }
-?>

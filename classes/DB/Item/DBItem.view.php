@@ -2,7 +2,7 @@
 /* @var $this DBItem */
 ?>
 <article class="DBItem <?php echo $this->specifier->getClassName();?>">
-	<h1><?php $this->view("singleLine", true);?></h1>
+<?php $this->view("header", true);?>
 	<table>
 <?php
 $this->emit(new Event("view.fields.start", $this));

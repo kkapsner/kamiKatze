@@ -55,6 +55,12 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 	public $canHaveMultipleLinks = false;
 	
 	/**
+	 * If the NtoN correlation should be edited with multiple <input type=checkbox>.
+	 * @var boolean
+	 */
+	public $editWithCheckboxes = false;
+	
+	/**
 	 * If the field describes a loop that points to itself.
 	 * @var boolean
 	 */
@@ -70,6 +76,7 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 		parent::adoptProperties($classSpecifier, $properties);
 		
 		$this->canHaveMultipleLinks = array_read_key("canHaveMultipleLinks", $properties, $this->canHaveMultipleLinks);
+		$this->editWithCheckboxes = array_read_key("editWithCheckboxes", $properties, $this->editWithCheckboxes);
 		$this->toFieldInLinkingTable = array_read_key("selfLinkedField", $properties, $this->name . "_id");
 		$this->fromFieldInLinkingTable = array_read_key("otherLinkedField", $properties, $this->correlationName . "_id");
 		$this->linkingTableName = array_read_key("linkingTableName", $properties, false);
