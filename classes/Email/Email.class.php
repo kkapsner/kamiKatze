@@ -92,6 +92,7 @@ class Email{
 	public function __construct(EmailAddress $to = NULL, $subject = "", $nachricht = "", EmailAddress $from = NULL){		
 		$this->addHeader(new EmailHeaderMessageID());
 		$this->addHeader(new EmailHeaderMIMEVersion());
+		$this->addHeader(new EmailHeaderDate());
 
 		$this->from = new EmailHeaderAddress("From", $from);
 		$this->addHeader($this->from);
