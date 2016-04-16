@@ -59,7 +59,7 @@ class DBItemFieldReferenceEnum extends DBItemFieldEnum{
 	 * @param int $id
 	 * @return string
 	 */
-	private function idToValue($id){
+	protected function idToValue($id){
 		return $this->typeExtension[$id];
 	}
 
