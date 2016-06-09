@@ -262,8 +262,15 @@ abstract class BBCodeTag extends Node{
 	 * @param string $name
 	 */
 	public function __get($name){
+		$name = strtolower($name);
 		if (array_key_exists($name, $this->parameter)){
 			return $this->parameter[$name];
+		}
+		else {
+			$alias = BBCodeAliasses::getRealParameterFor($name);
+			if ($alias !== $name){
+				return $this->{$alias};
+			}
 		}
 		return NULL;
 	}
