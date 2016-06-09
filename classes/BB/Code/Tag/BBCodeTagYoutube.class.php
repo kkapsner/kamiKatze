@@ -34,7 +34,7 @@ class BBCodeTagYoutube extends BBCodeTag{
 	 * {@inheritdoc}
 	 */
 	public function toHTML(){
-		$url = 'http://www.youtube-nocookie.com/v/' . $this->childrenToText() . '&amp;hl=de_DE&amp;fs=1&amp;rel=0&amp;border=' . $this->rand;
+		$url = 'http://www.youtube-nocookie.com/v/' . $this->childrenToText() . '&amp;hl=de_DE&amp;fs=1&amp;rel=0&amp;border=' . $this->border;
 		return '<object width="445" height="364" class="youTube">' . "\r" .
 '	<param name="movie" value="' . $url . '"></param>' . "\r" .
 '	<param name="allowFullScreen" value="true"></param>' . "\r" .

@@ -36,6 +36,11 @@ class BBCodeTagRoot extends BBCodeTag{
 	 */
 	public $parser = NULL;
 
+	/**
+	 * The variables that are available for the nodes.
+	 * @var mixed[]
+	 */
+	public $variables = NULL;
 
 	/**
 	 * {@inheritdoc}
@@ -61,5 +66,3 @@ class BBCodeTagRoot extends BBCodeTag{
 		return $this->childrenToHTML();
 	}
 }
-
-?>
