@@ -19,6 +19,11 @@ class BBCodeTagText extends BBCodeTag{
 	 * {@inheritdoc}
 	 */
 	protected static $allowedChildren = array();
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	protected static $allowedParents = true;
 
 	/**
 	 * {@inheritdoc}

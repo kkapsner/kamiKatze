@@ -138,14 +138,22 @@ abstract class BBCodeTag extends Node{
 		$tagName = BBCodeAliasses::getRealTagFor($tagName);
 		$tagInfo = self::getTagTypeInfo($tagName);
 		return (
+				$thisInfo["allowedChildren"] === true ||
 				in_array($tagInfo["type"], $thisInfo["allowedChildren"]) ||
 				in_array($tagName, $thisInfo["allowedChildren"])
 			) && (
+				$tagInfo["allowedParents"] === true ||
 				in_array($thisInfo["type"], $tagInfo["allowedParents"]) ||
 				in_array($this->realTagName, $tagInfo["allowedParents"])
 			) &&
-			!in_array("!" . $tagName, $thisInfo["allowedChildren"]) &&
-			!in_array("!" . $this->realTagName, $tagInfo["allowedParents"])
+			(
+				$thisInfo["allowedChildren"] === true ||
+				!in_array("!" . $tagName, $thisInfo["allowedChildren"])
+			) &&
+			(
+				$tagInfo["allowedParents"] === true ||
+				!in_array("!" . $this->realTagName, $tagInfo["allowedParents"])
+			)
 		;
 	}
 
@@ -304,6 +312,23 @@ abstract class BBCodeTag extends Node{
 			}
 		}
 		return "utf-8";
+	}
+	
+	
+	/**
+	 * Debugging function which draws the tree in html.
+	 */
+	public function printTree(){
+		echo "<span class=\"name\">" . $this->realTagName . "</span>";
+		if (count($this) > 0){
+			echo "<ul>";
+			foreach ($this as $child){
+				echo "<li>";
+				$child->printTree();
+				echo "</li>";
+			}
+			echo "</ul>";
+		}
 	}
 }
 

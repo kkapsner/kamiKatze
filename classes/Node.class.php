@@ -357,7 +357,10 @@ class Node implements Countable, ArrayAccess, SeekableIterator, EventEmitter{
 			}
 		}
 		if (!$event->getPropagationStopped()){
-			$this->getParentEmitter()->emit($event);
+			$parentEmitter = $this->getParentEmitter();
+			if ($parentEmitter){
+				$parentEmitter->emit($event);
+			}
 		}
 	}
 	
