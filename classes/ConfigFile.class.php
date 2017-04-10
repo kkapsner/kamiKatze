@@ -45,7 +45,7 @@ class ConfigFile{
 			$this->load();
 		}
 	}
-
+	
 	/**
 	 * Loads the config file and parses the content.
 	 *
@@ -134,6 +134,19 @@ class ConfigFile{
 			}
 		}
 		
+	}
+	
+	/**
+	 * Writes the config file to disk.
+	 *
+	 * @param string $path The path where the config file should be stored.
+	 */
+	public function write($path){
+		$content = "";
+		foreach ($this->variables as $name => $value){
+			$content .= $name . " = " . var_export($value, true) . "\n";
+		}
+		file_put_contents(realpath($path) . DIRECTORY_SEPARATOR . $this->filename, $content);
 	}
 	
 	/**
