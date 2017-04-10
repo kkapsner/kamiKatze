@@ -17,6 +17,12 @@ trait DBItemFieldExtenderTrait{
 	 * @var array
 	 */
 	public $extensionFieldOptions = array();
+	
+	/**
+	 * Format for the table names that contain the extender information.
+	 * @var String|null
+	 */
+	public $extenderTableFormat = null;
 
 	/**
 	 * {@inheritdoc}
@@ -45,8 +51,12 @@ trait DBItemFieldExtenderTrait{
 	protected function adoptProperties(DBItemClassSpecifier $classSpecifier, $properties){
 		parent::adoptProperties($classSpecifier, $properties);
 		
+		if (array_key_exists("extenderFormat", $properties)){
+			$this->extenderTableFormat = $properties["extenderFormat"];
+		}
+		
 		foreach ($this->typeExtension as $value){
-			$this->extensionFieldOptions[$value] = DBItemField::parseClass($value);
+			$this->extensionFieldOptions[$value] = DBItemField::parseClass(new DBItemClassSpecifier($value, $this->getTableName($value)));
 		}
 	}
 
@@ -83,8 +93,7 @@ trait DBItemFieldExtenderTrait{
 					$field->appendDBNameAndValueForCreate($values[$field->name], $keys, $dbValues);
 				}
 			}
-			$db->query("INSERT INTO " . $db->quote(DBItemClassSpecifier::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " (" . $keys . ") VALUES (" . $dbValues . ")");
-
+			$db->query("INSERT INTO " . $db->quote($this->getTableName($extenderValue), DB::PARAM_IDENT) . " (" . $keys . ") VALUES (" . $dbValues . ")");
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
 				$field->createDependencies($id, $values);
 			}
@@ -126,7 +135,7 @@ trait DBItemFieldExtenderTrait{
 				$db = DB::getInstance();
 				$data = $db->query(
 					"SELECT * FROM " .
-					$db->quote(DBItemClassSpecifier::$tablePrefix . $extenderValue, DB::PARAM_IDENT) .
+					$db->quote($this->getTableName($extenderValue), DB::PARAM_IDENT) .
 					"WHERE `id` = " . $item->DBid
 				);
 				$data = $data->fetch(DB::FETCH_ASSOC);
@@ -163,7 +172,7 @@ trait DBItemFieldExtenderTrait{
 				}
 			}
 			if (strlen($prop) !== 0){
-				$db->query("UPDATE " . $db->quote(DBItemClassSpecifier::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " SET " . $prop . " WHERE `id` = " . $item->DBid);
+				$db->query("UPDATE " . $db->quote($this->getTableName($extenderValue), DB::PARAM_IDENT) . " SET " . $prop . " WHERE `id` = " . $item->DBid);
 			}
 		}
 		return false;
@@ -178,7 +187,7 @@ trait DBItemFieldExtenderTrait{
 		$extenderValue = $this->getValue($item);
 		$db = DB::getInstance();
 		if ($extenderValue !== null){
-			$db->query("DELETE FROM  " . $db->quote(DBItemClassSpecifier::$tablePrefix . $extenderValue, DB::PARAM_IDENT) . " WHERE `id` = " . $item->DBid);
+			$db->query("DELETE FROM  " . $db->quote($this->getTableName($extenderValue), DB::PARAM_IDENT) . " WHERE `id` = " . $item->DBid);
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
 				/* @var $field DBItemField */
 				$field->deleteDependencies($item);
@@ -225,7 +234,19 @@ trait DBItemFieldExtenderTrait{
 			return null;
 		}
 	}
-
+	
+	/**
+	 * Returns the table name for the extended properties.
+	 * 
+	 * @param String $value The value of the extender field.
+	 * @return String The name of the corresonding extender table.
+	 */
+	protected function getTableName($value){
+		if ($this->extenderTableFormat){
+			return DBItemClassSpecifier::$tablePrefix . sprintf($this->extenderTableFormat, $value);
+		}
+		else {
+			return DBItemClassSpecifier::$tablePrefix . $value;
+		}
+	}
 }
-
-?>
