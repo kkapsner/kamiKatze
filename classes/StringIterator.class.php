@@ -136,6 +136,32 @@ class StringIterator implements SeekableIterator, ArrayAccess, Countable, Serial
 		}
 		return $text;
 	}
+	
+	/**
+	 * Checks if the string after the current position starts with a specific
+	 * search string. If the string is found the iterator advances behind the
+	 * matched string.
+	 * 
+	 * @param string $search The searched string.
+	 * @param boolean $caseInsensitive If the search should be performed case
+	 *     insensitive
+	 * @return boolean If the search is present at the current position.
+	 */
+	public function isCurrentEqual($search, $caseInsensitive = false){
+		$len = strlen($search);
+		$testStr = substr($this->str, $this->current, $len);
+		if ($caseInsensitive){
+			$search = strtoupper($search);
+			$testStr = strtoupper($testStr);
+		}
+		if ($testStr === $search){
+			$this->current += $len;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
 	/**
 	 * {@inheritdoc}

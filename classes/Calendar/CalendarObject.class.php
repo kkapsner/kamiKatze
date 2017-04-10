@@ -42,7 +42,7 @@ class CalendarObject extends ViewableImplementation implements Countable, Iterat
 			"properties" => array(
 				"required" => array(),
 				"optional" => array(
-					"once" => array("class", "completed", "created", "description", "dtstamp", "dtstart", "geo", "last-mod", "location", "organizer", "percent", "priority", "recurid", "seq", "status", "summary", "uid", "url"),
+					"once" => array("class", "completed", "created", "description", "dtstamp", "dtstart", "geo", "last-mod", "location", "organizer", "percent", "percent-complete", "priority", "recurid", "seq", "status", "summary", "uid", "url"),
 					"onceExclusive" => array(array("due", "duration")),
 					"multi" => array("attach", "attendee", "categories", "comment", "contact", "exdate", "exrule", "rstatus", "related", "resources", "rdate", "rrule")
 				)
@@ -255,6 +255,39 @@ class CalendarObject extends ViewableImplementation implements Countable, Iterat
 	public function getIterator(){
 		return new ArrayIterator($this->children);
 	}
+	
+	/**
+	 * Parses an input to a calendar object.
+	 * @param StringIterator|String $iterator The input
+	 * @return CalendarObject Returns the parsed calendar object.
+	 * @throws InvalidArgumentException on invalid syntax.
+	 */
+	public static function parse($iterator){
+		if (is_string($iterator)){
+			// unfold lines
+			$iterator = str_replace(array("\r\n ", "\r\n\t"), "", $iterator);
+			$iterator = new StringIterator($iterator);
+		}
+		if ($iterator->isCurrentEqual("BEGIN:", true)){
+			$name = $iterator->goToNext("\r\n");
+			$iterator->goToNextNot("\r\n");
+			$object = new self($name);
+			while (!$iterator->isCurrentEqual("END:$name", true)){
+				$startPos = $iterator->key();
+				$property = CalendarProperty::parse($iterator);
+				if (strtoupper($property->name) === "BEGIN"){
+					$iterator->seek($startPos);
+					$object->addChild(self::parse($iterator));
+				}
+				else {
+					$object->properties[$property->name] = $property;
+				}
+			}
+			$iterator->goToNextNot("\r\n");
+			return $object;
+		}
+		else {
+			throw new InvalidArgumentException("Invalid vCal syntax: No proper beginning (position 0).");
+		}
+	}
 }
-
-?>

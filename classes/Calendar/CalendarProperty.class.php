@@ -78,7 +78,72 @@ class CalendarProperty extends ViewableImplementation implements IteratorAggrega
 	public function getIterator(){
 		return new ArrayIterator($this->parameter);
 	}
-
+	
+	/**
+	 * Generates a parse exception.
+	 * 
+	 * @param string $message The exception message
+	 * @param integer $position The position of the error in the parsed text.
+	 * @return \InvalidArgumentException The gerenared exception.
+	 */
+	private static function getParseException($message, $position){
+		return new InvalidArgumentException("Invalid vCal syntax: $message (position $position).");
+	}
+	
+	/**
+	 * Parses an input to a calendar property object.
+	 * @param StringIterator|String $iterator The input
+	 * @return CalendarProperty Returns the parsed calendar property object.
+	 * @throws InvalidArgumentException on invalid syntax.
+	 */
+	public static function parse($iterator){
+		if (is_string($iterator)){
+			$iterator = new StringIterator($iterator);
+		}
+		$name = $iterator->goToNextNot("a-zA-Z0-9-");
+		if ($name === ""){
+			throw self::getParseException("missing name", $iterator->key());
+		}
+		
+		$parameter = array();
+		while ($iterator->current() === ";"){
+			// read parameter
+			
+			$iterator->next();
+			$pName = $iterator->goToNextNot("a-zA-Z0-9-");
+			if ($pName === ""){
+				throw self::getParseException("missing parameter name", $iterator->key());
+			}
+			if ($iterator->current() !== "="){
+				throw self::getParseException("expected equal sign", $iterator->key());
+			}
+			$iterator->next();
+			
+			if ($iterator->current() === "\""){
+				// quoted parameter value
+				$iterator->next();
+				$pValue = $iterator->goToNext("\"");
+				if ($iterator->current() !== "\""){
+					throw self::getParseException("expected double quote", $iterator->key());
+				}
+				$iterator->next();
+			}
+			else {
+				$pValue = $iterator->goToNextNot("\x20\x09\x21\x23-\x2B\x2D-\x39\x3C-\x7E\x80-\xF8");
+			}
+			$parameter[strToLower($pName)] = $pValue;
+		}
+		
+		if ($iterator->current() !== ":"){
+			throw self::getParseException("expected semicolon", $iterator->key());
+		}
+		$iterator->next();
+		
+		$value = $iterator->goToNext("\r\n");
+		$iterator->goToNextNot("\r\n");
+		
+		$property = new self($name, $value);
+		$property->parameter = $parameter;
+		return $property;
+	}
 }
-
-?>

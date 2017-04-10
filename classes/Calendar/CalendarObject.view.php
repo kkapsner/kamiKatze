@@ -7,15 +7,8 @@ $name = $this->getName();
 
 echo "BEGIN:" . $name . "\r\n";
 
-foreach ($this->getRequiredProperties() as $prop){
-	$value = $this->$prop;
-	$value->view($context, true, $args);
-}
-foreach ($this->getOptionalProperties() as $prop){
-	$value = $this->$prop;
-	if ($value){
-		$value->view($context, true, $args);
-	}
+foreach ($this->properties as $property){
+	$property->view($context, true, $args);
 }
 
 foreach ($this as $obj){
@@ -23,4 +16,3 @@ foreach ($this as $obj){
 }
 
 echo "END:" . $name . "\r\n";
-?>

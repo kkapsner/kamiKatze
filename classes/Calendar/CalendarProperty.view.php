@@ -4,7 +4,7 @@
 /* @var $context String */
 /* @var $args mixed */
 
-echo strToUpper($this->name);
+$line = strToUpper($this->name);
 
 foreach ($this as $name => $value){
 	if (
@@ -18,7 +18,7 @@ foreach ($this as $name => $value){
 	){
 		$value = '"' . $value . '"';
 	}
-	echo ";" . strToUpper($name) . "=" . $value;
+	$line .= ";" . strToUpper($name) . "=" . $value;
 }
 
 $value = $this->value;
@@ -26,5 +26,11 @@ if (!$this->rawValue){
 	$value = preg_replace('/[,;]/', '\\\\$0', $value);
 }
 
-echo ":" . $value . "\r\n";
-?>
+$line .= ":" . $value;
+
+while(strlen($line) > 74){
+	echo substr($line, 0, 74) . "\r\n ";
+	$line = substr($line, 74);
+}
+
+echo $line . "\r\n";
