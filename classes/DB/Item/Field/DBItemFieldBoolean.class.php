@@ -44,6 +44,20 @@ class DBItemFieldBoolean extends DBItemFieldNative{
 	public function isValidValue($value){
 		return is_bool($value) || is_numeric($value);
 	}
-}
+	
 
-?>
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param type $value
+	 * @return string|null If null is returned the field has no value to be stored in the original table.
+	 */
+	public function translateToDB($value){
+		if ($value === null && $this->null){
+			return "NULL";
+		}
+		else {
+			return DB::getInstance()->quote($value? 1: 0, DB::PARAM_INT);
+		}
+	}
+}
