@@ -17,13 +17,15 @@ if ($args->DBid === 0){
 			var tables = {};
 			var currentTable = null;
 			Array.prototype.slice.call(sel.parentNode.getElementsByTagName("table")).forEach(function(table){
-				var extension = table.getAttribute("data-extension");
-				tables[extension] = table;
-				if (extension !== sel.value){
-					table.parentNode.removeChild(table);
-				}
-				else {
-					currentTable = table;
+				if (table.parentNode === sel.parentNode){
+					var extension = table.getAttribute("data-extension");
+					tables[extension] = table;
+					if (extension !== sel.value){
+						table.parentNode.removeChild(table);
+					}
+					else {
+						currentTable = table;
+					}
 				}
 			});
 			
