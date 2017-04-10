@@ -30,6 +30,12 @@ class EmailPart{
 	public $name;
 
 	/**
+	 * The parts method
+	 * @var string
+	 */
+	public $method;
+
+	/**
 	 * The content
 	 * @var string
 	 */
@@ -157,6 +163,9 @@ class EmailPart{
 		}
 		if ($this->name != ''){
 			$ct->setParameter("name", $this->name);
+		}
+		if ($this->method  != ''){
+			$ct->setParameter("method", $this->method);
 		}
 		$str = $ct->__toString();
 		foreach ($this->headers as $header){

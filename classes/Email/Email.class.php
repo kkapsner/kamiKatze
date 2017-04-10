@@ -305,6 +305,15 @@ class Email{
 		}
 		return $this->addAttachment($type, basename($path), file_get_contents($path));
 	}
+	
+	/**
+	 * Returns the master part of the email.
+	 * 
+	 * @return EmailPart
+	 */
+	public function getMasterPart(){
+		return $this->masterPart;
+	}
 
 	/**
 	 * Generates the mail head and returns it.
@@ -360,5 +369,3 @@ class Email{
 		return $this->getHead() . self::newLine . $this->getBody();
 	}
 }
-
-?>
