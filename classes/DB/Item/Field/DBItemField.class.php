@@ -120,7 +120,13 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 		$properties["originalType"] = $type;
 		
 		$properties["null"] = $dbProperties["Null"] === "YES";
-		$properties["default"] = $dbProperties["Default"];
+		if (
+			!array_key_exists("default", $properties) &&
+			array_key_exists("Default", $dbProperties)
+		){
+			$properties["default"] = $dbProperties["Default"];
+		}
+		
 		if (
 			!array_key_exists("displayName", $properties) &&
 			array_key_exists("DisplayName", $dbProperties)
