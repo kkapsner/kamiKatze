@@ -23,7 +23,7 @@ class BBCodeTagB extends BBCodeTagSimpleReplace{
 	/**
 	 * {@inheritdoc}
 	 */
-	protected static $allowedParents = array("block", "inline");
+	protected static $allowedParents = array("block", "inline", "");
 
 
 
