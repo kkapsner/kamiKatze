@@ -30,9 +30,9 @@ class BBCodeTagVar extends BBCodeTag{
 	 * @todo describe parameter
 	 */
 	protected $parameter = array(
-		"viewContext" => "",
+		"viewcontext" => "",
 		"format" => "%s",
-		"viewArgument" => "",
+		"viewargument" => "",
 		"required" => false,
 		"optional" => false
 	);
@@ -71,7 +71,7 @@ class BBCodeTagVar extends BBCodeTag{
 			else {
 				$arg = null;
 			}
-			return $obj->view($this->viewContext, false, $arg);
+			return $obj->view($this->viewContext . ".text|" . $this->viewContext, false, $arg);
 		}
 		else {
 			return sprintf($this->format, $obj);
@@ -111,7 +111,7 @@ class BBCodeTagVar extends BBCodeTag{
 			else {
 				$arg = null;
 			}
-			return $obj->view($this->viewContext, false, $arg);
+			return $obj->view($this->viewContext . ".html|" . $this->viewContext, false, $arg);
 		}
 		else {
 			return htmlentities(sprintf($this->format, $obj), ENT_QUOTES, $this->getCharset());
@@ -139,6 +139,19 @@ class BBCodeTagVar extends BBCodeTag{
 				$name = substr($name, 0, $dotPos);
 				if (array_key_exists($name, $array)){
 					return $this->getValue($rest, $array[$name]);
+				}
+			}
+		}
+		elseif (is_object($array)){
+			if (property_exists($array, $name)){
+				return $array->${$name};
+			}
+			$dotPos = strpos($name, ".");
+			if ($dotPos !== false){
+				$rest = substr($name, $dotPos + 1);
+				$name = substr($name, 0, $dotPos);
+				if (property_exists($array, $name)){
+					return $this->getValue($rest, $array->${$name});
 				}
 			}
 		}
