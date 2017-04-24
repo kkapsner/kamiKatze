@@ -67,6 +67,12 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 * @var boolean
 	 */
 	public $editable = true;
+	/**
+	 * Name of an additional validation method on the class to be called for
+	 * validation.
+	 * @var string
+	 */
+	public $additionalValidation = false;
 
 	/**
 	 * If there is some field chaining - this is the parent field.
@@ -337,7 +343,7 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 		
 		$props = array(
 			"null", "default", "type", "typeExtension", "displayName", "regExp",
-			"displayable", "editable", "searchable", "displayName"
+			"displayable", "editable", "searchable", "displayName", "additionalValidation"
 		);
 		foreach ($props as $prop){
 			$this->{$prop} = array_read_key($prop, $properties, $this->{$prop});
@@ -367,6 +373,13 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 					DBItemValidationException::WRONG_REGEXP,
 					$this
 				);
+			}
+			if ($this->additionalValidation){
+				$class = $this->parentClassSpecifier->getClassName();
+				$additionalErrors = $class::{$this->additionalValidation}($this, $value);
+				if (is_array($additionalErrors)){
+					$errors = array_merge($errors, $additionalErrors);
+				}
 			}
 		}
 		elseif ($this->editable && $this->default === null && !$this->null) {

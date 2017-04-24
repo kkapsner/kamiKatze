@@ -30,6 +30,10 @@ class DBItemValidationException extends UnexpectedValueException{
 	 * Error code if the value is missing but required
 	 */
 	const WRONG_MISSING = 4;
+	/**
+	 * Error code if the value fails a custom validation.
+	 */
+	const WRONG_CUSTOM = 5;
 
 	/**
 	 * The field htat created the exception.
