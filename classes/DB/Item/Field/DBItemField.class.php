@@ -246,12 +246,12 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 
 	/**
 	 * Performs the iterator for parseClass.
-	 * @param DBItemClassSpecifire $classSpecifier
+	 * @param DBItemClassSpecifier $classSpecifier
 	 * @param Iterator $iter
 	 * @return DBItemFieldCollection
 	 */
 	protected static function iterateForParseClass($classSpecifier, $iter){
-		$ret = new DBItemFieldCollection();
+		$ret = self::$classOptions[$classSpecifier->getSpecifiedName()];
 		$groups = array();
 
 		foreach ($iter as $result){
@@ -296,7 +296,8 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 
 		if (!array_key_exists($specifiedName, self::$classOptions)){
 			$db = DB::getInstance();
-			self::$classOptions[$specifiedName] = self::iterateForParseClass(
+			self::$classOptions[$specifiedName] = new DBItemFieldCollection();
+			self::iterateForParseClass(
 				$classSpecifier,
 				$db->query("SHOW FULL COLUMNS FROM " . $db->quote($classSpecifier->getTableName(), DB::PARAM_IDENT))
 			);
