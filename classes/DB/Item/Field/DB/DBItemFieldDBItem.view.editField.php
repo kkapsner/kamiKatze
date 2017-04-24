@@ -16,6 +16,7 @@ if (
 	$fieldName = $db->quote($this->correlationName, DB::PARAM_IDENT);
 	$availableItems = DBItem::getByConditionCLASS(
 		$this->classSpecifier, $fieldName . " IS NULL OR (" . $fieldName . " = " . $args->DBid .
+		($this->availableCondition? " AND " . $this->availableCondition: "") . 
 		(
 			($this->correlation === DBItemFieldDBItem::ONE_TO_N && $this->correlationCondition)?
 			" AND " . $this->correlationCondition:
@@ -25,7 +26,7 @@ if (
 	);
 }
 else {
-	$availableItems = DBItem::getByConditionCLASS($this->classSpecifier);
+	$availableItems = DBItem::getByConditionCLASS($this->classSpecifier, $this->availableCondition);
 }
 
 switch ($this->correlation){

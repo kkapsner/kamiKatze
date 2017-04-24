@@ -88,6 +88,11 @@ abstract class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearc
 	 * @var boolean
 	 */
 	public $canOverwriteOthers = false;
+	/**
+	 * The condition that the available DBItems fulfill.
+	 * @var string
+	 */
+	public $availableCondition = "";
 	
 	/**
 	 * {@inheritdoc}
@@ -101,6 +106,7 @@ abstract class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearc
 		$this->correlation = $properties["correlation"];
 		$this->correlationName = array_read_key("correlationName", $properties, $classSpecifier->getClassName());
 		$this->canOverwriteOthers = array_read_key("canOverwriteOthers", $properties, $this->canOverwriteOthers);
+		$this->availableCondition = array_read_key("availableCondition", $properties, $this->availableCondition);
 		
 		$this->setClass(array_read_key("class", $properties, $this->class));
 
