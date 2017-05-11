@@ -113,7 +113,7 @@ abstract class DBItem extends DBItemFriends{
 		return self::fastGetCLASS($classSpecifier, (int) $id);
 	}
 	
-	protected static function fastGetCLASS(DBItemClassSpecifier $classSpecifier, $id){
+	protected static function fastGetCLASS(DBItemClassSpecifier $classSpecifier, $id, $data = null){
 		if (!is_int($id) && !ctype_digit($id)){
 			return null;
 		}
@@ -123,7 +123,7 @@ abstract class DBItem extends DBItemFriends{
 			self::$instances[$specifiedName] = array();
 		}
 		if (!array_key_exists($id, self::$instances[$specifiedName])){
-			self::$instances[$specifiedName][$id] = new $className($classSpecifier, $id);
+			self::$instances[$specifiedName][$id] = new $className($classSpecifier, $id, $data);
 		}
 
 		return self::$instances[$specifiedName][$id];
@@ -157,7 +157,7 @@ abstract class DBItem extends DBItemFriends{
 		$ret = new DBItemCollection($classSpecifier->getClassName());
 		$db = DB::getInstance();
 
-		$sql = "SELECT `id` FROM " . $db->quote($classSpecifier->getTableName(), DB::PARAM_IDENT);
+		$sql = "SELECT * FROM " . $db->quote($classSpecifier->getTableName(), DB::PARAM_IDENT);
 		if ($where){
 			$sql .= " WHERE " . $where;
 		}
@@ -173,7 +173,7 @@ abstract class DBItem extends DBItemFriends{
 		$res = $db->query($sql);
 		if ($res){
 			foreach ($res as $row){
-				$ret[] = self::fastGetCLASS($classSpecifier, $row["id"]);
+				$ret[] = self::fastGetCLASS($classSpecifier, $row["id"], $row);
 			}
 		}
 		return $ret;
@@ -271,7 +271,16 @@ abstract class DBItem extends DBItemFriends{
 		$this->fields = DBItemField::parseClass($this->specifier);
 		$this->table = $this->db->quote($this->specifier->getTableName(), DB::PARAM_IDENT);
 		$this->DBid = $DBid;
-		$this->load();
+		if ($data){
+			$this->oldValues = $data;
+			foreach ($this->fields as $field){
+				/* @var $field DBItemField */
+				$field->loadDependencies($this);
+			}
+		}
+		else {
+			$this->load();
+		}
 	}
 
 	/**
@@ -308,7 +317,7 @@ abstract class DBItem extends DBItemFriends{
 		if ($this->changed && !$this->deleted){
 			$prop = "";
 			foreach ($this->fields as $field){
-//				/* @var $field DBItemField */
+				/* @var $field DBItemField */
 				$field->saveDependencies($this);
 			}
 			foreach ($this->newValues as $name => $value){
