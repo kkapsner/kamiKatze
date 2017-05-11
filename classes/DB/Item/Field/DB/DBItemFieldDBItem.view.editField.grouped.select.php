@@ -29,7 +29,10 @@ if (!$removedGroup && count($groups) === 1){
 else {
 ?>
 			<select name="<?php echo $args["postName"];?>">
-				<option></option><?php
+				<?php
+		if ($this->idField->null){
+			echo "<option></option>";
+		}
 		$value = $args["value"];
 		foreach ($groups as $groupName => $group){
 			if ($groupName){

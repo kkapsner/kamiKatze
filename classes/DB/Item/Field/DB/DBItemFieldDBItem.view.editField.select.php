@@ -7,7 +7,10 @@
  *		"value" =>  current item) */
 ?>
 			<select name="<?php echo $args["postName"];?>">
-				<option></option><?php
+				<?php
+		if ($this->null){
+			echo "<option></option>";
+		}
 		$value = $args["value"];
 		foreach ($args["availableItems"] as $hoItem){
 			?>
