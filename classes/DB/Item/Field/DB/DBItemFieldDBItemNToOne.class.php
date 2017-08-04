@@ -29,5 +29,5 @@ class DBItemFieldDBItemNToOne extends DBItemFieldDBItemXToOne{
 	 * @param DBItem $item
 	 * @param array $values
 	 */
-	protected function performAssignmentsAfterCreation(DBItem $item, $values){}
+	public function performAssignmentsAfterCreation(DBItem $item, $values){}
 }

@@ -514,21 +514,21 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 * @param int $id
 	 * @param array $values
 	 */
-	protected function createDependencies($id, $values){}
+	public function createDependencies($id, $values){}
 
 	/**
 	 * Performs assigments that have to occure after the creation of an item.
 	 * @param DBItem $item
 	 * @param type $values
 	 */
-	protected function performAssignmentsAfterCreation(DBItem $item, $values){}
+	public function performAssignmentsAfterCreation(DBItem $item, $values){}
 
 	/**
 	 * Loads all depedencies of the item in other tables than the original one.
 	 *
 	 * @param DBItem $item
 	 */
-	protected function loadDependencies(DBItem $item){}
+	public function loadDependencies(DBItem $item){}
 
 	/**
 	 * Saves all depedencies of the item in other tables than the original one.
@@ -536,7 +536,7 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 * @param DBItem $item
 	 * @return boolean If the fields value must be stored in the original table.
 	 */
-	protected function saveDependencies(DBItem $item){
+	public function saveDependencies(DBItem $item){
 		return true;
 	}
 
@@ -545,7 +545,7 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 *
 	 * @param DBItem $item
 	 */
-	protected function deleteDependencies(DBItem $item){}
+	public function deleteDependencies(DBItem $item){}
 
 	/**
 	 * Returns the value of this field in the item.

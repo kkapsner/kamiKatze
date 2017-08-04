@@ -141,7 +141,7 @@ abstract class DBItemFieldDBItem extends DBItemField implements DBItemFieldSearc
 	 * @param DBItem $item
 	 * @param array $values
 	 */
-	protected function performAssignmentsAfterCreation(DBItem $item, $values){
+	public function performAssignmentsAfterCreation(DBItem $item, $values){
 		if (array_key_exists($this->name, $values)){
 			$item->{$this->name} = $values[$this->name];
 		}

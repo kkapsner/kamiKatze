@@ -62,7 +62,7 @@ abstract class DBItemFieldDBItemXToN extends DBItemFieldDBItem{
 	 * 
 	 * @param DBItem $item
 	 */
-	protected function deleteDependencies(DBItem $item){
+	public function deleteDependencies(DBItem $item){
 		$item->{$this->name} = new DBItemCollection($this->class);
 	}
 	/**

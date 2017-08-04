@@ -145,7 +145,7 @@ class DBItemFieldDBDynamicItemOneToN extends DBItemFieldDBItemOneToN {
 	 * 
 	 * @param DBItem $item
 	 */
-	protected function deleteDependencies(DBItem $item){
+	public function deleteDependencies(DBItem $item){
 		$col = new Collection("DBItemCollection");
 		foreach ($this->class as $class){
 			$col[] = new DBItemCollection($class);

@@ -90,7 +90,7 @@ class DBItemFieldArray extends DBItemField{
 	 * @param int $id
 	 * @param mixed[] $values
 	 */
-	protected function createDependencies($id, $values){
+	public function createDependencies($id, $values){
 		if (array_key_exists($this->name, $values)){
 			foreach ($values[$this->name]["create"] as $value){
 				$this->createSubitem($id, $value);
@@ -103,7 +103,7 @@ class DBItemFieldArray extends DBItemField{
 	 *
 	 * @param DBItem $item
 	 */
-	protected function deleteDependencies(DBItem $item){
+	public function deleteDependencies(DBItem $item){
 		foreach ($this->getValue($item) as $subItem){
 			/* @var $subItem DBItem */
 			$subItem->delete();
@@ -164,7 +164,7 @@ class DBItemFieldArray extends DBItemField{
 	 * 
 	 * @param DBItem $item
 	 */
-	protected function saveDependencies(DBItem $item){
+	public function saveDependencies(DBItem $item){
 		foreach ($this->getValue($item) as $subItem){
 			/* @var $subItem DBItem */
 			$subItem->save();

@@ -113,7 +113,7 @@ abstract class DBItem extends DBItemFriends{
 		return self::fastGetCLASS($classSpecifier, (int) $id);
 	}
 	
-	protected static function fastGetCLASS(DBItemClassSpecifier $classSpecifier, $id, $data = null){
+	public static function fastGetCLASS(DBItemClassSpecifier $classSpecifier, $id, $data = null){
 		if (!is_int($id) && !ctype_digit($id)){
 			return null;
 		}
@@ -412,7 +412,7 @@ abstract class DBItem extends DBItemFriends{
 	 * @param DBItemField $field
 	 * @return boolean
 	 */
-	protected function realValueChanged(DBItemField $field){
+	public function realValueChanged(DBItemField $field){
 		return array_key_exists($field->name, $this->newValues) &&
 			$this->newValues[$field->name] !== array_read_key($field->name, $this->oldValues, $field->default);
 	}
@@ -422,7 +422,7 @@ abstract class DBItem extends DBItemFriends{
 	 * 
 	 * @param DBItemField $field
 	 */
-	protected function makeRealNewValueOld(DBItemField $field){
+	public function makeRealNewValueOld(DBItemField $field){
 		if ($this->realValueChanged($field)){
 			$this->oldValues[$field->name] = $this->newValues[$field->name];
 		}
@@ -434,7 +434,7 @@ abstract class DBItem extends DBItemFriends{
 	 * @param DBItemField $field the name
 	 * @return mixed
 	 */
-	protected function getRealValue(DBItemField $field){
+	public function getRealValue(DBItemField $field){
 		$name = $field->name;
 		if (array_key_exists($name, $this->newValues)){
 			return $this->newValues[$name];
@@ -485,7 +485,7 @@ abstract class DBItem extends DBItemFriends{
 	 * @param string $name
 	 * @param mixed $value
 	 */
-	protected function setRealValue($name, $value){
+	public function setRealValue($name, $value){
 		if (!array_key_exists($name, $this->oldValues)){
 			$this->oldValues[$name] = $value;
 		}
@@ -503,7 +503,7 @@ abstract class DBItem extends DBItemFriends{
 	 * 
 	 * @param string|null $name
 	 */
-	protected function clearProcessedValueCache($name = null){
+	public function clearProcessedValueCache($name = null){
 		if ($name === null){
 			$this->processedValueCache = array();
 		}

@@ -51,7 +51,7 @@ class DBItemFieldFile extends DBItemField{
 	 * 
 	 * @param DBItem $item
 	 */
-	protected function deleteDependencies(DBItem $item){
+	public function deleteDependencies(DBItem $item){
 		$fileItem = $this->getValue($item);
 		if ($fileItem !== null){
 			$fileItem->delete();

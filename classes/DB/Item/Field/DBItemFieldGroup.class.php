@@ -18,7 +18,7 @@ class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSu
 	 * @param int $id
 	 * @param mixed[] $values
 	 */
-	protected function createDependencies($id, $values){
+	public function createDependencies($id, $values){
 		if (array_key_exists($this->name, $values)){
 			foreach ($this->groupFields as $field){
 				$field->createDependencies($id, $values[$this->name]);
@@ -31,7 +31,7 @@ class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSu
 	 *
 	 * @param DBItem $item
 	 */
-	protected function deleteDependencies(DBItem $item){
+	public function deleteDependencies(DBItem $item){
 		foreach ($this->groupFields as $field){
 			$field->deleteDependencies($item);
 		}
@@ -94,7 +94,7 @@ class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSu
 	 * 
 	 * @param DBItem $item
 	 */
-	protected function saveDependencies(DBItem $item){
+	public function saveDependencies(DBItem $item){
 		foreach ($this->groupFields as $field){
 			$field->saveDependencies($item);
 		}
