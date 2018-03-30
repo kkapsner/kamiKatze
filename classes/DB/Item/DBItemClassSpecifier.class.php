@@ -69,7 +69,12 @@ class DBItemClassSpecifier{
 	public function __construct($className, $tableName = null){
 		$this->className = $className;
 		if ($tableName === null){
-			$this->tableName = self::$tablePrefix . $className;
+			if (property_exists($className, "tableName")){
+				$this->tableName = self::$tablePrefix . $className::$tableName;
+			}
+			else {
+				$this->tableName = self::$tablePrefix . $className;
+			}
 		}
 		else {
 			$this->tableName = $tableName;
