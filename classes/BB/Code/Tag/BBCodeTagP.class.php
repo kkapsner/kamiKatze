@@ -28,12 +28,12 @@ class BBCodeTagP extends BBCodeTagSimpleReplace{
 	/**
 	 * {@inheritdoc}
 	 */
-	protected $htmlTag = "p";
+	protected $htmlTag = "div";
 
 	/**
 	 * {@inheritdoc}
 	 */
-	protected $class = NULL;
+	protected $class = "paragraph";
 }
 
 ?>
