@@ -43,7 +43,7 @@ class DB extends PDO{
 	/**
 	 * {@inheritdoc}
 	 *
-	 * @param type $dsn
+	 * @param type $dsn The dsn or a ConfigFile containing the configuration
 	 * @param type $username
 	 * @param type $password
 	 * @param array $driverOptions
@@ -56,6 +56,13 @@ class DB extends PDO{
 			}
 			catch (Exception $e){
 				self::$defaultConfig = null;
+			}
+		}
+		
+		if ($dsn instanceof ConfigFile){
+			$config = $dsn;
+			foreach (array("dsn", "username", "password", "driverOptions") as $name){
+				${$name} = $config->{$name};
 			}
 		}
 		
