@@ -117,11 +117,14 @@ class DBItemFieldTimestamp extends DBItemFieldNative{
 	 * @param type $value
 	 * @return string|null If null is returned the field has no value to be stored in the original table.
 	 */
-	public function translateToDB($value){var_dump($value);
+	public function translateToDB($value){
 		if ($value === null && $this->null){
 			return "NULL";
 		}
 		else {
+			if ($value instanceof DateTime){
+				$value = $value->format("Y-m-d H:i:s");
+			}
 			return DB::getInstance()->quote($value, DB::PARAM_STR);
 		}
 	}
