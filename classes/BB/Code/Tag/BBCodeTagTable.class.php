@@ -67,7 +67,7 @@ class BBCodeTagTable extends BBCodeTag{
 						if ($i){
 							$ret .= "</td></tr><tr><td>";
 						}
-						$cells = preg_split("/(?:\\t+|\\s{2,})/", $line);
+						$cells = preg_split("/(?:\\t+|\\s{2,}|\\|)/", $line);
 						foreach ($cells as $j => $cell){
 							if ($j){
 								$ret .= "</td><td>";
