@@ -251,7 +251,9 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 * @return DBItemFieldCollection
 	 */
 	protected static function iterateForParseClass($classSpecifier, $iter){
-		$ret = self::$classOptions[$classSpecifier->getSpecifiedName()];
+		$ret = !is_array($iter)?
+			self::$classOptions[$classSpecifier->getSpecifiedName()]:
+			new DBItemFieldCollection();
 		$groups = array();
 
 		foreach ($iter as $result){
