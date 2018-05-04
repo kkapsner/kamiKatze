@@ -12,7 +12,7 @@ if (
 		$this->correlation === DBItemFieldDBItem::ONE_TO_N
 	)
 ){
-	$db = DB::getInstance();
+	$db = $this->getDB();
 	$fieldName = $db->quote($this->correlationName, DB::PARAM_IDENT);
 	$availableItems = DBItem::getByConditionCLASS(
 		$this->classSpecifier, $fieldName . " IS NULL OR (" . $fieldName . " = " . $args->DBid .

@@ -85,6 +85,12 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 * @var DBItemClassSpecifier
 	 */
 	protected $parentClassSpecifier = null;
+	
+	/**
+	 * The database object to use with the field
+	 * @var DB
+	 */
+	private $db = null;
 
 	/**
 	 * Returns the properties of a filed providing the properties of the field
@@ -297,7 +303,7 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 		$specifiedName = $classSpecifier->getSpecifiedName();
 
 		if (!array_key_exists($specifiedName, self::$classOptions)){
-			$db = DB::getInstance();
+			$db = DBItem::getDBCLASS($classSpecifier);
 			self::$classOptions[$specifiedName] = new DBItemFieldCollection();
 			self::iterateForParseClass(
 				$classSpecifier,
@@ -394,6 +400,18 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 		}
 		return $errors;
 	}
+	
+	/**
+	 * Retrieves the DB for the field to use.
+	 * @return DB
+	 */
+	protected function getDB(){
+		if (!($this->db instanceof DB)){
+			$this->db = DBItem::getDBCLASS($this->parentClassSpecifier);
+		}
+		
+		return $this->db;
+	}
 
 	/**
 	 * Checks if the $value is correct for the specific field.
@@ -466,7 +484,7 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 			return "NULL";
 		}
 		else {
-			return DB::getInstance()->quote($value, DB::PARAM_STR);
+			return $this->getDB()->quote($value, DB::PARAM_STR);
 		}
 	}
 	
@@ -475,7 +493,7 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 * @return string|null if null is returned the field has no value to be stored in the original table.
 	 */
 	public function translateNameToDB(){
-		return DB::getInstance()->quote($this->name, DB::PARAM_IDENT);
+		return $this->getDB()->quote($this->name, DB::PARAM_IDENT);
 	}
 	
 	/**

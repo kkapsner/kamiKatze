@@ -82,7 +82,7 @@ trait DBItemFieldExtenderTrait{
 	 * @param array $values
 	 */
 	public function createDependencies($id, $values){
-		$db = DB::getInstance();
+		$db = $this->getDB();
 		$keys = $db->quote('id', DB::PARAM_IDENT);
 		$dbValues = $id;
 		$extenderValue = array_read_key($this->name, $values, $this->default);
@@ -132,7 +132,7 @@ trait DBItemFieldExtenderTrait{
 		}
 		else {
 			if ($extenderValue !== null){
-				$db = DB::getInstance();
+				$db = $this->getDB();
 				$data = $db->query(
 					"SELECT * FROM " .
 					$db->quote($this->getTableName($extenderValue), DB::PARAM_IDENT) .
@@ -162,7 +162,7 @@ trait DBItemFieldExtenderTrait{
 	public function saveDependencies(DBItem $item){
 		$extenderValue = $this->getValue($item);
 		if ($extenderValue !== null){
-			$db = DB::getInstance();
+			$db = $this->getDB();
 			$prop = "";
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
 				/* @var $field DBItemField */
@@ -185,7 +185,7 @@ trait DBItemFieldExtenderTrait{
 	 */
 	public function deleteDependencies(DBItem $item){
 		$extenderValue = $this->getValue($item);
-		$db = DB::getInstance();
+		$db = $this->getDB();
 		if ($extenderValue !== null){
 			$db->query("DELETE FROM  " . $db->quote($this->getTableName($extenderValue), DB::PARAM_IDENT) . " WHERE `id` = " . $item->DBid);
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){

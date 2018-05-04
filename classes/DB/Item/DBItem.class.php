@@ -21,7 +21,7 @@ abstract class DBItem extends DBItemFriends{
 	 * @var DBItem[]
 	 */
 	private static $instances = array();
-
+	
 	/**
 	 * Instance of the DB
 	 * @var DB
@@ -90,6 +90,20 @@ abstract class DBItem extends DBItemFriends{
 	
 	// static class functions
 	
+	public static function getDBCLASS($classSpecifier){
+		$classSpecifier = DBItemClassSpecifier::make($classSpecifier);
+		$className = $classSpecifier->getClassName();
+		if (
+			property_exists($className, "classDb") &&
+			$className::$classDb instanceof DB
+		){
+			return $className::$classDb;
+		}
+		else {
+			return DB::getInstance();
+		}
+	}
+	
 	/**
 	 * Get the DBItem of type $class with ID $id.
 	 * @param string|DBItemClassSpecifier $classSpecifier
@@ -155,8 +169,9 @@ abstract class DBItem extends DBItemFriends{
 		$classSpecifier = DBItemClassSpecifier::make($classSpecifier);
 
 		$ret = new DBItemCollection($classSpecifier->getClassName());
-		$db = DB::getInstance();
-
+		
+		$db = self::getDBCLASS($classSpecifier);
+		
 		$sql = "SELECT * FROM " . $db->quote($classSpecifier->getTableName(), DB::PARAM_IDENT);
 		if ($where){
 			$sql .= " WHERE " . $where;
@@ -213,8 +228,9 @@ abstract class DBItem extends DBItemFriends{
 				throw $errors[$keys[0]];
 			}
 		}
-
-		$db = DB::getInstance();
+		
+		$db = self::getDBCLASS($classSpecifier);
+		
 		$keys = "";
 		$values = "";
 		foreach (DBItemField::parseClass($classSpecifier) as $field){
@@ -266,7 +282,7 @@ abstract class DBItem extends DBItemFriends{
 	 * @param string[]|null $data
 	 */
 	protected function __construct(DBItemClassSpecifier $classSpecifier, $DBid, $data = null){
-		$this->db = DB::getInstance();
+		$this->db = self::getDBCLASS($classSpecifier);
 		$this->specifier = $classSpecifier;
 		$this->fields = DBItemField::parseClass($this->specifier);
 		$this->table = $this->db->quote($this->specifier->getTableName(), DB::PARAM_IDENT);

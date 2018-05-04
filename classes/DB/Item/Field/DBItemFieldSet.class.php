@@ -149,7 +149,7 @@ class DBItemFieldSet extends DBItemFieldNative{
 		if (!(count($value))){
 			return "1 = 1";
 		}
-		$db = DB::getInstance();
+		$db = $this->getDB();
 		$name = $db->quote($this->name, DB::PARAM_IDENT);
 		foreach ($value as &$v){
 			$v = "FIND_IN_SET(" . $db->quote($v) . ", " . $name . ") > 0";

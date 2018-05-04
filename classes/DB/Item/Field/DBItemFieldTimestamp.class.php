@@ -125,7 +125,7 @@ class DBItemFieldTimestamp extends DBItemFieldNative{
 			if ($value instanceof DateTime){
 				$value = $value->format("Y-m-d H:i:s");
 			}
-			return DB::getInstance()->quote($value, DB::PARAM_STR);
+			return $this->getDB()->quote($value, DB::PARAM_STR);
 		}
 	}
 }

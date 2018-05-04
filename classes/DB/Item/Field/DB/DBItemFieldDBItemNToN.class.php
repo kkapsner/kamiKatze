@@ -16,8 +16,8 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 	 * @param string $name2 Name for the other linked class
 	 * @return string the table name
 	 */
-	protected static function getLinkingTableName($name1, $name2){
-		$db = DB::getInstance();
+	protected function getLinkingTableName($name1, $name2){
+		$db = $this->getDB();
 		if ($name1 <= $name2){
 			$tableName = DBItemClassSpecifier::$tablePrefix . $name1 . "_" . $name2;
 		}
@@ -81,10 +81,10 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 		$this->fromFieldInLinkingTable = array_read_key("otherLinkedField", $properties, $this->correlationName . "_id");
 		$this->linkingTableName = array_read_key("linkingTableName", $properties, false);
 		if (!$this->linkingTableName){
-			$this->linkingTableName = self::getLinkingTableName($this->name, $this->correlationName);
+			$this->linkingTableName = $this->getLinkingTableName($this->name, $this->correlationName);
 		}
 		else {
-			$this->linkingTableName = DB::getInstance()->quote($this->linkingTableName, DB::PARAM_IDENT);
+			$this->linkingTableName = $this->getDB()->quote($this->linkingTableName, DB::PARAM_IDENT);
 		}
 		
 		$this->isLoop = (
@@ -101,7 +101,7 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 	 */
 	public function getValue(DBItem $item){
 		$ret = new DBItemCollection($this->class);
-		$db = DB::getInstance();
+		$db = $this->getDB();
 
 		$sql = "SELECT " . $db->quote($this->toFieldInLinkingTable, DB::PARAM_IDENT) .
 			" FROM " . $this->linkingTableName .
@@ -134,7 +134,7 @@ class DBItemFieldDBItemNToN extends DBItemFieldDBItemXToN{
 				throw new InvalidArgumentException("Property " . $this->name . " contains a non " . $this->class . ".");
 			}
 			
-			$db = DB::getInstance();
+			$db = $this->getDB();
 			$insertStatement = $db->prepare("INSERT INTO" . $this->linkingTableName . "
 				(
 					" . $db->quote($this->fromFieldInLinkingTable, DB::PARAM_IDENT) . ",

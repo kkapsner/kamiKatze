@@ -103,7 +103,7 @@ abstract class DBItemFieldDBItemXToOne extends DBItemFieldDBItem{
 	 * @param DBItem $value
 	 */
 	public function getWhere($value){
-		$db = DB::getInstance();
+		$db = $this->getDB();
 		$name = $db->quote($this->name, DB::PARAM_IDENT);
 		if ($value === null){
 			return $name . " IS NULL";

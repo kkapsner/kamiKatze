@@ -57,7 +57,7 @@ class DBItemFieldBoolean extends DBItemFieldNative{
 			return "NULL";
 		}
 		else {
-			return DB::getInstance()->quote($value? 1: 0, DB::PARAM_INT);
+			return $this->getDB()->quote($value? 1: 0, DB::PARAM_INT);
 		}
 	}
 }

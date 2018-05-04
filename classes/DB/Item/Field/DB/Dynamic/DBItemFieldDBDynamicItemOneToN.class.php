@@ -130,7 +130,7 @@ class DBItemFieldDBDynamicItemOneToN extends DBItemFieldDBItemOneToN {
 	 */
 	public function getValue(DBItem $item){
 		$ret = new Collection("DBItemCollection");
-		$db = DB::getInstance();
+		$db = $this->getDB();
 		foreach ($this->classSpecifier as $i => $classSpecifier){
 			$ret[] = DBItem::getByConditionCLASS(
 				$classSpecifier,

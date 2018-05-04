@@ -28,7 +28,7 @@ class DBItemFieldReferenceEnum extends DBItemFieldEnum{
 		
 		$this->typeExtension = array();
 		
-		$db = DB::getInstance();
+		$db = $this->getDB();
 		foreach (
 			$db->query("
 				SELECT

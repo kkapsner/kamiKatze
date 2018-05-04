@@ -16,7 +16,7 @@ class DBItemFieldNative extends DBItemField implements DBItemFieldSearchable{
 	 * @return string the where clause string
 	 */
 	public function getWhere($value){
-		$db = DB::getInstance();
+		$db = $this->getDB();
 		if ($this->null && $value === null){
 			return $db->quote($this->name, DB::PARAM_IDENT) . " IS NULL";
 		}
