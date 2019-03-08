@@ -28,7 +28,7 @@ class BBCodeTagQuote extends BBCodeTag{
 	/**
 	 * {@inheritdoc}
 	 */
-	protected $parameter = array("author" => false, "date" => false, "class" => false);
+	protected $parameter = array("author" => false, "date" => false, "class" => false, "quotes" => "en");
 
 	/**
 	 * {@inheritdoc}
@@ -42,7 +42,21 @@ class BBCodeTagQuote extends BBCodeTag{
 			}
 			$author = '<cite class="author">- ' . $this->author . $date . ' -</cite>';
 		}
-		return '<blockquote class="' . $this->class . '">&ldquo;' . $this->childrenToHTML() . "&rdquo;" . $author . '</blockquote>';
+		
+		$quotes = array(
+			"none" => array("", ""),
+			"en" => array("&ldquo;", "&rdquo;"),
+			"de" => array("&#8222;", "&#8220;"),
+			"fr" => array("&#171;", "&#187;")
+		);
+		if (array_key_exists($this->quotes, $quotes)){
+			$selectedQuotes = $quotes[$this->quotes];
+		}
+		else {
+			$selectedQuotes = $quotes["en"];
+		}
+		
+		return '<blockquote class="' . $this->class . '">' . $selectedQuotes[0] . $this->childrenToHTML() . $selectedQuotes[1] . $author . '</blockquote>';
 	}
 }
 
