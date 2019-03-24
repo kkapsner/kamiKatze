@@ -28,20 +28,13 @@ class BBCodeTagYoutube extends BBCodeTag{
 	/**
 	 * {@inheritdoc}
 	 */
-	protected $parameter = array("border" => 0);
+	protected $parameter = array("border" => 0, "width" => 445, "height" => 364);
 
 	/**
 	 * {@inheritdoc}
 	 */
 	public function toHTML(){
-		$url = 'http://www.youtube-nocookie.com/v/' . $this->childrenToText() . '&amp;hl=de_DE&amp;fs=1&amp;rel=0&amp;border=' . $this->border;
-		return '<object width="445" height="364" class="youTube">' . "\r" .
-'	<param name="movie" value="' . $url . '"></param>' . "\r" .
-'	<param name="allowFullScreen" value="true"></param>' . "\r" .
-'	<param name="allowscriptaccess" value="never"></param>' . "\r" .
-'	<embed src="' . $url . '" type="application/x-shockwave-flash"' . "\r" .
-'		allowscriptaccess="never" allowfullscreen="true" width="445" height="364"></embed>' . "\r" .
-'</object>';
+		return '<iframe class="youTube" frameborder="' . $this->border . '" scrolling="no" marginheight="0" marginwidth="0" width="' . $this->width . '" height="' . $this->height . '" type="text/html" src="https://www.youtube.com/embed/' . $this->childrenToText() . '?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0"></iframe>';
 	}
 }
 
