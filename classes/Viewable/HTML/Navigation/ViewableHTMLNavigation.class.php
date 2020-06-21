@@ -14,7 +14,7 @@ class ViewableHTMLNavigation extends ViewableHTML{
 	 * The navigation items.
 	 * @var array
 	 */
-	protected $items;
+	protected $items = array();
 
 	/**
 	 * Checks if the navigation has items.
