@@ -5,7 +5,9 @@
 	$fields = $args;
 	foreach ($fields as $fieldItem){
 		/* @var $fieldItem DBItemField */
-		echo '<col class="' . $this->html($fieldItem->name) . '">';
+		if ($fieldItem->displayable){
+			echo '<col class="' . $this->html($fieldItem->name) . '">';
+		}
 	}
 	?>
 </colgroup>
@@ -14,7 +16,9 @@
 		<?php
 		foreach ($fields as $fieldItem){
 			/* @var $fieldItem DBItemField */
-			echo "<th>" . $this->html($fieldItem->name) . "</th>";
+			if ($fieldItem->displayable){
+				echo "<th>" . $this->html($fieldItem->displayName) . "</th>";
+			}
 		}
 		?>
 	</tr>
