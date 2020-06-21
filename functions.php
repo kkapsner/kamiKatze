@@ -12,7 +12,7 @@
  * @return mixed
  */
 function array_read_key($key, $array, $default = false){
-	if (array_key_exists($key, $array)){
+	if (is_array($array) && array_key_exists($key, $array)){
 		return $array[$key];
 	}
 	else {
