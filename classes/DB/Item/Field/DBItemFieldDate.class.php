@@ -101,7 +101,7 @@ class DBItemFieldDate extends DBItemFieldNative{
 				}
 			}
 			else {
-				$value = DateTime::createFromFormat($this->editFormat, $input);
+				$value = DateTime::createFromFormat("Y-m-d", $input);
 			}
 			if ($value === false){
 				throw new InvalidArgumentException("Date has wrong format.");
