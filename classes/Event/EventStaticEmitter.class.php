@@ -24,7 +24,7 @@ interface EventStaticEmitter{
 	 *
 	 * @param Event|String $event the event type
 	 */
-	public static function emitStatic($event);
+	public static function emitStatic($event, $target = null);
 
 	/**
 	 * Getter for a parent emitter if a emitter chain is present
