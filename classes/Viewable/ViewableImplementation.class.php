@@ -58,21 +58,22 @@ class ViewableImplementation extends EventEmitterImplementation implements Viewa
 		$contextChain = explode("|", $context? $context: "");
 		foreach ($contextChain as $currentContext){
 			$currentName = $name;
-			while ($currentName){
+			$reflection = new ReflectionClass($currentName);
+			while ($reflection){
+				$currentName = $reflection->getName();
 				$path = $al->getLoadingPoint($currentName);
 				if ($path === false){
-					$reflection = new ReflectionClass($currentName);
 					$path = $reflection->getFileName();
 				}
 				$file = dirname($path) . DIRECTORY_SEPARATOR .
-					$currentName . ".view" .
+					$reflection->getShortName() . ".view" .
 					($currentContext? "." . $currentContext: "") .
 					".php";
 				if (is_file($file)){
 					return $file;
 				}
 				else {
-					$currentName = get_parent_class($currentName);
+					$reflection = $reflection->getParentClass();
 				}
 			}
 		}
