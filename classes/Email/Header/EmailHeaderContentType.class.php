@@ -38,12 +38,13 @@ class EmailHeaderContentType extends EmailHeaderParametric{
 
 	/**
 	 * {@nheritdoc}
+	 * Content type must be a valid MIME type (https://www.rfc-editor.org/rfc/rfc6838.html#section-4.2)
 	 *
 	 * @param type $value
 	 * @return boolean
 	 */
 	public function setValue($value){
-		if (preg_match('/^[a-z]+\/[a-z]+$/i', $value)){
+		if (preg_match('/^[a-z0-9][a-z0-9!#$&\\-^_]*\/[a-z0-9][a-z0-9!#$&\\-^_]*$/i', $value)){
 			$this->value = $value;
 			return true;
 		}
