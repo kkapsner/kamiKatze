@@ -44,7 +44,7 @@ class EmailHeaderContentType extends EmailHeaderParametric{
 	 * @return boolean
 	 */
 	public function setValue($value){
-		if (preg_match('/^[a-z0-9][a-z0-9!#$&\\-^_]*\/[a-z0-9][a-z0-9!#$&\\-^_]*$/i', $value)){
+		if (preg_match('/^[a-z0-9][a-z0-9!#$&\\-^_.+]*\/[a-z0-9][a-z0-9!#$&\\-^_.+]*$/i', $value)){
 			$this->value = $value;
 			return true;
 		}
