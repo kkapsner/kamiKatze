@@ -71,9 +71,10 @@ class EmailHeaderParametric extends EmailHeader{
 	 * @return bool if the parameter was set
 	 */
 	public function setParameter($name, $value){
-		if (preg_match('/^[^\x00-\x20\x7F-\xFF()<>@,;:\\\\"\/\[\]?=]+$/', $name) &&
-			preg_match('/^[\x20-\x7E]+$/', $value)
-		){
+		if (preg_match('/^[^\x00-\x20\x7F-\xFF()<>@,;:\\\\"\/\[\]?=]+$/', $name)){
+			if (!preg_match('/^[\x20-\x7E]+$/', $value)){
+				$value = EmailEncoder::escapeHeaderValue($value);
+			}
 			$this->parameter[$name] = $value;
 			return true;
 		}
