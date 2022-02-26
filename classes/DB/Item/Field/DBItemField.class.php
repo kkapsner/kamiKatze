@@ -68,6 +68,11 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 	 */
 	public $editable = true;
 	/**
+	 * If this field should be output in JSON.
+	 * @var boolean
+	 */
+	public $jsonable = true;
+	/**
 	 * Name of an additional validation method on the class to be called for
 	 * validation.
 	 * @var string
@@ -352,7 +357,7 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 		
 		$props = array(
 			"null", "default", "type", "typeExtension", "displayName", "regExp",
-			"displayable", "editable", "searchable", "displayName", "additionalValidation"
+			"displayable", "editable", "searchable", "jsonable", "displayName", "additionalValidation"
 		);
 		foreach ($props as $prop){
 			$this->{$prop} = array_read_key($prop, $properties, $this->{$prop});

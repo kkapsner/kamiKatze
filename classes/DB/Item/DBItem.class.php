@@ -9,7 +9,7 @@
  * @author Korbinian Kapsner
  * @package DB\Item
  */
-abstract class DBItem extends DBItemFriends{
+abstract class DBItem extends DBItemFriends implements JsonSerializable{
 	/**
 	 * Default order for the items if selected by @see DBItem::getByCondition() without third parameter.
 	 * @var String
@@ -589,6 +589,20 @@ abstract class DBItem extends DBItemFriends{
 			return call_user_func_array(array($class, $name . "CLASS"), $arguments);
 		}
 		throw new BadMethodCallException("No method called " . $name);
+	}
+	
+	/**
+	 * Implementation of the JsonSerializable interface
+	 * @return array
+	 */
+	public function jsonSerialize(){
+		$arr = array("id" => $this->DBid);
+		foreach ($this->fields as $field){
+			if ($field->jsonable){
+				$arr[$field->name] = $field->getValue($this);
+			}
+		}
+		return $arr;
 	}
 }
 
