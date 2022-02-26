@@ -14,7 +14,7 @@ class MarkdownParser{
 	
 	/**
 	 * 
-	 * @param type $str
+	 * @param String $str
 	 * @return MarkdownLines[] the parsed line structure
 	 */
 	public static function parse($str){
@@ -32,7 +32,7 @@ class MarkdownParser{
 				if ($lastLine instanceof MarkdownLine){
 					if (!$emptyLineBetween){
 						if (!$lastLine->isHeading){
-							$lastLine->headingLevel = $line{1} === "="? 1: 2;
+							$lastLine->headingLevel = $line[1] === "="? 1: 2;
 						}
 						$lastLine->isHeading = true;
 					}
