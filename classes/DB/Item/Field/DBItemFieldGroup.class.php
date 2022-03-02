@@ -112,7 +112,9 @@ class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSu
 			$value = (array) $value;
 		}
 		foreach ($this->groupFields as $field){
-			$field->setValue($item, $value[$field->name]);
+			if (array_key_exists($field->name, $value)){
+				$field->setValue($item, $value[$field->name]);
+			}
 		}
 	}
 
@@ -141,7 +143,9 @@ class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSu
 			$value = (array) $value;
 		}
 		foreach ($this->groupFields as $field){
-			$field->appendDBNameAndValueForCreate($value[$field->name], $nameOut, $valueOut);
+			if (array_key_exists($field->name, $value)){
+				$field->appendDBNameAndValueForCreate($value[$field->name], $nameOut, $valueOut);
+			}
 		}
 	}
 }
