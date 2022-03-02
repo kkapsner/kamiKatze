@@ -4,8 +4,11 @@
 /* @var $args DBItem */
 
 $value = $this->getValue($args);
-if (!$value){
-	$value = new DateTime();
+if ($value){
+	$value = $value->format("Y-m-d");
+}
+else {
+	$value = "";
 }
 
-?><input type="date" format="<?php echo $this->html($this->editFormat);?>" name="<?php echo $this->getPostName($args);?>" value="<?php echo $this->html($value->format("Y-m-d"));?>">
+?><input type="date" format="<?php echo $this->html($this->editFormat);?>" name="<?php echo $this->getPostName($args);?>" value="<?php echo $this->html($value);?>">

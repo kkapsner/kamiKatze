@@ -59,6 +59,9 @@ class DBItemFieldTimestamp extends DBItemFieldNative{
 		if ($realValue === null){
 			return null;
 		}
+		elseif ($realValue === "current_timestamp()"){
+			return new DateTime();
+		}
 		else {
 			return new DateTime($realValue);
 		}
@@ -92,19 +95,24 @@ class DBItemFieldTimestamp extends DBItemFieldNative{
 	public function translateRequestData($data, &$translatedData){
 		if (array_key_exists($this->name, $data)){
 			$input = $data[$this->name];
-			if (is_array($this->editFormat)){
-				foreach ($this->editFormat as $format){
-					$value = DateTime::createFromFormat($format, $input);
-					if ($value !== false){
-						break;
+			if ($input !== ""){
+				if (is_array($this->editFormat)){
+					foreach ($this->editFormat as $format){
+						$value = DateTime::createFromFormat($format, $input);
+						if ($value !== false){
+							break;
+						}
 					}
+				}
+				else {
+					$value = DateTime::createFromFormat($this->editFormat, $input);
+				}
+				if ($value === false){
+					throw new InvalidArgumentException("Timestamp has wrong format.");
 				}
 			}
 			else {
-				$value = DateTime::createFromFormat($this->editFormat, $input);
-			}
-			if ($value === false){
-				throw new InvalidArgumentException("Timestamp has wrong format.");
+				$value = null;
 			}
 			$translatedData[$this->name] = $value;
 		}
