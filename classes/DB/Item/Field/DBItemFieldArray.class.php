@@ -105,7 +105,7 @@ class DBItemFieldArray extends DBItemField{
 	 */
 	public function deleteDependencies(DBItem $item){
 		foreach ($this->getValue($item) as $subItem){
-			/* @var $subItem DBItem */
+			/** @var DBItem $subItem */
 			$subItem->delete();
 		}
 	}
@@ -166,7 +166,7 @@ class DBItemFieldArray extends DBItemField{
 	 */
 	public function saveDependencies(DBItem $item){
 		foreach ($this->getValue($item) as $subItem){
-			/* @var $subItem DBItem */
+			/** @var DBItem $subItem */
 			$subItem->save();
 		}
 	}
@@ -179,7 +179,7 @@ class DBItemFieldArray extends DBItemField{
 	 */
 	public function setValue(DBItem $item, $value){
 		foreach ($value["create"] as $v){
-			/* @var $v DBItem */
+			/** @var DBItem $v */
 			$this->createSubitem($item->DBid, $v);
 		}
 		foreach ($value["modify"] as $v){

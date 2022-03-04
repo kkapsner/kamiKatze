@@ -131,7 +131,7 @@ class Node implements Countable, ArrayAccess, SeekableIterator, EventEmitter{
 	 */
 	public function contains(Node $otherNode){
 		foreach ($this->children as $child){
-			/* @var $child Node*/
+			/** @var Node $child*/
 			if ($child === $otherNode || $child->contains($otherNode)){
 				return true;
 			}

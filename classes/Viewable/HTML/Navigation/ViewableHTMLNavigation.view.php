@@ -1,5 +1,5 @@
 <nav<?php
-/* @var $this ViewableHTMLNavigation */
+/** @var ViewableHTMLNavigation $this */
 	echo $this->getAllHTMLAttributes(true);
 ?>>
 	<?php if ($this->hasItems()){?>

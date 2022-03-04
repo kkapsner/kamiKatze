@@ -1,9 +1,9 @@
 
 			<input type="hidden" name="<?php echo $args["postName"];?>[present]" value="1">
 <?php
-/* @var $this DBItemFieldDBItem */
-/* @var $context string */
-/* @var $args DBItem */
+/** @var DBItemFieldDBItem $this */
+/** @var string $context */
+/** @var DBItem $args */
 
 $postName = $args["postName"];
 echo "<ol>\n";

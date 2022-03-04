@@ -1,5 +1,5 @@
 <?php
-/* @var $this LDAPUser */
+/** @var LDAPUser $this */
 $displayName = $this->displayName;
 if ($displayName){
 	echo $this->html($displayName);

@@ -1,5 +1,5 @@
 <?php
-/*@var $this MarkdownLine*/
+/** @var MarkdownLine $this*/
 
 if (
 	preg_match_all(

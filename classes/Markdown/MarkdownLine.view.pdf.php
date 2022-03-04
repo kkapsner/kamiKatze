@@ -1,6 +1,6 @@
 <?php
-/*@var $this MarkdownLine*/
-/*@var $pdf PDF*/
+/** @var MarkdownLine $this*/
+/** @var PDF $pdf*/
 $pdf = $args;
 
 if ($this->isHeading){

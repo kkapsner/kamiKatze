@@ -2,7 +2,7 @@
 
 $first = true;
 foreach ($this as $item){
-	/* @var $item DBItem */
+	/** @var DBItem $item */
 	if (!$first){
 		echo array_read_key("delimiter", $args, ", ");
 	}

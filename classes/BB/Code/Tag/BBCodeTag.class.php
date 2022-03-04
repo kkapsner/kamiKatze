@@ -93,7 +93,7 @@ abstract class BBCodeTag extends Node{
 	public static function createTag($tagName, array $parameter = array()){
 		$tagName = strToLower($tagName);
 		$classname = self::tagNameToClass($tagName);
-		/* @var $tag BBCodeTag*/
+		/** @var BBCodeTag $tag*/
 		$tag = new $classname($parameter);
 		$tag->tagName = $tagName;
 		return $tag;
@@ -187,7 +187,7 @@ abstract class BBCodeTag extends Node{
 	public function childrenToText(){
 		$ret = "";
 		foreach ($this as $child){
-			/* @var $child BBCodeTag */
+			/** @var BBCodeTag $child */
 			$ret .= $child->toText();
 		}
 		return $ret;
@@ -222,7 +222,7 @@ abstract class BBCodeTag extends Node{
 	public function childrenToBBCode(){
 		$ret = "";
 		foreach ($this as $child){
-			/* @var $child BBCodeTag */
+			/** @var BBCodeTag $child */
 			$ret .= $child->toBBCode();
 		}
 		return $ret;
@@ -241,7 +241,7 @@ abstract class BBCodeTag extends Node{
 	public function childrenToHTML(){
 		$ret = "";
 		foreach ($this as $child){
-			/* @var $child BBCodeTag */
+			/** @var BBCodeTag $child */
 			$ret .= $child->toHTML();
 		}
 		return $ret;
@@ -306,7 +306,7 @@ abstract class BBCodeTag extends Node{
 	public function getCharset(){
 		$root = $this->getRoot();
 		if ($root !== NULL && $root instanceof BBCodeTagRoot){
-			/* @var $root BBCodeTagRoot */
+			/** @var BBCodeTagRoot $root */
 			if ($root->parser !== NULL){
 				return $root->parser->charset;
 			}

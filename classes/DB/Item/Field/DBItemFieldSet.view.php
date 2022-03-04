@@ -1,6 +1,6 @@
 <?php
-/* @var $this DBItemFieldSet */
-/* @var $args DBItem */
+/** @var DBItemFieldSet $this */
+/** @var DBItem $args */
 
 $value = $this->getValue($args);
 if ($value === null){

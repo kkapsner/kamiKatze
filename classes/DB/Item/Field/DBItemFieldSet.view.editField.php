@@ -1,7 +1,7 @@
 <?php
-/* @var $this DBItemFieldOption */
-/* @var $context string */
-/* @var $args DBItem */
+/** @var DBItemFieldOption $this */
+/** @var string $context */
+/** @var DBItem $args */
 
 $postName = $this->getPostName($args);
 echo "\n\t\t\t" . '<input type="hidden" name="' . $postName . '[present]" value="1" >';

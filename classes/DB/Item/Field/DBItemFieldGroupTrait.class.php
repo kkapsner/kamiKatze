@@ -45,7 +45,7 @@ trait DBItemFieldGroupTrait{
 		}
 		$this->groupFields = self::iterateForParseClass($classSpecifier, $group);
 		foreach ($this->groupFields as $field){
-			/* @var $field DBItemField */
+			/** @var DBItemField $field */
 			$field->parentField = $this;
 		}
 	}

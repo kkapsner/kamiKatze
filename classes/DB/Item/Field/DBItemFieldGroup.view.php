@@ -1,7 +1,7 @@
 <table class="group <?php echo $this->html($this->name)?>">
 <?php
-/* @var $this DBItemFieldArray */
-/* @var $args DBItem */
+/** @var DBItemFieldArray $this */
+/** @var DBItem $args */
 
 $this->groupFields->view("rows", true, $args);
 ?>

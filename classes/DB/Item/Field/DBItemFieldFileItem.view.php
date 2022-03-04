@@ -1,7 +1,7 @@
 <?php
 
-/* @var $this DBItemFieldFileItem */
-/* @var $args DBItemFieldFile */
+/** @var DBItemFieldFileItem $this */
+/** @var DBItemFieldFile $args */
 
 ?><a href="<?php echo $this->url($this->URL);?>" target="_blank"><?php
 if (($args instanceof DBItemFieldFile) && $args->image){

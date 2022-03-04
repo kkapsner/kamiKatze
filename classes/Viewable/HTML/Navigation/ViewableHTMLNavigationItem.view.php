@@ -1,5 +1,5 @@
 <li<?php
-	/* @var $this ViewableHTMLNavigationItem */
+	/** @var ViewableHTMLNavigationItem $this */
 	$className = $this->getHTMLAttribute("class");
 	if($this->active) $className .= " active";
 	if($className) echo ' class="' . $this->html($className) . '"';

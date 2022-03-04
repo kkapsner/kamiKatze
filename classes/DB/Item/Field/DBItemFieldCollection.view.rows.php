@@ -1,10 +1,10 @@
 <?php
-/* @var $this DBItemFieldCollection */
-/* @var $context string */
-/* @var $args DBItem */
+/** @var DBItemFieldCollection $this */
+/** @var string $context */
+/** @var DBItem $args */
 
 	foreach ($this as $item){
-		/* @var $item DBItemField */
+		/** @var DBItemField $item */
 		$item->view("row", true, $args);
 		$this->emit(new Event("view.field." . $item->name, $args));
 	}

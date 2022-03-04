@@ -23,7 +23,7 @@ class MarkdownParser{
 		$ret = new MarkdownDocument();
 		$lastLine = null;
 		$emptyLineBetween = false;
-		/*@var $lastLine MarkdownLine*/
+		/** @var MarkdownLine $lastLine*/
 		foreach ($lines as $line){
 			if ($line === ""){
 				$emptyLineBetween = true;

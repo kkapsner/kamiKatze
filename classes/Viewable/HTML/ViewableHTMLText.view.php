@@ -1,5 +1,5 @@
 <?php
 
-/* @var $this ViewableHTMLText */
+/** @var ViewableHTMLText $this */
 echo $this->html($this->text);
 ?>

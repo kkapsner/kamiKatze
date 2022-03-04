@@ -1,8 +1,8 @@
 <?php
 
-/* @var $this CalendarObject */
-/* @var $context String */
-/* @var $args mixed */
+/** @var CalendarObject $this */
+/** @var String $context */
+/** @var mixed $args */
 $name = $this->getName();
 
 echo "BEGIN:" . $name . "\r\n";

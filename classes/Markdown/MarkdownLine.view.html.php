@@ -1,5 +1,5 @@
 <?php
-/*@var $this MarkdownLine*/
+/** @var MarkdownLine $this*/
 
 if ($this->isHeading){
 	echo "<h" . ($this->headingLevel + MarkdownLine::$baseHeaderLevel) . ">" .

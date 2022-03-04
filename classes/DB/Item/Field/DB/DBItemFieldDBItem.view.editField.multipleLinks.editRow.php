@@ -1,8 +1,8 @@
 <li>
 <?php
-/* @var $this DBItemFieldDBItem */
-/* @var $context string */
-/* @var $args mixed[] Array of the postName, the DBItem the sub item!*/
+/** @var DBItemFieldDBItem $this */
+/** @var string $context */
+/** @var mixed[] $args Array of the postName, the DBItem the sub item!*/
 
 $this->view(
 	"editField.select",

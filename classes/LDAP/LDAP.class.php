@@ -532,7 +532,7 @@ class LDAP extends LDAPResourceContainer{
 	public function __call($name, $arguments){
 		if (function_exists("ldap_" . $name)){
 			$func = new ReflectionFunction("ldap_" . $name);
-			/* @var $parameter ReflectionParameter[] */
+			/** @var ReflectionParameter[] $parameter */
 			$parameter = $func->getParameters();
 			if (preg_match("/^link(|_identifier)$/i", $parameter[0]->name)){
 				array_unshift($arguments, $this->resource);

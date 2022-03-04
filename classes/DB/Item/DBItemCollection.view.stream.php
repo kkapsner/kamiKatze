@@ -1,9 +1,9 @@
 <div class="collection <?php echo $this->html($this->getClass() . " "  . implode(" ", explode("|", $context)));?>"><?php
 
-/* @var $this DBItemCollection */
+/** @var DBItemCollection $this */
 
 foreach ($this as $item){
-	/* @var $item DBItem */
+	/** @var DBItem $item */
 	$item->view($context, true, $args);
 }
 

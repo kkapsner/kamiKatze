@@ -1,6 +1,6 @@
 <?php
-/* @var $this DBItemFieldArray */
-/* @var $args DBItem */
+/** @var DBItemFieldArray $this */
+/** @var DBItem $args */
 
 $values = $this->getValue($args);
 

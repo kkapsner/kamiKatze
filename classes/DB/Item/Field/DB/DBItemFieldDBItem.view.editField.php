@@ -1,7 +1,7 @@
 <?php
-/* @var $this DBItemFieldDBItem */
-/* @var $context string */
-/* @var $args DBItem */
+/** @var DBItemFieldDBItem $this */
+/** @var string $context */
+/** @var DBItem $args */
 
 $postName = $this->getPostName($args);
 

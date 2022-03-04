@@ -1,6 +1,6 @@
 <?php
-/* @var $this DBItemFieldDate */
-/* @var $args DBItem */
+/** @var DBItemFieldDate $this */
+/** @var DBItem $args */
 
 $value = $this->getValue($args);
 if ($value === null){

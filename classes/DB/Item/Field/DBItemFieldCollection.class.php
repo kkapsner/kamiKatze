@@ -35,7 +35,7 @@ class DBItemFieldCollection extends Collection{
 	 */
 	public function translateRequestData($data, &$translatedData = array()){
 		foreach ($this as $field){
-			/* @var $field DBItemField */
+			/** @var DBItemField $field */
 			$field->translateRequestData($data, $translatedData);
 		}
 		return $translatedData;
@@ -50,7 +50,7 @@ class DBItemFieldCollection extends Collection{
 	public function validate($values){
 		$errors = array();
 		foreach ($this as $field){
-			/* @var $field DBItemField */
+			/** @var DBItemField $field */
 			$errors = array_merge($errors, $field->validate($values));
 		}
 		return $errors;

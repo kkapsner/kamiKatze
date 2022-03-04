@@ -1,6 +1,6 @@
 <?php
-/* @var $this DBItemFieldExtender */
-/* @var $context string */
-/* @var $args DBItem */
+/** @var DBItemFieldExtender $this */
+/** @var string $context */
+/** @var DBItem $args */
 
 $this->viewByName("DBItemFieldExtenderTrait", $context, $output, $args);

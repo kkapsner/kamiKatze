@@ -1,6 +1,6 @@
 <?php
 
-/* @var $this ViewableHTMLTagStyle */
+/** @var ViewableHTMLTagStyle $this */
 if ($this->ie){
 	echo "<!--[if IE]>";
 }

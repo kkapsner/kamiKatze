@@ -1,9 +1,9 @@
 <tr>
 	<?php
 	
-	/* @var $this DBItem */
+	/** @var DBItem $this */
 	foreach ($args as $fieldItem){
-		/* @var $fieldItem DBItemFieldOption */
+		/** @var DBItemFieldOption $fieldItem */
 		if ($fieldItem->displayable){
 			echo '<td class="' . $this->html($fieldItem->name) . '">';
 			$fieldItem->view(false, true, $this);

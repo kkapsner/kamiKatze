@@ -202,7 +202,7 @@ class Email{
 		$name = strToUpper($name);
 		$ret = array();
 		foreach ($this->headers as $header){
-			/* @var $header EmailHeader */
+			/** @var EmailHeader $header */
 			if ($name === "" || strToUpper($header->getName()) === $name){
 				$ret[] = $header;
 			}
@@ -324,7 +324,7 @@ class Email{
 	public function getHead($ignoredHeaders = array("BCC")){
 		$head = "";
 		foreach ($this->headers as $h){
-			/* @var $h EmailHeader */
+			/** @var EmailHeader $h */
 			if (!in_array(strToUpper($h->getName()), $ignoredHeaders)){
 				$head .= $h;
 			}

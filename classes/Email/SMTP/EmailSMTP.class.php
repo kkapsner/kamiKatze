@@ -162,28 +162,28 @@ class EmailSMTP{
 				$fromHeader->addAddress($this->defaultFrom);
 				$value = $fromHeader->getValue();
 			}
-			/* @var $fromHeader EmailHeaderAddress */
+			/** @var EmailHeaderAddress $fromHeader */
 			foreach ($value as $address){
 				$this->sendLine("MAIL FROM:<" . $address->address . ">");
 			}
 		}
 		$to = $mail->getHeaders("TO");
 		foreach ($to as $toHeader){
-			/* @var $toHeader EmailHeaderAddress */
+			/** @var EmailHeaderAddress $toHeader */
 			foreach ($toHeader->getValue() as $address){
 				$this->sendRCPT($address);
 			}
 		}
 		$cc = $mail->getHeaders("CC");
 		foreach ($cc as $ccHeader){
-			/* @var $ccHeader EmailHeaderAddress */
+			/** @var EmailHeaderAddress $ccHeader */
 			foreach ($ccHeader->getValue() as $address){
 				$this->sendRCPT($address);
 			}
 		}
 		$bcc = $mail->getHeaders("BCC");
 		foreach ($bcc as $bccHeader){
-			/* @var $bccHeader EmailHeaderAddress */
+			/** @var EmailHeaderAddress $bccHeader */
 			foreach ($bccHeader->getValue() as $address){
 				$this->sendRCPT($address);
 			}

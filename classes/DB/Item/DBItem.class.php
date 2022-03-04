@@ -234,7 +234,7 @@ abstract class DBItem extends DBItemFriends implements JsonSerializable{
 		$keys = "";
 		$values = "";
 		foreach (DBItemField::parseClass($classSpecifier) as $field){
-			/* @var $field DBItemField */
+			/** @var DBItemField $field */
 			if (array_key_exists($field->name, $fieldValues)){
 				$field->appendDBNameAndValueForCreate($fieldValues[$field->name], $keys, $values);
 			}
@@ -252,7 +252,7 @@ abstract class DBItem extends DBItemFriends implements JsonSerializable{
 		$item = self::fastGetCLASS($classSpecifier, $newId);
 		
 		foreach (DBItemField::parseClass($classSpecifier) as $field){
-			/* @var $field DBItemField */
+			/** @var DBItemField $field */
 			$field->performAssignmentsAfterCreation($item, $fieldValues);
 		}
 		
@@ -290,7 +290,7 @@ abstract class DBItem extends DBItemFriends implements JsonSerializable{
 		if ($data){
 			$this->oldValues = $data;
 			foreach ($this->fields as $field){
-				/* @var $field DBItemField */
+				/** @var DBItemField $field */
 				$field->loadDependencies($this);
 			}
 		}
@@ -306,7 +306,7 @@ abstract class DBItem extends DBItemFriends implements JsonSerializable{
 		if ($this->DBid === 0){
 			$data = array();
 			foreach ($this->fields as $field){
-				/* @var $field DBItemField */
+				/** @var DBItemField $field */
 				$data[$field->name] = $field->default;
 			}
 			$this->changeable = false;
@@ -321,7 +321,7 @@ abstract class DBItem extends DBItemFriends implements JsonSerializable{
 		}
 		$this->oldValues = $data;
 		foreach ($this->fields as $field){
-			/* @var $field DBItemField */
+			/** @var DBItemField $field */
 			$field->loadDependencies($this);
 		}
 	}
@@ -333,7 +333,7 @@ abstract class DBItem extends DBItemFriends implements JsonSerializable{
 		if ($this->changed && !$this->deleted){
 			$prop = "";
 			foreach ($this->fields as $field){
-				/* @var $field DBItemField */
+				/** @var DBItemField $field */
 				$field->saveDependencies($this);
 			}
 			foreach ($this->newValues as $name => $value){
@@ -356,7 +356,7 @@ abstract class DBItem extends DBItemFriends implements JsonSerializable{
 	public function delete(){
 		if (!$this->deleted){
 			foreach ($this->fields as $item){
-				/* @var $item DBItemField */
+				/** @var DBItemField $item */
 				$item->deleteDependencies($this);
 			}
 			
@@ -387,7 +387,7 @@ abstract class DBItem extends DBItemFriends implements JsonSerializable{
 		}
 		
 		foreach ($collection as $item){
-			/* @var $item DBItemField */
+			/** @var DBItemField $item */
 			if ($item instanceof DBItemFieldHasSearchableSubcollection){
 				if ($searchAllCollections){
 					foreach ($item->getAllSubcollections() as $subcollection){

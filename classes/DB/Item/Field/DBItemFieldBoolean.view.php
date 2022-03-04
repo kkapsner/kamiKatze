@@ -1,6 +1,6 @@
 <?php
-/* @var $this DBItemFieldBoolean */
-/* @var $args DBItem */
+/** @var DBItemFieldBoolean $this */
+/** @var DBItem $args */
 
 echo $this->getValue($args)? $this->trueString: $this->falseString;
 ?>

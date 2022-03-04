@@ -2,10 +2,10 @@
 <input type="hidden" name="class" value="<?php echo $this->html(get_class($this));?>">
 <table class="dbItem">
 	<?php
-	/* @var $this DBItem */
+	/** @var DBItem $this */
 	$this->emit(new Event("view.edit.fields.start", $this));
 	foreach (DBItemField::parseClass(get_class($this)) as $item){
-		/* @var $item DBItemField */
+		/** @var DBItemField $item */
 		$item->view($context, true, $this);
 		$this->emit(new Event("view.edit.field." . $item->name, $this));
 	}

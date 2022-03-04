@@ -1,7 +1,7 @@
 <?php
-/* @var $this DBItemFieldDBItem */
-/* @var $context string */
-/* @var $args array(
+/** @var DBItemFieldDBItem $this */
+/** @var string $context */
+/** @var array $args(
  *		"postName" => post name,
  *		"groups" => available items in groups,
  *		"value" =>  current item) */

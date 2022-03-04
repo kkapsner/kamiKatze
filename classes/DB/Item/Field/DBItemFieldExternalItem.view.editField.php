@@ -1,7 +1,7 @@
 <?php
-/* @var $this DBItemFieldExternalItem */
-/* @var $context string */
-/* @var $args DBItem */
+/** @var DBItemFieldExternalItem $this */
+/** @var string $context */
+/** @var DBItem $args */
 
 $postName = $this->getPostName($args);
 $availableItems = call_user_func(array($this->class, "getAll"));

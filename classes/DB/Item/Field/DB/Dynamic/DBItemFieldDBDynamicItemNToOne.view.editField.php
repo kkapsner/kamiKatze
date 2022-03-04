@@ -1,7 +1,7 @@
 <?php
-/* @var $this DBItemFieldDBDynamicItemNToOne */
-/* @var $context string */
-/* @var $args DBItem */
+/** @var DBItemFieldDBDynamicItemNToOne $this */
+/** @var string $context */
+/** @var DBItem $args */
 
 $postName = $this->getPostName($args);
 $value = $this->getValue($args);

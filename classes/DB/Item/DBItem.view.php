@@ -1,5 +1,5 @@
 <?php
-/* @var $this DBItem */
+/** @var DBItem $this */
 ?>
 <article class="DBItem <?php echo $this->specifier->getClassName();?>">
 <?php $this->view("header", true);?>
@@ -7,7 +7,7 @@
 <?php
 $this->emit(new Event("view.fields.start", $this));
 foreach (DBItemField::parseClass(get_class($this)) as $item){
-	/* @var $item DBItemField */
+	/** @var DBItemField $item */
 	if ($item->displayable){
 		echo "<tr><td>" . $this->html($item->displayName) . "</td><td>";
 		$item->view(false, true, $this);

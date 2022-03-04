@@ -1,10 +1,10 @@
 <colgroup>
 	<?php
-	/* @var $this DBItemCollection */
+	/** @var DBItemCollection $this */
 	
 	$fields = $args;
 	foreach ($fields as $fieldItem){
-		/* @var $fieldItem DBItemField */
+		/** @var DBItemField $fieldItem */
 		if ($fieldItem->displayable){
 			echo '<col class="' . $this->html($fieldItem->name) . '">';
 		}
@@ -15,7 +15,7 @@
 	<tr>
 		<?php
 		foreach ($fields as $fieldItem){
-			/* @var $fieldItem DBItemField */
+			/** @var DBItemField $fieldItem */
 			if ($fieldItem->displayable){
 				echo "<th>" . $this->html($fieldItem->displayName) . "</th>";
 			}

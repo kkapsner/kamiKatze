@@ -1,8 +1,8 @@
 <?php
 
-/* @var $this CalendarProperty */
-/* @var $context String */
-/* @var $args mixed */
+/** @var CalendarProperty $this */
+/** @var String $context */
+/** @var mixed $args */
 
 $line = strToUpper($this->name);
 

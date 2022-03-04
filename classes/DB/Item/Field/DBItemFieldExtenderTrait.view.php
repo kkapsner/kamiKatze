@@ -1,6 +1,6 @@
 <?php
-/* @var $this DBItemFieldEnum */
-/* @var $args DBItem */
+/** @var DBItemFieldEnum $this */
+/** @var DBItem $args */
 
 $value = $this->getValue($args);
 if ($value === null){
@@ -13,7 +13,7 @@ else {
 if ($value !== null){
 	echo "<ul>";
 	foreach ($this->extensionFieldOptions[$value] as $subItem){
-		/* @var $subItem DBItemField */
+		/** @var DBItemField $subItem */
 		if ($subItem->displayable){
 			echo "<li>" . $this->html($subItem->displayName) . ": ";
 			$subItem->view(false, true, $args);

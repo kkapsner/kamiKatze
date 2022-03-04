@@ -1,6 +1,6 @@
 <?php
 
-/* @var $this DBItem */
+/** @var DBItem $this */
 echo get_class($this) . " #" . $this->DBid . "";
 
 ?>

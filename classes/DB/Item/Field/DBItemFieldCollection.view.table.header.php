@@ -1,7 +1,7 @@
 <thead>
 	<tr>
 <?php
-/* @var $this DBItemFieldCollection */
+/** @var DBItemFieldCollection $this */
 
 foreach ($this as $field){
 	if ($field->displayable){

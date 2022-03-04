@@ -1,6 +1,6 @@
 <?php
-/* @var $this DBItemFieldDBDynamicItemOneToN */
-/* @var $args DBItem */
+/** @var DBItemFieldDBDynamicItemOneToN $this */
+/** @var DBItem $args */
 
 $value = $this->getValue($args);
 if (count($value) === 1){

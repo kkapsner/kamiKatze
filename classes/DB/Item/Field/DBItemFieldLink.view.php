@@ -1,6 +1,6 @@
 <?php
-/* @var $this DBItemFieldLink */
-/* @var $args DBItem */
+/** @var DBItemFieldLink $this */
+/** @var DBItem $args */
 $value = $this->getValue($args);
 if ($value !== null){
 	echo '<a href="' . $this->url($this->linkPrefix . $value . $this->linkPostfix) . '"';

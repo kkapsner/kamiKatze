@@ -6,7 +6,7 @@
 	<meta http-equiv="Content-Style-Type" content="text/css">
 	<meta http-equiv="Content-Script-Type" content="text/javascript">-->
 <?php
-	/* @var $this Template */
+	/** @var Template $this */
 	if ($this->favicon) {
 ?>
 	<link href="<?php echo $this->url($this->stylePlace . $this->favicon);?>" type="image/x-icon" rel="icon">

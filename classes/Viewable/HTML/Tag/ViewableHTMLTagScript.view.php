@@ -1,6 +1,6 @@
 <?php
 
-/* @var $this ViewableHTMLTagScript */
+/** @var ViewableHTMLTagScript $this */
 echo "<" . $this->tagName;
 foreach ($this->getHTMLAttirbuteList() as $name){
 	echo $this->getHTMLAttribute($name, true);

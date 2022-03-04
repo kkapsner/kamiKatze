@@ -1,7 +1,7 @@
 <?php
-/* @var $this DBItemFieldArray */
-/* @var $context string */
-/* @var $args mixed[] Array of the postName and the DBItem the sub item!*/
+/** @var DBItemFieldArray $this */
+/** @var string $context */
+/** @var mixed[] $args Array of the postName and the DBItem the sub item!*/
 
 echo "<tr>";
 $subID = $args[1]->DBid === 0? "<new>": $args[1]->DBid;
@@ -10,7 +10,7 @@ foreach ($this->arrayFields as $field){
 	$oldParent = $field->parentField;
 	$field->parentField = $this;
 	
-	/* @var $field DBItemField */
+	/** @var DBItemField $field */
 	if ($field !== $this->linkField && $field->displayable){
 		echo '<td>';
 		$field->view("editField", true, $args[1]);

@@ -1,7 +1,7 @@
 <?php
-/* @var $this DBItemFieldArray */
-/* @var $context string */
-/* @var $args DBItem */
+/** @var DBItemFieldArray $this */
+/** @var string $context */
+/** @var DBItem $args */
 
 $postName = $this->getPostName($args);
 $values = $this->getValue($args);

@@ -70,7 +70,7 @@ trait DBItemFieldExtenderTrait{
 		parent::translateRequestData($data, $translatedData);
 
 		foreach ($this->extensionFieldOptions as $extenderCollection){
-			/* @var $extenderCollection DBItemFieldCollection */
+			/** @var DBItemFieldCollection $extenderCollection */
 			$extenderCollection->translateRequestData($data, $translatedData);
 		}
 	}
@@ -88,7 +88,7 @@ trait DBItemFieldExtenderTrait{
 		$extenderValue = array_read_key($this->name, $values, $this->default);
 		if ($extenderValue !== null){
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
-				/* @var $field DBItemField */
+				/** @var DBItemField $field */
 				if (array_key_exists($field->name, $values)){
 					$field->appendDBNameAndValueForCreate($values[$field->name], $keys, $dbValues);
 				}
@@ -110,7 +110,7 @@ trait DBItemFieldExtenderTrait{
 		$extenderValue = $item->{$this->name};
 		if ($extenderValue !== null){
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
-				/* @var $field DBItemField */
+				/** @var DBItemField $field */
 				$field->performAssignmentsAfterCreation($item, $values);
 			}
 		}
@@ -126,7 +126,7 @@ trait DBItemFieldExtenderTrait{
 		if ($item->DBid === 0){
 			$data = array();
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
-				/* @var $field DBItemField */
+				/** @var DBItemField $field */
 				$data[$field->name] = $field->default;
 			}
 		}
@@ -148,7 +148,7 @@ trait DBItemFieldExtenderTrait{
 			$item->setRealValue($k, $v);
 		}
 		foreach ($this->extensionFieldOptions[$extenderValue] as $field){
-			/* @var $field DBItemField */
+			/** @var DBItemField $field */
 			$field->loadDependencies($item);
 		}
 	}
@@ -165,7 +165,7 @@ trait DBItemFieldExtenderTrait{
 			$db = $this->getDB();
 			$prop = "";
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
-				/* @var $field DBItemField */
+				/** @var DBItemField $field */
 				if ($field->saveDependencies($item) && $item->realValueChanged($field)){
 					$field->appendDBNameAndValueForUpdate($item->getRealValue($field), $prop);
 					$item->makeRealNewValueOld($field);
@@ -189,7 +189,7 @@ trait DBItemFieldExtenderTrait{
 		if ($extenderValue !== null){
 			$db->query("DELETE FROM  " . $db->quote($this->getTableName($extenderValue), DB::PARAM_IDENT) . " WHERE `id` = " . $item->DBid);
 			foreach ($this->extensionFieldOptions[$extenderValue] as $field){
-				/* @var $field DBItemField */
+				/** @var DBItemField $field */
 				$field->deleteDependencies($item);
 			}
 		}
