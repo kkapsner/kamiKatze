@@ -203,6 +203,9 @@ class DBItemField extends DBItemFriends implements DBItemFieldInterface{
 		elseif (preg_match ("/(?:tiny||medium|long)text$/i", $type)){
 			$type = "text";
 		}
+		elseif (preg_match ("/(?:(?:tiny|small|medium||big)int|float|double|decimal)$/i", $type)){
+			$type = "number";
+		}
 		
 		return $type;
 	}
