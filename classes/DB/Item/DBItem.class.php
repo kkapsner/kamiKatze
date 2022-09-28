@@ -18,7 +18,7 @@ abstract class DBItem extends DBItemFriends implements JsonSerializable{
 	
 	/**
 	 * Stores all instances of ANY DBItem.
-	 * @var DBItem[]
+	 * @var DBItem[][]
 	 */
 	private static $instances = array();
 	
