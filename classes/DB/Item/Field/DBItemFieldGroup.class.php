@@ -114,6 +114,7 @@ class DBItemFieldGroup extends DBItemField implements DBItemFieldHasSearchableSu
 		foreach ($this->groupFields as $field){
 			if (array_key_exists($field->name, $value)){
 				$field->setValue($item, $value[$field->name]);
+				$item->clearProcessedValueCache($field->name);
 			}
 		}
 	}
