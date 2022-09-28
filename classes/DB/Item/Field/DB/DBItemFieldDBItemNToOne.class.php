@@ -20,7 +20,7 @@ class DBItemFieldDBItemNToOne extends DBItemFieldDBItemXToOne{
 	 * @param string|null $valueOut
 	 */
 	public function appendDBNameAndValueForCreate($value, &$nameOut, &$valueOut = null){
-		DBItemField::appendDBNameAndValueForCreate($value->DBid, $nameOut, $valueOut);
+		DBItemField::appendDBNameAndValueForCreate($value instanceof DBItem? $value->DBid: null, $nameOut, $valueOut);
 	}
 
 	/**
